@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101325">
+  <meta name="description" content="Launch a little rocket, earn research credits, and build your way to outer space. A cozy launch-and-upgrade game.">
+  <title>Rocket Away — One little launch at a time</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
+  <script type="module" src="./game.js"></script>
+</head>
+<body>
+<main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
+  <header class="header">
+    <a class="wordmark" href="./" aria-label="Rocket Away home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 21 9 17C12 9 19 5 27 5c0 8-4 15-12 18l-2-2Z"/><circle cx="20" cy="12" r="3"/><path d="m10 12-6 1-2 7 7-3m10 5-1 6-7 2 2-7M8 24l-3 3"/></svg>rocket<span>away</span><sup>✦</sup></a>
+    <div class="wallet" aria-label="Research credits"><span>CREDITS</span><strong><i>✦</i> <span id="credits">0</span></strong></div>
+    <button id="game-menu" class="icon-button" aria-label="Open game menu" aria-haspopup="dialog">☰</button>
+  </header>
+  <section class="mission" aria-label="Journey to 100 kilometers">
+    <div id="journey" class="journey" hidden>
+      <div class="journey-heading"><strong id="journey-destination"></strong><span id="journey-count"></span></div>
+      <ol id="journey-steps" class="journey-steps" aria-label="Your expedition milestones"></ol>
+      <div class="journey-footer"><strong id="journey-current"></strong><span id="journey-lives"></span></div>
+    </div>
+    <div class="mission-heading"><span id="mission-status">MISSION 01 · REACH SPACE</span><span id="progress-caption"><b id="best">0.0</b> / <span id="goal-limit">100</span> <span id="goal-unit">km</span></span></div>
+    <div class="mission-track" role="progressbar" aria-label="Best altitude toward space" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="mission-progress"><div id="mission-fill"></div></div>
+    <div class="milestones" id="milestones"></div>
+    <div class="contract-track"><span id="contract-detail">CONTRACT · Launch at 114% power or better</span><b id="contract-reward">+70</b></div>
+  </section>
+  <div class="game-layout">
+    <section class="launch-site" id="launchpad" aria-label="Launch site">
+      <div class="viewport">
+        <canvas id="game" aria-label="Your assembled rocket. Tap its nose, tank, engine, or side boosters to choose parts. Flights are automatic."></canvas>
+        <div class="flight-top"><div><span class="label">ALTITUDE</span><strong><span id="altitude">0.00</span><small> km</small></strong></div><div class="flight-number"><span class="label" id="flight-number">FLIGHT 01</span><span id="flight-status">ON THE PAD</span></div></div>
+        <div class="scene-tag" id="scene-tag">TAP ROCKET PARTS TO BUILD</div>
+        <div class="flight-tools" id="flight-tools" hidden><button id="speed" class="small-button" aria-label="Change flight speed">Speed ×1</button><button id="pause" class="small-button" aria-label="Pause flight">Ⅱ Pause</button></div>
+        <div class="flight-telemetry" id="telemetry" hidden><div><span class="label">FUEL</span><div class="fuel-track"><div id="fuel"></div></div></div><div><span class="label">VERTICAL SPEED</span><strong id="velocity">0 m/s</strong></div></div>
+      </div>
+      <div class="launch-console">
+        <div class="launch-copy"><div class="eyebrow" id="launch-eyebrow">READY WHEN YOU ARE</div><h2 id="launch-title">Great things start small.</h2><p id="launch-description">A little rocket with a very big ambition.</p></div>
+        <div id="timing" class="timing" hidden><div class="timing-label"><button id="cancel-launch" type="button" aria-label="Cancel launch and return to build">‹ Back</button><span>LAUNCH TIMING</span><b id="timing-quality">100%</b></div><div class="timing-track"><div class="sweet-spot"></div><div id="needle"></div></div><span class="timing-help">Tap in the gold zone for extra thrust.</span></div>
+        <button class="primary" id="launch">Prepare launch <span aria-hidden="true">↗</span></button>
+      </div>
+    </section>
+    <aside class="workshop" id="workshop" aria-labelledby="workshop-title">
+      <div class="workshop-heading"><div><h2 id="workshop-title" tabindex="-1">Your rocket</h2><p id="hangar-status">Buy a part, or launch your rocket as-is.</p></div></div>
+      <div class="assembly-stage" id="assembly-stage">
+        <span class="assembly-hint" id="assembly-hint">Tap a rocket section to change it</span>
+        <div id="assembly-art" class="assembly-art"></div>
+        <div id="assembly-slots"></div><div class="rocket-readiness"><span>Estimated at 110% · <b id="fitted-height"></b></span><small id="fitted-readiness"></small></div>
+      </div>
+      <section class="part-picker" aria-labelledby="candidate-name">
+        <div class="picker-heading"><span id="category-label">ENGINE</span><span id="candidate-position">1 / 4</span></div>
+        <div class="part-shelf" id="part-shelf" role="group" aria-label="Available parts"></div>
+        <div class="part-browser"><h3 id="candidate-name" aria-live="polite">Spark engine</h3><button id="part-info" class="small-button" aria-label="Part details">Info</button></div>
+        <p id="candidate-trait" hidden></p><p id="candidate-description" hidden></p><span id="candidate-state" hidden></span>
+        <div class="part-comparison"><span><span id="comparison-label">Estimated height</span><small>Estimate at 110% power</small></span><div><strong id="candidate-height">—</strong><small id="candidate-difference">Current rocket</small></div></div>
+        <div class="picker-action"><p id="candidate-tradeoff"></p><button id="part-fit" class="small-button">Fitted</button></div>
+      </section>
+      <button id="shop-launch" class="primary">Launch rocket <span aria-hidden="true">↗</span></button>
+      <span id="save-status" class="save-status">PROGRESS SAVED ON THIS DEVICE</span>
+    </aside>
+    <section id="expedition" class="expedition-panel" aria-labelledby="expedition-title">
+      <div class="expedition-top"><div><div class="eyebrow" id="expedition-step">EXPEDITIONS</div><h2 id="expedition-title" tabindex="-1">One rocket. Six checkpoints.</h2></div></div>
+      <p id="expedition-summary"></p>
+      <div id="expedition-goal"></div>
+      <div class="expedition-progress"><ol id="expedition-map" class="journey-steps" aria-label="The six milestones in this expedition"></ol><span id="expedition-stats"></span></div>
+      <h3 id="expedition-setup-title">Choose your starting rocket</h3>
+      <div id="expedition-choices" class="expedition-choices"></div>
+      <div id="expedition-footer" class="expedition-footer"></div>
+
+    </section>
+        <div class="overlay" id="overlay" hidden>
+          <section class="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1" id="result">
+            <div class="eyebrow" id="result-eyebrow">FLIGHT REPORT</div><h2 id="result-title">A little closer.</h2><p id="result-description"></p>
+            <div class="report" id="report"><div><span>PEAK ALTITUDE</span><strong id="final-altitude">0 km</strong></div><div><span>CREDITS EARNED</span><strong class="gold" id="earnings">+0</strong></div></div>
+            <p id="bonus-note" class="bonus-note"></p><button id="return" class="primary">Back to workshop <span aria-hidden="true">↗</span></button>
+          </section>
+        </div>
+  </div>
+  <dialog id="menu-dialog" class="reset-dialog menu-dialog" aria-labelledby="menu-title">
+    <div class="menu-heading"><h2 id="menu-title">Game menu</h2><button id="menu-close" class="small-button" autofocus>Back to game</button></div>
+    <p id="menu-context"></p>
+    <div class="menu-modes" role="group" aria-label="Game mode"><button id="run-expeditions" class="small-button">Expeditions</button><button id="run-classic" class="small-button">Free Flight</button></div>
+    <p class="menu-note">Each mode keeps its own rocket and credits.</p>
+    <details id="run-details"><summary>Bonuses from your saved run <span id="module-count"></span></summary><div id="menu-modules"></div></details>
+    <button id="sound" class="small-button" aria-label="Turn sound on" aria-pressed="false">Sound <span id="sound-state">OFF</span></button>
+    <button id="run-abandon" class="small-button">End expedition</button>
+    <button id="reset-all" class="reset-button" aria-label="Reset entire game">Reset entire game</button>
+    <p id="menu-flight-note" hidden>Finish this flight before switching modes or resetting.</p>
+  </dialog>
+  <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><button id="part-info-close" class="primary">Back to parts</button></dialog>
+  <dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">
+    <div class="eyebrow">A FRESH START</div>
+    <h2 id="reset-title">Reset the entire game?</h2>
+    <p id="reset-description">This clears all Free Flight progress and all expedition progress on this device: your current run, credits, parts, unlocked starting rockets, difficulty levels, and run history. Both modes start fresh.</p>
+    <p class="reset-warning">This can’t be undone.</p>
+    <div class="reset-actions"><button id="reset-cancel" class="small-button" autofocus>Keep playing</button><button id="reset-confirm" class="primary">Reset entire game</button></div>
+  </dialog>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+</main>
+</body>
+</html>
