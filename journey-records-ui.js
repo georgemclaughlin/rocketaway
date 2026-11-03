@@ -1,4 +1,4 @@
-import { worldFor } from './worlds.js?v=balanced-journeys';
+import { worldFor } from './worlds.js?v=flight-polish';
 export function journeyRecordsMarkup(profile) {
   const records=profile.flightRecords;
   const stats=[

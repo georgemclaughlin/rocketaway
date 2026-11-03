@@ -1,4 +1,4 @@
-import { stepFlight } from './engine.js?v=balanced-journeys';
+import { stepFlight } from './engine.js?v=flight-polish';
 
 export const FAST_FORWARD_SECONDS = 6;
 const PHYSICS_STEP = 1 / 120;

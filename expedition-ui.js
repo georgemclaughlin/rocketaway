@@ -1,23 +1,16 @@
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=balanced-journeys';
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=balanced-journeys';
-import { altitudeLabel } from './journey.js?v=balanced-journeys';
-import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=balanced-journeys';
-import { newProgram } from './engine.js?v=balanced-journeys';
-import { fittedParts, partById } from './parts.js?v=balanced-journeys';
-import { rocketArt } from './builder.js?v=balanced-journeys';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=balanced-journeys';
-import { researchLoadout } from './research.js?v=balanced-journeys';
-import { researchButtonState } from './research-ui.js?v=balanced-journeys';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=flight-polish';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=flight-polish';
+import { altitudeLabel } from './journey.js?v=flight-polish';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=flight-polish';
+import { newProgram } from './engine.js?v=flight-polish';
+import { fittedParts } from './parts.js?v=flight-polish';
+import { rocketArt } from './builder.js?v=flight-polish';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=flight-polish';
+import { researchButtonState } from './research-ui.js?v=flight-polish';
+import { kitDetails } from './kit-details.js?v=flight-polish';
 
-const kitBenefits = {
-  scrapper: 'Credits to customize.',
-  stager: 'Extra lift from boosters.',
-  scientist: 'More credits per flight.',
-};
 function kitArt(item,profile) {
-  const program = newProgram();
-  for (const id of researchLoadout(profile,item).parts) program.parts.equipped[partById(id).slot] = id;
-  return rocketArt(fittedParts(program));
+  return rocketArt(kitDetails(item,profile).parts);
 }
 
 // Setup describes only the upcoming journey; the flight report covers the result.
@@ -66,15 +59,21 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore })
       $('expedition-title').innerHTML=`${worldMarkup(world)}<span>Launch from ${world.name==='Moon'?'the Moon':world.name}</span>`;
       $('expedition-summary').textContent=profile.campaignComplete?`Replay ${world.name} with a new build. Your Tau Ceti journey stays complete.`:`Reach ${altitudeLabel(milestoneHeight({difficulty,conditionsVersion:CONDITIONS_VERSION},5))} → ${next.name}. Six milestones, three misses.`;
       $('expedition-goal').innerHTML=`<nav class="world-route" aria-label="Road to Tau Ceti. Select an unlocked world to replay.">${worldRoute(profile,difficulty)}</nav>`;
+      const route=$('expedition-goal').querySelector('.world-route');
+      requestAnimationFrame(()=>{
+        if(!route.isConnected)return;
+        const selected=route.querySelector('[aria-pressed="true"]');
+        if(selected)route.scrollLeft+=selected.getBoundingClientRect().left-route.getBoundingClientRect().left-(route.clientWidth-selected.clientWidth)/2;
+      });
       const kits=KITS.filter(item=>profile.totalGates>=item.unlock);
       $('expedition').dataset.kits=kits.length;
+      $('expedition-setup-title').textContent=kits.length===1?'Your first rocket':'Choose a starting build';
       if(!kits.some(item=>item.id===kit))kit='scrapper';
       $('expedition-choices').style.setProperty('--choices',kits.length);
       $('expedition-choices').innerHTML=kits.map(item=>{
         const loadout=expeditionLoadout(profile,item,difficulty);
-        const upgraded=loadout.parts.filter(id=>!item.parts.includes(id));
-        const latest=upgraded.at(-1);
-        return `<button class="expedition-card kit-card" data-kit="${item.id}" aria-pressed="${kit===item.id}"><span class="card-icon kit-rocket">${kitArt(item,profile)}</span><strong>${item.name}${loadout.rank?` <small>R${loadout.rank}</small>`:''}<span class="kit-check" aria-hidden="true">${kit===item.id?' ✓':''}</span></strong><p>${latest?`Starts with ${partById(latest).name}`:kitBenefits[item.id]}</p><b>${loadout.credits} starting credits</b></button>`;
+        const details=kitDetails(item,profile);
+        return `<button class="expedition-card kit-card" data-kit="${item.id}" aria-pressed="${kit===item.id}"><span class="card-icon kit-rocket">${kitArt(item,profile)}</span><strong>${item.name}${loadout.rank?` <small>R${loadout.rank}</small>`:''}<span class="kit-check" aria-hidden="true">${kit===item.id?' ✓':''}</span></strong><p><span class="kit-equipment">${details.equipment}</span><span class="kit-benefit">${details.benefit}</span></p><b>${loadout.credits} credits</b></button>`;
       }).join('');
       const researchButton=researchButtonState(profile,kit);
       $('expedition-footer').innerHTML=`<p class="kit-unlock">${flightConditions(difficulty).grant?`Starting credits include ${flightConditions(difficulty).grant} world funding.`:ended?'Fresh rocket. Your research stays yours.':'Choose parts, then test your build. Tau Ceti awaits.'}</p><div class="start-actions"><button id="research-hub" class="research-action ${researchButton.available?'research-ready':''}" data-research-state="${researchButton.state}" aria-label="${researchButton.ariaLabel}">${researchButton.label}</button><button id="run-start" class="primary">Build rocket ↗</button></div>`;

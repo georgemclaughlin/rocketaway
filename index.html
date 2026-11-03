@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=constant-fast-forward">
-  <script type="module" src="./game.js?v=constant-fast-forward"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=flight-polish">
+  <script type="module" src="./game.js?v=flight-polish"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -51,7 +51,7 @@
         <div class="picker-heading"><span id="category-label">ENGINE</span><span id="candidate-position">1 / 4</span></div>
         <div class="part-shelf" id="part-shelf" role="group" aria-label="Available parts"></div>
         <div class="part-browser"><h3 id="candidate-name" aria-live="polite">Spark engine</h3><button id="part-info" class="small-button" aria-label="Part details">Info</button></div>
-        <p id="candidate-trait" hidden></p><p id="candidate-description" hidden></p><span id="candidate-state" hidden></span>
+        <p id="candidate-description"></p><p id="candidate-trait" hidden></p><span id="candidate-state" hidden></span>
         <div class="part-comparison"><span><span id="comparison-label">Estimated height</span><small>Estimate at 110% power</small></span><div><strong id="candidate-height">—</strong><small id="candidate-difference">Current rocket</small></div></div>
         <div class="picker-action"><p id="candidate-tradeoff"></p><button id="part-fit" class="small-button">Fitted</button></div>
       </section>
@@ -72,7 +72,7 @@
           <section class="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1" id="result">
             <div class="eyebrow" id="result-eyebrow">FLIGHT REPORT</div><h2 id="result-title">A little closer.</h2><p id="result-description"></p>
             <div class="report" id="report"><div><span>PEAK ALTITUDE</span><strong id="final-altitude">0 km</strong></div><div><span>CREDITS EARNED</span><strong class="gold" id="earnings">+0</strong></div></div>
-            <p id="bonus-note" class="bonus-note"></p><p id="result-unlocks" hidden></p><button id="return" class="primary">Back to workshop <span aria-hidden="true">↗</span></button>
+            <p id="flight-advice" hidden></p><p id="bonus-note" class="bonus-note"></p><div id="result-unlocks" hidden></div><p id="result-stock" hidden></p><button id="return" class="primary">Back to workshop <span aria-hidden="true">↗</span></button>
           </section>
         </div>
   </div>

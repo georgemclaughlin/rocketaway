@@ -1,6 +1,6 @@
-import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=balanced-journeys';
-import { fittedParts } from './parts.js?v=balanced-journeys';
-import { rocketArt } from './builder.js?v=balanced-journeys';
+import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=flight-polish';
+import { fittedParts } from './parts.js?v=flight-polish';
+import { rocketArt } from './builder.js?v=flight-polish';
 
 export function createTravel(onArrive) {
   const dialog=document.getElementById('travel-dialog');

@@ -1,6 +1,6 @@
-import { modifyAssembly } from './modifiers.js?v=balanced-journeys';
-import { researchModifiers } from './research.js?v=balanced-journeys';
-import { flightConditions } from './worlds.js?v=balanced-journeys';
+import { modifyAssembly } from './modifiers.js?v=flight-polish';
+import { researchModifiers } from './research.js?v=flight-polish';
+import { flightConditions } from './worlds.js?v=flight-polish';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },

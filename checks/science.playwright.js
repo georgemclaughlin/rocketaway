@@ -32,7 +32,7 @@ async page=>{
  await fits('#result,#return,#result-unlocks','flight report');
  // A mid-expedition report has both stock news and a newly unlocked kit.
  await page.evaluate(async()=>{const e=await import('./expeditions.js'),p=await import('./parts.js'),s=e.newExpeditions();e.startExpedition(s,{seed:1});s.active.program.credits=1000;for(const id of ['ember','long'])p.fitPart(s.active.program,id);e.beginExpeditionFlight(s,1.2);localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();await page.locator('#run-resume').click();await page.locator('#speed').click();await page.waitForFunction(()=>document.querySelector('#launch').textContent.includes('See result'),null,{timeout:30000});await page.locator('#launch').click();
- assert((await page.locator('#result-unlocks').innerText()).includes('New stock'),'midflight stock notice');
+ assert((await page.locator('#result-stock').innerText()).includes('New stock'),'midflight stock notice');
  await fits('#result,#return,#result-unlocks','ongoing expedition report');
  // Completed journey records remain accessible after choosing replay, without changing progress.
  await page.evaluate(async()=>{const e=await import('./expeditions.js'),s=e.newExpeditions();s.profile.maxDifficulty=8;e.startExpedition(s,{seed:1,difficulty:8});e.beginExpeditionFlight(s,1.2);e.settleExpedition(s,{done:true,peak:e.milestoneHeight(s.active,5)+1000,payMultiplier:1});localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();await page.locator('#ending-explore').click();

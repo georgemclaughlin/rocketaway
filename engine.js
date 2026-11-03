@@ -1,4 +1,4 @@
-import { newInventory, restoreInventory } from './parts.js?v=balanced-journeys';
+import { newInventory, restoreInventory } from './parts.js?v=flight-polish';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [

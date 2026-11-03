@@ -1,4 +1,4 @@
-import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=balanced-journeys';
+import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=flight-polish';
 
 export function researchButtonState(profile,selectedKit='scrapper') {
  const data=profile.research.data;

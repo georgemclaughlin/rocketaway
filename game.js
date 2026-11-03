@@ -1,18 +1,20 @@
-import { createScienceUI } from './science-ui.js?v=balanced-journeys';
-import { environmentLabel } from './science-data.js?v=balanced-journeys';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=balanced-journeys';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=balanced-journeys';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=balanced-journeys';
-import { KITS, EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=balanced-journeys';
-import { MODULES } from './modifiers.js?v=balanced-journeys';
-import { createExpeditionUI } from './expedition-ui.js?v=balanced-journeys';
-import { createBuilder } from './builder.js?v=balanced-journeys';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=balanced-journeys';
-import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=balanced-journeys';
-import { createTravel } from './travel.js?v=balanced-journeys';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=balanced-journeys';
-import { launchRating } from './launch-feedback.js?v=balanced-journeys';
-import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=constant-fast-forward';
+import { createScienceUI } from './science-ui.js?v=flight-polish';
+import { environmentLabel } from './science-data.js?v=flight-polish';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=flight-polish';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=flight-polish';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=flight-polish';
+import { KITS, EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=flight-polish';
+import { MODULES } from './modifiers.js?v=flight-polish';
+import { createExpeditionUI } from './expedition-ui.js?v=flight-polish';
+import { createBuilder, rocketArt } from './builder.js?v=flight-polish';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=flight-polish';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=flight-polish';
+import { createTravel } from './travel.js?v=flight-polish';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=flight-polish';
+import { launchRating } from './launch-feedback.js?v=flight-polish';
+import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=flight-polish';
+import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=flight-polish';
+import { kitDetails } from './kit-details.js?v=flight-polish';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -137,9 +139,10 @@ $('records-menu').addEventListener('click',()=>{
 });
 $('records-close').addEventListener('click',()=>$('records-dialog').close());
 function unlockNotice(result) {
-  const kits=(result.unlockedKits||[]).map(id=>KITS.find(k=>k.id===id)?.name).filter(Boolean);
-  const parts=(result.newParts||[]).map(id=>partById(id)?.name).filter(Boolean);
-  return [kits.length?`${kits.join(' + ')} unlocked for your next expedition!`:'',parts.length?`New stock: ${parts.slice(0,2).join(', ')}${parts.length>2?` +${parts.length-2} more`:''}.`:''].filter(Boolean).join(' ');
+  return (result.unlockedKits||[]).map(id=>KITS.find(k=>k.id===id)).filter(Boolean).map(kit=>{
+    const details=kitDetails(kit,expeditionSession.profile);
+    return `<div class="unlock-card"><span class="unlock-rocket" aria-hidden="true">${rocketArt(details.parts)}</span><div><strong>${kit.name} unlocked!</strong><span>${details.benefit}</span><small>Choose it on your next expedition.</small></div></div>`;
+  }).join('');
 }
 $('run-classic').addEventListener('click', () => {
   if (mode !== 'workshop') return;
@@ -332,6 +335,7 @@ function pause() {
     $('result').hidden = false;
     $('result-eyebrow').textContent = 'TAKE A LITTLE SPACE'; $('result-title').textContent = 'Just floating.';
     $('result-unlocks').hidden=true;
+    $('flight-advice').hidden=true; $('result-stock').hidden=true;
     $('result-description').textContent = 'Your mission will be right here.'; $('bonus-note').textContent = '';
     $('return').textContent = 'Keep flying'; $('pause').textContent = '▷ Resume'; $('pause').setAttribute('aria-label', 'Resume flight');
     syncScreens(); $('return').focus({ preventScroll: true }); announce('Flight paused.');
@@ -345,6 +349,7 @@ function finish() {
   const result = inExpedition() ? settleExpedition(expeditionSession, flight) : settleFlight(program, flight);
   if (!result) return;
   mode = 'report'; $('launch').disabled = true; persist(); renderWorkshop(); updateFlightHud();
+  $('flight-advice').hidden=true;
   $('result').hidden = false;
   $('result').classList.toggle('record', result.record);
   $('flight-tools').hidden = true; $('overlay').hidden = false; $('report').hidden = false;
@@ -359,15 +364,29 @@ function finish() {
     const run = expeditionSession.active;
     const count = result.cleared.length;
     $('result-eyebrow').textContent = run.status === 'won' ? 'ALL MILESTONES CLEARED' : run.status === 'lost' ? 'EXPEDITION ENDED' : result.success ? `${count} MILESTONE${count===1?'':'S'} CLEARED` : 'GOAL MISSED';
-    $('result-title').textContent = run.status === 'won' ? `${worldFor(run).name}, cleared!` : run.status === 'lost' ? 'A new build awaits.' : result.success ? 'Higher than before.' : 'Refit. Try again.';
+    $('result-title').textContent = run.status === 'won' ? `${worldFor(run).name}, cleared!` : run.status === 'lost' ? 'A new build awaits.' : progressTitle(result);
     $('result-description').textContent = run.status === 'won' ? `Departure target reached: ${altitudeLabel(journeyState(run).goal)}. ${destinationFor(run).star ? 'The last launchpad is behind you. One final crossing to Tau Ceti.' : `Next launchpad: ${destinationFor(run).name}. A fresh rocket, one step closer to Tau Ceti.`}` : run.status === 'lost' ? 'Your unlocked worlds and starting rockets are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
     $('bonus-note').textContent = `+${result.data} research points · spend in Research`;
+    if(!result.success) {
+      const feedback=missedFlightAdvice(run,result);
+      $('result-description').textContent=`${feedback.summary} ${run.stage} of 6 milestones kept.`;
+      $('flight-advice').textContent=feedback.advice;
+      $('flight-advice').dataset.kind=feedback.kind;
+      $('flight-advice').hidden=false;
+    } else if(result.record&&result.improvement>=10&&result.stage>1) {
+      $('flight-advice').textContent=`New best · ${altitudeLabel(result.improvement)} higher than your last record.`;
+      $('flight-advice').dataset.kind='record'; $('flight-advice').hidden=false;
+    }
     $('return').textContent = run.status==='won' ? `Travel to ${destinationFor(run).name} ↗` : run.status==='lost' ? `Retry ${worldFor(run).name} ↗` : 'Back to rocket ↗';
   }
-  $('result-unlocks').textContent=unlockNotice(result);
+  $('result-unlocks').innerHTML=unlockNotice(result);
   $('result-unlocks').hidden=!$('result-unlocks').textContent;
+  const newParts=(result.newParts||[]).map(id=>partById(id)?.name).filter(Boolean);
+  $('result-stock').textContent=newParts.length?`New stock: ${newParts.slice(0,2).join(', ')}${newParts.length>2?` +${newParts.length-2} more`:''}.`:'';
+  $('result-stock').hidden=!newParts.length;
   const rating=launchRating(flight.quality);
-  $('bonus-note').textContent += ` · ${rating.label} launch · ${rating.power}% power`;
+  if(inExpedition())$('bonus-note').innerHTML=`<span class="report-research">+${result.data} research points</span><span>${rating.label} launch · ${rating.power}% power</span>`;
+  else $('bonus-note').textContent += ` · ${rating.label} launch · ${rating.power}% power`;
   syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete'; tone(result.firstWin ? 1040 : 660, .35);
   announce(`${result.firstWin ? 'Mission complete! ' : ''}Peak altitude ${(result.altitude / 1000).toFixed(2)} kilometers. Earned ${result.total} credits.`);
 }

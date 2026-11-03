@@ -1,6 +1,7 @@
-import { flightConditions } from './worlds.js?v=balanced-journeys';
-import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=balanced-journeys';
-import { createFlight, stepFlight } from './engine.js?v=balanced-journeys';
+import { flightConditions } from './worlds.js?v=flight-polish';
+import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=flight-polish';
+import { createFlight, stepFlight } from './engine.js?v=flight-polish';
+import { partInsight } from './part-insights.js?v=flight-polish';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
@@ -86,7 +87,7 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('candidate-name').textContent = candidate.name;
     $('candidate-trait').hidden = !candidate.trait;
     $('candidate-trait').textContent = candidate.trait ? `${candidate.trait.name} · ${candidate.trait.detail}` : '';
-    $('candidate-description').textContent = candidate.detail;
+    $('candidate-description').textContent = partInsight(program, candidateId);
     $('candidate-height').textContent = `${(preview.height/1000).toFixed(1)} km`;
     const target = getTarget();
     $('comparison-label').textContent = equipped ? 'Equipped estimate' : target ? (preview.height>=target ? `After fitting: clears ${Number((target/1000).toFixed(1))} km` : `After fitting: ${((target-preview.height)/1000).toFixed(1)} km short`) : 'With this part';
