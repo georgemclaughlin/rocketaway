@@ -296,6 +296,10 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
   .flight-tools { right: 16px; }
   .flight-telemetry { left: 16px; right: 16px; }
 }
+@media (max-width: 600px) {
+  .flight-tools { flex-direction: column; width: 80px; right: 12px; gap: 6px; }
+  .flight-tools .small-button { min-width: 0; padding-inline: 6px; }
+}
 @media (max-height: 700px) and (min-height: 521px) {
   .app { grid-template-rows: 44px 48px minmax(0,1fr); gap: 6px; padding-top: max(4px,env(safe-area-inset-top)); padding-bottom: max(6px,env(safe-area-inset-bottom)); }
   .app[data-hub="true"] { grid-template-rows: 44px minmax(0,1fr); }
