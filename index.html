@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
-  <script type="module" src="./game.js"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=research-actions">
+  <script type="module" src="./game.js?v=research-actions"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -17,7 +17,7 @@
   </header>
   <section class="mission" aria-label="Journey to 100 kilometers">
     <div id="journey" class="journey" hidden>
-      <div class="journey-heading"><strong id="journey-destination"></strong><span class="journey-tools"><span id="journey-count"></span><button id="research-open" class="research-link" aria-label="Open permanent research lab">Lab · 0</button></span></div>
+      <div class="journey-heading"><strong id="journey-destination"></strong><span class="journey-tools"><span id="journey-count"></span></span></div>
       <ol id="journey-steps" class="journey-steps" aria-label="Your expedition milestones"></ol>
       <div class="journey-footer"><strong id="journey-current"></strong><span id="journey-lives"></span></div>
     </div>
@@ -56,7 +56,7 @@
         <div class="part-comparison"><span><span id="comparison-label">Estimated height</span><small>Estimate at 110% power</small></span><div><strong id="candidate-height">—</strong><small id="candidate-difference">Current rocket</small></div></div>
         <div class="picker-action"><p id="candidate-tradeoff"></p><button id="part-fit" class="small-button">Fitted</button></div>
       </section>
-      <button id="shop-launch" class="primary">Launch rocket <span aria-hidden="true">↗</span></button>
+      <div class="hangar-actions"><button id="research-open" class="research-action" aria-label="Open permanent research">Research</button><button id="shop-launch" class="primary">Launch rocket <span aria-hidden="true">↗</span></button></div>
       <span id="save-status" class="save-status">PROGRESS SAVED ON THIS DEVICE</span>
     </aside>
     <section id="expedition" class="expedition-panel" aria-labelledby="expedition-title">
@@ -64,7 +64,7 @@
       <p id="expedition-summary"></p>
       <div id="expedition-goal"></div>
       <div class="expedition-progress"><ol id="expedition-map" class="journey-steps" aria-label="The six milestones in this expedition"></ol><span id="expedition-stats"></span></div>
-      <div class="setup-heading"><h3 id="expedition-setup-title">Choose your starting rocket</h3><button id="research-hub" class="research-link" aria-label="Open permanent research lab">Lab · 0</button></div>
+      <div class="setup-heading"><h3 id="expedition-setup-title">Choose your starting rocket</h3></div>
       <div id="expedition-choices" class="expedition-choices"></div>
       <div id="expedition-footer" class="expedition-footer"></div>
 

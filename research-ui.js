@@ -1,5 +1,11 @@
 import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js';
 
+export function researchButtonState(profile) {
+ const data=profile.research.data;
+ const available=RESEARCH_TRACKS.some(t=>profile.totalGates>=t.unlock&&researchCost(profile,t.id)!==null&&data>=researchCost(profile,t.id));
+ return {available,label:`<span class="research-button-title">Research <b>${data}</b></span><small>${available?'Upgrade available':'Permanent upgrades'}</small>`,ariaLabel:`Permanent research lab, ${data} data${available?', upgrade available':''}`};
+}
+
 export function createResearchUI({getSession,onPurchase,canOpen}) {
  const $=id=>document.getElementById(id);
  let selected='scrapper';

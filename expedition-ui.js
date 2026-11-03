@@ -5,6 +5,7 @@ import { fittedParts, partById } from './parts.js';
 import { rocketArt } from './builder.js';
 import { worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js';
 import { researchLoadout } from './research.js';
+import { researchButtonState } from './research-ui.js?v=research-actions';
 
 const kitBenefits = {
   scrapper: 'Credits to customize.',
@@ -57,7 +58,8 @@ export function createExpeditionUI({ getSession, onBuild, onResume }) {
         const latest=upgraded.at(-1);
         return `<button class="expedition-card kit-card" data-kit="${item.id}" aria-pressed="${kit===item.id}"><span class="card-icon kit-rocket">${kitArt(item,profile)}</span><strong>${item.name}${loadout.rank?` <small>R${loadout.rank}</small>`:''}<span class="kit-check" aria-hidden="true">${kit===item.id?' ✓':''}</span></strong><p>${latest?`Starts with ${partById(latest).name}`:kitBenefits[item.id]}</p><b>${loadout.credits} starting credits</b></button>`;
       }).join('');
-      $('expedition-footer').innerHTML=`<p class="kit-unlock">${ended?'Fresh rocket. Research, worlds, and starting builds stay yours.':'Build, upgrade, and leave Earth. Tau Ceti awaits.'}</p><div class="start-actions"><button id="run-start" class="primary">Build on ${world.name} ↗</button></div>`;
+      const researchButton=researchButtonState(profile);
+      $('expedition-footer').innerHTML=`<p class="kit-unlock">${ended?'Fresh rocket. Research, worlds, and starting builds stay yours.':'Build, upgrade, and leave Earth. Tau Ceti awaits.'}</p><div class="start-actions"><button id="research-hub" class="research-action ${researchButton.available?'research-ready':''}" aria-label="${researchButton.ariaLabel}">${researchButton.label}</button><button id="run-start" class="primary">Build rocket ↗</button></div>`;
     } else {
       $('expedition-title').textContent=`Return to ${worldFor(run).name}`;
       $('expedition-summary').textContent='Your flight was saved. Resume from ignition with the same rocket and launch power.';
