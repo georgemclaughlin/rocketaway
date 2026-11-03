@@ -10,7 +10,7 @@ export const KITS = [
   {id:'scientist',name:'Scientist',icon:'⌁',detail:'Science capsule + Ember · 100 credits',credits:100,parts:['lab','ember'],unlock:6},
 ];
 export function newExpeditions() {
-  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,discoveries:[]},history:[]};
+  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,campaignComplete:false,discoveries:[]},history:[]};
 }
 const int = (value,max=1e8) => Number.isFinite(value) ? Math.max(0,Math.min(max,Math.floor(value))) : 0;
 function rng(run) { let x=run.rng|0; x^=x<<13; x^=x>>>17; x^=x<<5; run.rng=x>>>0; return run.rng/4294967296; }
@@ -64,6 +64,7 @@ function recordRun(session) {
   if(run.recorded) return;
   run.recorded=true;
   if(run.status==='won') { session.profile.wins++; session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,run.difficulty+1)); }
+  if(run.status==='won' && run.difficulty===8) session.profile.campaignComplete=true;
   session.history.unshift({seed:run.seed,kit:run.kit,stage:run.stage,won:run.status==='won',difficulty:run.difficulty,modules:[...run.program.relics]});
   session.history=session.history.slice(0,8);
 }
@@ -99,9 +100,11 @@ export function restoreExpeditions(raw) {
   if(!raw || ![1,2].includes(raw.version)) return session;
   session.mode=raw.mode==='classic'?'classic':'expedition';
   const profile=raw.profile||{};
+  session.profile.campaignComplete=profile.campaignComplete===true;
   for(const key of ['runs','wins','totalGates','bestStage','maxDifficulty']) session.profile[key]=int(profile[key],key==='bestStage'?6:key==='maxDifficulty'?8:1e8);
   session.profile.discoveries=MODULES.filter(item=>Array.isArray(profile.discoveries)&&profile.discoveries.includes(item.id)).map(item=>item.id);
   session.history=(Array.isArray(raw.history)?raw.history:[]).slice(0,8).filter(item=>item&&Number.isFinite(item.seed)).map(item=>({seed:int(item.seed,4294967295),kit:KITS.some(kit=>kit.id===item.kit)?item.kit:'scrapper',stage:int(item.stage,6),won:item.won===true,difficulty:int(item.difficulty,8),modules:MODULES.filter(m=>Array.isArray(item.modules)&&item.modules.includes(m.id)).map(m=>m.id)}));
+  if(session.history.some(item=>item.won&&item.difficulty===8)) session.profile.campaignComplete=true;
   const input=raw.active;
   if(!input || !KITS.some(kit=>kit.id===input.kit) || !['draft','route','build','flying','debrief','won','lost'].includes(input.status)) return session;
   const program=restoreProgram(input.program); program.plan='explorer';
@@ -116,6 +119,7 @@ export function restoreExpeditions(raw) {
     run.lastResult={altitude:int(r.altitude),target:int(r.target),success:r.success===true,total:int(r.total),flightPay:int(r.flightPay),bonus:int(r.bonus),stage:int(r.stage,6),power:Number.isFinite(r.power)?Math.max(90,Math.min(120,Math.round(r.power))):null,cleared:Array.isArray(r.cleared)?r.cleared.filter(Number.isFinite).map(n=>int(n)):r.success?[int(r.target)]:[],nextTarget:run.stage<6?checkpoint(run):null,record:r.record===true,improvement:int(r.improvement)};
   }
   if(run.stage>=6) run.status='won'; else if(run.strikes>=3) run.status='lost';
+  if(run.status==='won' && run.difficulty===8) session.profile.campaignComplete=true;
   if(['draft','route'].includes(run.status) || (run.status==='debrief'&&!run.lastResult)) run.status='build';
   session.active=run;
   if(raw.version===1 && !['won','lost'].includes(run.status)) {

@@ -80,7 +80,7 @@
   <dialog id="menu-dialog" class="reset-dialog menu-dialog" aria-labelledby="menu-title">
     <div class="menu-heading"><h2 id="menu-title">Game menu</h2><button id="menu-close" class="small-button" autofocus>Back to game</button></div>
     <p id="menu-context"></p>
-    <div class="menu-modes" role="group" aria-label="Game mode"><button id="run-expeditions" class="small-button">Expeditions</button><button id="run-classic" class="small-button">Free Flight</button></div>
+    <div class="menu-modes" role="group" aria-label="Game mode"><button id="run-expeditions" class="small-button">Road to Tau Ceti</button><button id="run-classic" class="small-button">Free Flight</button></div>
     <p class="menu-note">Each mode keeps its own rocket and credits.</p>
     <details id="run-details"><summary>Bonuses from your saved run <span id="module-count"></span></summary><div id="menu-modules"></div></details>
     <button id="sound" class="small-button" aria-label="Turn sound on" aria-pressed="false">Sound <span id="sound-state">OFF</span></button>
@@ -92,9 +92,14 @@
   <dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">
     <div class="eyebrow">A FRESH START</div>
     <h2 id="reset-title">Reset the entire game?</h2>
-    <p id="reset-description">This clears all Free Flight progress and all expedition progress on this device: your current run, credits, parts, unlocked starting rockets, difficulty levels, and run history. Both modes start fresh.</p>
+    <p id="reset-description">This clears all Free Flight progress and all expedition progress on this device: your current run, credits, parts, unlocked worlds, starting rockets, and run history. Both modes start fresh.</p>
     <p class="reset-warning">This can’t be undone.</p>
     <div class="reset-actions"><button id="reset-cancel" class="small-button" autofocus>Keep playing</button><button id="reset-confirm" class="primary">Reset entire game</button></div>
+  </dialog>
+  <dialog id="travel-dialog" aria-labelledby="travel-title" aria-describedby="travel-caption">
+    <div class="eyebrow">ROAD TO TAU CETI</div><h2 id="travel-title"></h2>
+    <div id="travel-scene" aria-hidden="true"></div>
+    <p id="travel-caption"></p><button id="travel-skip" class="small-button">Skip travel →</button>
   </dialog>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
 </main>

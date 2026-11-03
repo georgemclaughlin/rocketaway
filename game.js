@@ -5,6 +5,8 @@ import { MODULES } from './modifiers.js';
 import { createExpeditionUI } from './expedition-ui.js';
 import { createBuilder } from './builder.js';
 import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
+import { worldFor, destinationFor, WORLDS } from './worlds.js';
+import { createTravel } from './travel.js';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -33,6 +35,7 @@ const builder = createBuilder({ getProgram: () => program, canEdit: canBuild, ge
   $('hangar-status').textContent = `${part.name} fitted. Ready to test.`;
   announce(`${part.name} fitted. ${program.credits} credits remaining.`);
 } });
+const travelToNextWorld = createTravel(() => { workshop(); announce(expeditionSession.profile.campaignComplete ? 'Tau Ceti reached! All worlds are open to replay.' : `Arrived at ${destinationFor(expeditionSession.active).name}. Choose your starting rocket.`); });
 function persist() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(freeProgram)); localStorage.setItem(EXPEDITION_KEY, JSON.stringify(expeditionSession)); storageAvailable = true; }
   catch { storageAvailable = false; }
@@ -47,6 +50,7 @@ function syncScreens() {
   app.dataset.mode = expeditionMode ? 'expedition' : 'classic';
   app.dataset.hub = expeditionMode && (!run || ['won','lost'].includes(run.status)) && currentScreen === 'expedition';
   app.dataset.flight = mode !== 'workshop';
+  app.style.setProperty('--world-accent', worldFor(run).color);
   $('launchpad').inert = modal || currentScreen !== 'launchpad';
   $('workshop').inert = modal || currentScreen !== 'workshop';
   $('expedition').inert = modal || currentScreen !== 'expedition';
@@ -61,7 +65,7 @@ function syncScreens() {
   $('run-abandon').hidden = !inExpedition() || ['won','lost'].includes(run.status);
   $('run-abandon').disabled = mode !== 'workshop';
   $('menu-flight-note').hidden = mode === 'workshop';
-  $('menu-context').textContent = expeditionMode ? run && !['won','lost'].includes(run.status) ? `Expedition · ${run.stage}/6 milestones · ${3-run.strikes} misses left` : 'Expeditions · a fresh rocket every run' : 'Free Flight · permanent rocket and upgrades';
+  $('menu-context').textContent = expeditionMode ? run && !['won','lost'].includes(run.status) ? `${worldFor(run).name} → ${destinationFor(run).name} · ${run.stage}/6 milestones` : 'Road to Tau Ceti · nine worlds, one journey' : 'Free Flight · permanent rocket and upgrades';
   $('run-details').hidden = !inExpedition() || !run.program.relics.length;
   $('module-count').textContent = run?.program.relics.length || '';
   $('menu-modules').innerHTML = (run?.program.relics || []).map(id => { const m = MODULES.find(m => m.id === id); return `<p><strong>${m.name}</strong><br>${m.detail}</p>`; }).join('');
@@ -98,7 +102,7 @@ $('run-expeditions').addEventListener('click', () => {
 });
 $('run-abandon').addEventListener('click', () => {
   if (mode !== 'workshop') return;
-  if (confirm('End this expedition? Its rocket and credits will be lost. Your unlocked starting rockets and difficulty levels are kept.')) {
+  if (confirm('End this expedition? Its rocket and credits will be lost. Your unlocked worlds and starting rockets are kept.')) {
     abandonExpedition(expeditionSession); $('menu-dialog').close();
     persist(); renderWorkshop(); showScreen('expedition'); $('run-start').focus({ preventScroll: true });
   }
@@ -129,12 +133,12 @@ function renderJourney() {
   const key = `${run.seed}/${run.difficulty}/${journey.reached}/${mode}/${run.status}/${run.strikes}`;
   if (key === lastJourneyKey) return;
   lastJourneyKey = key;
-  $('journey-destination').textContent = `Finish line · ${altitudeLabel(journey.goal)}`;
-  $('journey-count').textContent = `${journey.reached} of 6 reached`;
+  $('journey-destination').textContent = `${worldFor(run).name} → ${destinationFor(run).name}`;
+  $('journey-count').textContent = `World ${run.difficulty+1}/9`;
   $('journey-steps').innerHTML = journeyMarkup(journey);
-  $('journey-current').textContent = run.status === 'lost' ? 'Expedition ended' : journey.next ? `${airborne ? 'Climbing to' : 'Next'}: ${journey.next.name} · ${altitudeLabel(journey.next.altitude)}` : 'Finish line reached!';
+  $('journey-current').textContent = run.status === 'lost' ? 'Expedition ended' : journey.next ? `${airborne ? 'Climbing to' : 'Next'}: ${journey.next.name} · ${altitudeLabel(journey.next.altitude)}` : 'Departure target reached!';
   $('journey-lives').textContent = `${3-run.strikes} misses left`;
-  document.querySelector('.mission').setAttribute('aria-label', `Expedition to ${altitudeLabel(journey.goal)}. ${journey.reached} of 6 milestones reached.`);
+  document.querySelector('.mission').setAttribute('aria-label', `World ${run.difficulty+1} of 9: ${worldFor(run).name}. Reach ${altitudeLabel(journey.goal)} to travel to ${destinationFor(run).name}. ${journey.reached} of 6 milestones reached.`);
 }
 function renderWorkshop() {
   $('credits').textContent = program.credits.toLocaleString();
@@ -214,6 +218,8 @@ function prepare() {
   mode = 'arming'; armTime = 0; timingPosition = 0;
   showScreen('launchpad');
   $('timing').hidden = false; document.querySelector('.launch-console').classList.add('arming');
+  $('scene-tag').hidden = false;
+  $('scene-tag').textContent = inExpedition() ? `${worldFor(expeditionSession.active).name} · ${worldFor(expeditionSession.active).kind}` : 'Ready for ignition';
   $('launch').innerHTML = 'Launch! <span aria-hidden="true">↟</span>'; $('flight-status').textContent = 'AWAITING IGNITION';
   renderWorkshop(); announce('Launch ready. Tap Launch when the marker reaches the gold zone. Every launch earns credits.');
   $('launch').focus({ preventScroll: true });
@@ -278,10 +284,10 @@ function finish() {
     const run = expeditionSession.active;
     const count = result.cleared.length;
     $('result-eyebrow').textContent = run.status === 'won' ? 'ALL MILESTONES CLEARED' : run.status === 'lost' ? 'EXPEDITION ENDED' : result.success ? `${count} MILESTONE${count===1?'':'S'} CLEARED` : 'GOAL MISSED';
-    $('result-title').textContent = run.status === 'won' ? 'From a spark to space.' : run.status === 'lost' ? 'A new build awaits.' : result.success ? 'Higher than before.' : 'Refit. Try again.';
-    $('result-description').textContent = run.status === 'won' ? `You reached all 6 milestones and the ${altitudeLabel(journeyState(run).goal)} finish line. A harder ascent is unlocked.` : run.status === 'lost' ? 'Your unlocked starting rockets and difficulty levels are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
+    $('result-title').textContent = run.status === 'won' ? `${worldFor(run).name}, cleared!` : run.status === 'lost' ? 'A new build awaits.' : result.success ? 'Higher than before.' : 'Refit. Try again.';
+    $('result-description').textContent = run.status === 'won' ? `Departure target reached: ${altitudeLabel(journeyState(run).goal)}. ${destinationFor(run).star ? 'Your journey to Tau Ceti is complete!' : `Next launchpad: ${destinationFor(run).name}. A fresh rocket, one step closer to Tau Ceti.`}` : run.status === 'lost' ? 'Your unlocked worlds and starting rockets are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
     $('bonus-note').textContent = `${result.power}% launch power · Flight +${result.flightPay} · Milestones +${result.bonus}`;
-    $('return').textContent = ['won','lost'].includes(run.status) ? 'Plan a new expedition ↗' : 'Back to rocket ↗';
+    $('return').textContent = run.status==='won' ? `Travel to ${destinationFor(run).name} ↗` : run.status==='lost' ? `Retry ${worldFor(run).name} ↗` : 'Back to rocket ↗';
   }
   syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete'; tone(result.firstWin ? 1040 : 660, .35);
   announce(`${result.firstWin ? 'Mission complete! ' : ''}Peak altitude ${(result.altitude / 1000).toFixed(2)} kilometers. Earned ${result.total} credits.`);
@@ -305,7 +311,11 @@ function workshop() {
   showScreen('workshop'); renderWorkshop();
   document.querySelector('[data-build-slot="engine"]').focus({ preventScroll: true });
 }
-$('return').addEventListener('click', () => mode === 'paused' ? pause() : workshop());
+$('return').addEventListener('click', () => {
+  if(mode==='paused')pause();
+  else if(mode==='report' && inExpedition() && expeditionSession.active.status==='won')travelToNextWorld(expeditionSession.active);
+  else workshop();
+});
 $('reset-all').addEventListener('click', () => {
   if (mode !== 'workshop') return;
   $('menu-dialog').close(); $('reset-dialog').showModal();
@@ -353,12 +363,13 @@ function cloud(x, y, size, opacity) {
 }
 function landscape(altitude) {
   const groundY = height - 44 + altitude * .08;
+  const terrain = inExpedition() ? worldFor(expeditionSession.active).terrain : WORLDS[0].terrain;
   if (groundY > height + 220) return;
-  ctx.fillStyle = '#738b8f'; ctx.beginPath(); ctx.moveTo(0, groundY - 42);
+  ctx.fillStyle = terrain[0]; ctx.beginPath(); ctx.moveTo(0, groundY - 42);
   ctx.bezierCurveTo(width * .17, groundY - 140, width * .3, groundY - 44, width * .45, groundY - 83);
   ctx.bezierCurveTo(width * .7, groundY - 142, width * .8, groundY - 79, width, groundY - 100); ctx.lineTo(width, height + 220); ctx.lineTo(0, height + 220); ctx.fill();
-  ctx.fillStyle = '#526f73'; ctx.beginPath(); ctx.moveTo(0, groundY - 7); ctx.bezierCurveTo(width * .22, groundY - 49, width * .5, groundY + 10, width * .62, groundY - 28); ctx.quadraticCurveTo(width * .8, groundY - 70, width, groundY - 20); ctx.lineTo(width, height + 220); ctx.lineTo(0, height + 220); ctx.fill();
-  ctx.fillStyle = '#344f59'; ctx.fillRect(0, groundY, width, height + 220);
+  ctx.fillStyle = terrain[1]; ctx.beginPath(); ctx.moveTo(0, groundY - 7); ctx.bezierCurveTo(width * .22, groundY - 49, width * .5, groundY + 10, width * .62, groundY - 28); ctx.quadraticCurveTo(width * .8, groundY - 70, width, groundY - 20); ctx.lineTo(width, height + 220); ctx.lineTo(0, height + 220); ctx.fill();
+  ctx.fillStyle = terrain[2]; ctx.fillRect(0, groundY, width, height + 220);
   // A tiny observatory watches over the launchpad.
   const buildingX = width * .16;
   ctx.fillStyle = '#d0c8b3'; ctx.fillRect(buildingX - 26, groundY - 30, 52, 30);
@@ -375,10 +386,11 @@ function landscape(altitude) {
 function drawScene() {
   if (!width || !height) return;
   const altitude = flight?.altitude || 0, space = Math.min(1, altitude / 80000);
+  const world = inExpedition() ? worldFor(expeditionSession.active) : WORLDS[0];
   const gradient = ctx.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, mix([91,132,167], [12,17,38], space)); gradient.addColorStop(1, mix([177,181,170], [41,43,77], space));
+  gradient.addColorStop(0, mix(world.sky, [12,17,38], space)); gradient.addColorStop(1, mix(world.haze, [41,43,77], space));
   ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
-  const visibility = Math.max(.08, space);
+  const visibility = Math.max(world.clouds || world.name==='Mars' ? .08 : .65, space);
   for (const star of stars) { ctx.fillStyle = `rgba(240,236,220,${star.opacity * visibility})`; ctx.beginPath(); ctx.arc(star.x, (star.y + altitude * .0006) % height, star.r, 0, Math.PI * 2); ctx.fill(); }
   const tankHeight = fittedParts(program).tank.height;
   const rocketScale = Math.min(.95, Math.max(.35, height / 320), (height - 65) / (tankHeight + 100));
@@ -387,10 +399,10 @@ function drawScene() {
   const rocketY = padY + (cruiseY - padY) * Math.min(1, altitude / 1300);
   if (altitude > 25000) {
     ctx.save(); ctx.globalAlpha = Math.min(.5, (altitude - 25000) / 100000);
-    const earth = ctx.createRadialGradient(width * .5, height * 3.8, height * 3.15, width * .5, height * 3.8, height * 3.5); earth.addColorStop(0, '#376b81'); earth.addColorStop(.5, '#78a8bc'); earth.addColorStop(1, '#78a8bc00');
+    const earth = ctx.createRadialGradient(width * .5, height * 3.8, height * 3.15, width * .5, height * 3.8, height * 3.5); earth.addColorStop(0, world.terrain[2]); earth.addColorStop(.5, world.color); earth.addColorStop(1, world.color+'00');
     ctx.fillStyle = earth; ctx.fillRect(0, height * .3, width, height); ctx.restore();
   }
-  if (altitude > 40000 && altitude < 140000) {
+  if (world.name==='Earth' && altitude > 40000 && altitude < 140000) {
     ctx.save(); ctx.globalAlpha = .12;
     for (let band = 0; band < 3; band++) {
       ctx.strokeStyle = ['#90e1c5', '#96a7ee', '#e1b5e4'][band]; ctx.lineWidth = 20;
@@ -399,12 +411,22 @@ function drawScene() {
     }
     ctx.restore();
   }
-  // Distant moon: the goal feels a little closer with every flight.
-  ctx.save(); ctx.globalAlpha = .25 + space * .45; ctx.fillStyle = '#ece7cf'; ctx.beginPath(); ctx.arc(width * .84, height * .25, 19, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#939bad'; ctx.beginPath(); ctx.arc(width * .84 + 6, height * .25 - 5, 4, 0, Math.PI * 2); ctx.arc(width * .84 - 7, height * .25 + 6, 3, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  // Recognizable companions above the moons; no invented moon over every world.
+  const companion = world.name==='Earth'?'moon':world.companion;
+  if(companion) {
+    const colors={moon:'#ece7cf',earth:'#72adc5',jupiter:'#d5b08b',neptune:'#567fc4'};
+    const radius=companion==='moon'?19:companion==='jupiter'?40:29;
+    ctx.save(); ctx.globalAlpha=.65+space*.25;ctx.fillStyle=colors[companion];
+    ctx.beginPath();ctx.arc(width*.84,height*.25,radius,0,Math.PI*2);ctx.fill();ctx.clip();
+    ctx.fillStyle=companion==='earth'?'#7caa85':'#8d7b8066';
+    if(companion==='jupiter')for(let i=-2;i<=2;i++)ctx.fillRect(width*.84-radius,height*.25+i*12,radius*2,5);
+    else {ctx.beginPath();ctx.ellipse(width*.84+5,height*.25-4,radius*.35,radius*.5,.5,0,Math.PI*2);ctx.fill();}
+    ctx.restore();
+  }
   const drift = reducedMotion ? 0 : Math.sin(ambientTime * .1) * 20;
   for (const [x, at, size] of [[.12,800,.8],[.78,2400,1.2],[.27,5100,1.4],[.83,8500,1],[.32,12500,.8]]) {
     const y = rocketY + (altitude - at) * .032;
-    if (y > -70 && y < height + 70) cloud(width * x + drift, y, size, .48);
+    if (world.clouds && y > -70 && y < height + 70) cloud(width * x + drift, y, size, .48);
   }
   drawDiscoveries(altitude, rocketY);
   if (flight && recordBefore > 0) {
@@ -491,7 +513,7 @@ function rocket(x, y, scale, rotation, boosting = false, time = ambientTime, fla
 }
 function drawDiscoveries(altitude, rocketY) {
   const balloonY = rocketY + (altitude - 1300) * .045;
-  if (balloonY > -80 && balloonY < height + 80) {
+  if ((!inExpedition() || worldFor(expeditionSession.active).name==='Earth') && balloonY > -80 && balloonY < height + 80) {
     ctx.save(); ctx.translate(width * .22, balloonY); ctx.fillStyle = '#e4b8a1';
     ctx.beginPath(); ctx.ellipse(0, 0, 19, 25, 0, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = '#ffe4bb'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-11, 20); ctx.lineTo(-6, 45); ctx.moveTo(11, 20); ctx.lineTo(6, 45); ctx.stroke();
@@ -536,7 +558,7 @@ function checkFlightMoments() {
       flightMilestonesShown = journey.reached;
       const reached = journey.steps[journey.reached-1];
       zoneSeen = Math.max(zoneSeen,reached.altitude);
-      showFlightNotice(journey.next ? `${reached.name} reached!` : 'Finish line reached!', `${journey.reached} of 6 milestones · ${journey.next ? `next: ${altitudeLabel(journey.next.altitude)}` : 'expedition complete'}`);
+      showFlightNotice(journey.next ? `${reached.name} reached!` : 'Departure target reached!', `${journey.reached} of 6 milestones · ${journey.next ? `next: ${altitudeLabel(journey.next.altitude)}` : 'expedition complete'}`);
       burst(width*.56,height*.48,'#a5dcc4',30); tone(900,.2);
       return;
     }

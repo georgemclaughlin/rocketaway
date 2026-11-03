@@ -20,17 +20,20 @@ Open **http://127.0.0.1:4173** on this computer. A phone on the same Wi-Fi can u
 
 The game fits the viewport and shows one phase at a time on phones and desktop. The hangar is home between launches; launch timing and flight take over the screen. The **☰ menu** holds mode switching, sound, ending a run, and resetting the game.
 
-## Expeditions: repeatable runs
+## Road to Tau Ceti
 
-Fresh games open in **Expeditions**. Choose a starting rocket, then follow **hangar → launch → results → the same hangar**. There are no module drafts or route selections between flights. Existing saves resume their chosen mode; **☰ → Expeditions** returns from Free Flight. Each mode keeps its own rocket and credits.
+Fresh games open on **Earth**, the first world on the **Road to Tau Ceti**. Choose a starting rocket, then follow **hangar → launch → results → the same hangar**. There are no module drafts or route selections between flights. Existing saves resume their chosen mode; **☰ → Road to Tau Ceti** returns from Free Flight. Each mode keeps its own rocket and credits.
 
 - **An altitude ladder, not six separate missions.** Standard milestones are 2.5, 10, 25, 55, 100, and 160 km. Every milestone passed in a flight counts and pays once. For example, reaching 13 km clears the first two and makes 25 km the next goal.
 - **Three misses end the run.** A flight below the next goal uses one miss but still earns credits. Both success and failure return directly to your rocket. Its parts stay fitted, earnings are ready to spend, and the next goal stays visible.
 - **Variation lives in the parts.** Each paid part gets a fixed bonus for that run: lighter construction, extra thrust, longer burn, lower drag, more research pay, or stronger boosters. The selector shows the bonus; it affects physics only while that part is fitted. Bonuses never reroll or change on an owned part.
 - **Useful shop offers.** Stock refreshes after each flight and higher tiers open as you clear milestones. Each category keeps its cheapest available unowned upgrade in stock, plus a varying second offer. Owned parts always refit for free. Previewing a part leaves the equipped rocket and its main estimate unchanged.
-- **Start again with a different build.** Milestones unlock Stagehand and Scientist starting rockets. Wins unlock the next Ascent, up to nine levels, each adding 5% of the standard altitude goals. Kits, unlocked difficulty, and history persist; rocket parts and credits start fresh each run. After finishing, the next expedition setup focuses on the new journey: its finish altitude, first target, and illustrated starting builds. Each build shows its advantage and starting credits. The **Finish line** selector lets you replay a goal or try a higher one. **Build this rocket** starts a fresh run in the hangar; unlocked builds and goals stay yours.
+- **Travel through real worlds.** The route is **Earth → Moon → Mars → Ceres → Europa → Titan → Triton → Pluto → Eris → Tau Ceti**. Clear all six milestones on a world to unlock the next launchpad. Each world has its own sky, terrain palette, and departure target; airless worlds have dark skies without cloud banks. The world strip shows names, cleared stops, and the current selection. Unlocked worlds can be replayed.
+- **A departure worth celebrating.** A winning report offers **Travel to [destination]**. Your assembled rocket flies between the two worlds in a short starfield animation, then opens the next world's build screen. Travel can be skipped or dismissed with Escape; reduced-motion mode uses a brief static arrival. Results and unlocks are saved before travel, so refreshing cannot lose progress or award it twice.
+- **Fresh builds, continuous progress.** Milestones unlock Stagehand and Scientist starting rockets. Each world starts with fresh parts and credits; unlocked worlds, starting builds, and journey completion persist. The next-world screen explains its departure goal and offers illustrated builds with starting credits. **Build on [world]** goes directly to the hangar. Three misses end only the current attempt; retry that world with your unlocks intact.
+- **Reach another star.** Completing Eris opens the final travel sequence to **Tau Ceti**, marks the journey complete, and leaves all nine worlds available to replay. Tau Ceti is the stellar destination, not a surface you land on.
 
-A persistent journey map stays above the hangar and flight: all six milestones, checkmarks for those reached, a highlighted next milestone, a reached count, and the final finish altitude. Named stops make each target part of the same climb. The map updates as milestones are crossed in flight and retains completed stops after a miss.
+A persistent journey map stays above the hangar and flight: all six milestones, checkmarks for those reached, a highlighted next milestone, the departure altitude, and your world number. The heading identifies the current world, next destination, and position among the nine launch worlds. Named altitude stops make each target part of the same climb. The map updates as milestones are crossed in flight and retains completed stops after a miss.
 
 The report shows how the flight moved your journey forward (for example, **0 → 2 of 6**) and separates what this flight cleared from the next goal. It includes actual launch power; the hangar keeps a short last-flight receipt. Estimates use 110% launch power. When a stronger launch can bridge a shortfall, the hangar says **Aim for gold**.
 
@@ -50,17 +53,17 @@ The first mission is **100 km**, the edge of space. Reaching it unlocks a **200 
 
 **Speed ×1 / ×3** fast-forwards flights. **P / Escape** pauses or resumes. Switching away pauses active flights. Sound is optional and starts muted. Motion effects respect reduced-motion preferences.
 
-These are arcade physics, not an orbital simulation. Component masses, fuel consumption, engine efficiency, drag, and staging affect the flight, but there is no manual steering or orbital maneuvering.
+The destinations are real, but the launch bases, route, growing altitude targets (5% per world), and compressed interstellar travel are arcade fiction. These are arcade physics, not an orbital simulation. Component masses, fuel consumption, engine efficiency, drag, and staging affect the flight, but there is no manual steering or orbital maneuvering.
 
 ## Saved progress and reset
 
 Credits, parts owned and fitted, contracts, milestones, best altitude, and flight count save in this browser when storage is available. Progress is per browser/device. Reloading during a Free Flight launch abandons it without paying rewards. Expeditions are saved separately, including the launch timing needed to resume an interrupted flight.
 
-Older expedition saves keep their rocket, credits, and earned bonuses. Pending module/route selections become a ready hangar. Previously flown milestones are credited once during migration. Already-earned legacy bonuses remain active for that run and can be inspected in the menu; new runs use physical part bonuses instead.
+Older expedition saves keep their rocket, credits, and earned bonuses. Their former Ascent level maps directly to the corresponding world; previously unlocked levels become unlocked worlds. Pending module/route selections become a ready hangar. Previously flown milestones are credited once during migration. Already-earned legacy bonuses remain active for that run and can be inspected in the menu; new runs use physical part bonuses instead.
 
 Older upgrade-based saves retain credits, altitude, and milestones. Their upgrade levels unlock corresponding owned components automatically. Previous flight-plan and event settings are no longer used; flights use the same baseline tuning for consistent part comparisons.
 
-To start completely over, select **☰ → Reset entire game**, then confirm **Reset entire game**. This clears both modes: Free Flight credits, parts, records, and contracts, plus the current expedition, unlocked kits and difficulty levels, discoveries, and run history. **Keep playing** or Escape cancels without changing either save. Only this game’s two save entries are reset; other browser data is untouched.
+To start completely over, select **☰ → Reset entire game**, then confirm **Reset entire game**. This clears both modes: Free Flight credits, parts, records, and contracts, plus the current expedition, unlocked worlds and starting builds, discoveries, and run history. **Keep playing** or Escape cancels without changing either save. Only this game’s two save entries are reset; other browser data is untouched.
 
 ## Files and checks
 
@@ -72,13 +75,26 @@ No build step, dependency installation, external assets, API keys, or backend ar
 - `builder.js` — part thumbnails, equipped assembly, upgrade comparisons, and height estimates.
 - `parts.js` — component catalog, run-specific part bonuses, inventory, fitting, and assembly statistics.
 - `expeditions.js` — seeded runs, altitude milestones, stock, rewards, progression, and save migration.
-- `expedition-ui.js` — starting rockets, difficulty selection, and saved-flight recovery.
+- `expedition-ui.js` — world selection, starting rockets, and saved-flight recovery.
+- `worlds.js` — real-world route, scenery palettes, destination names, and progression strip.
+- `travel.js` — skippable, reduced-motion-aware travel celebration.
 - `journey.js` — the shared milestone map, named stops, and live journey progress.
 - `modifiers.js` — legacy module/route effects retained for existing saves.
 - `engine.js` — flight physics, contracts, milestones, and save migration; legacy simulation helpers remain for regression checks.
 - `tests/` — mechanics, parts, persistence, reward integrity, and full campaign tests.
+- `checks/journey.playwright.js` — repeatable browser checks for world setup, real flight completion, travel, save integrity, phone layouts, and reduced motion.
 
 Run `npm test` (Node 18+). There are no npm dependencies. Playwright CLI is used for browser checks of layout, real touch input, uninterrupted flights, previewing/buying/refitting parts, complete progression, and reset behavior.
+
+With Playwright CLI installed and the local server running, use a fresh named browser session for the journey checks. These checks seed and reset game saves **inside that test session**:
+
+```sh
+playwright-cli -s=rocketaway-tests open http://127.0.0.1:4173
+playwright-cli -s=rocketaway-tests run-code --filename=checks/journey.playwright.js
+playwright-cli -s=rocketaway-tests close
+```
+
+The core game rules stay in pure modules tested by Node; browser checks cover their connection to the interface. A UI framework is not required for either test layer.
 
 ## GitHub Pages
 
@@ -87,3 +103,7 @@ The live game is hosted at [georgemclaughlin.github.io/rocketaway](https://georg
 Progress is stored only in the player’s browser. The game has no analytics or external services. Saves are separate for each site address and do not transfer automatically from a local preview to the hosted game.
 
 Artwork is drawn with canvas, and audio is synthesized locally.
+
+## Astronomy references
+
+World names and scene inspiration use real Solar System destinations; [NASA’s Solar System overview](https://science.nasa.gov/solar-system/) and [Titan facts](https://science.nasa.gov/saturn/moons/titan/facts/) provide background. Tau Ceti is the real stellar destination. No speculative planet is presented as a known landing site: the [NASA Exoplanet Archive entry for Tau Ceti](https://exoplanetarchive.ipac.caltech.edu/overview/tau%20cet) currently marks Tau Ceti e as refuted and flags other listed planets as controversial.

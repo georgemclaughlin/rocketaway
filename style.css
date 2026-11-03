@@ -578,3 +578,40 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
   .expedition-panel[data-phase="hub"] .kit-card b { font-size: 11px; }
   .kit-card > small { display: none; }
 }
+
+/* Real worlds, one continuous road to Tau Ceti. */
+.world-orb { display: inline-block; flex: none; width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(ellipse at 30% 28%,#ffffff70,transparent 45%),radial-gradient(ellipse at 67% 66%,var(--world-land) 0 16%,transparent 18%),radial-gradient(ellipse at 30% 35%,var(--world-land) 0 22%,transparent 24%),var(--world-color); box-shadow: inset -8px -4px 12px #07101d90,0 0 15px color-mix(in srgb,var(--world-color) 18%,transparent); }
+.world-star { background: radial-gradient(circle,#fff9d8,var(--world-color) 55%,var(--world-land)); box-shadow: 0 0 35px #ffd887aa,0 0 85px #ffc66544; }
+#expedition-title { display: flex; align-items: center; gap: 10px; }
+#expedition-title .world-orb { width: 34px; height: 34px; }
+#expedition-title > span:last-child { min-width: 0; }
+.world-route { display: grid; grid-template-columns: repeat(9,minmax(0,1fr)); gap: 3px; max-width: 620px; }
+.world-stop { position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px; min-width: 0; min-height: 44px; border: 1px solid transparent; border-radius: 7px; background: transparent; padding: 3px 0; color: #c0cedb; font: inherit; }
+.world-stop .world-orb { width: 19px; height: 19px; }
+.world-stop-number { font-size: 9px; line-height: 1; }
+.world-check { position: absolute; top: 0; right: 0; color: var(--gold); font-size: 10px; }
+.world-stop[aria-pressed="true"] { border-color: var(--gold); background: #f6d47b12; color: var(--gold); }
+.world-stop:disabled { opacity: .32; cursor: default; }
+.world-stop:not(:disabled):hover { background: #ffffff15; }
+.app[data-mode="expedition"] .assembly-stage { background: radial-gradient(ellipse at 40% 80%,var(--world-accent,#79b9d7) -240%,#1c2a3e 70%); }
+#travel-dialog { width: min(680px,calc(100vw - 28px)); max-height: calc(100dvh - 28px); margin: auto; padding: 30px; color: var(--ink); background: radial-gradient(ellipse at 70% 30%,#2d3157,#111528 70%); border: 1px solid #65748e; border-radius: 18px; text-align: center; overflow: hidden; }
+#travel-dialog::backdrop { background: #080c1aee; }
+#travel-dialog h2 { margin: 8px 0; font-size: clamp(24px,5vw,38px); }
+#travel-dialog p { color: #c3d0db; margin: 10px 0 20px; }
+#travel-scene { position: relative; height: clamp(140px,32vh,270px); overflow: hidden; background-image: radial-gradient(circle,#f5e6ba99 1px,transparent 1.5px),radial-gradient(circle,#b9d5f766 1px,transparent 1.5px); background-size: 43px 61px,79px 47px; background-position: 5px 17px,27px 9px; }
+#travel-scene .world-orb { position: absolute; width: clamp(66px,16vw,112px); height: clamp(66px,16vw,112px); top: 50%; margin-top: -45px; }
+.travel-from { left: 3%; animation: world-depart 3.4s ease-in-out both; }
+.travel-to { right: 3%; animation: world-arrive 3.4s ease-in-out both; }
+.travel-ship { position: absolute; width: 86px; height: 110px; left: 7%; top: calc(50% - 60px); animation: world-transfer 3.4s cubic-bezier(.45,0,.25,1) both; }
+.travel-ship svg { width: 100%; height: 100%; transform: rotate(70deg); }
+.travel-ship::before { content: ''; position: absolute; left: 5px; top: 53%; width: 50px; height: 9px; background: linear-gradient(90deg,transparent,#ed966a,#ffe6a1); border-radius: 50%; transform: rotate(-20deg); filter: blur(2px); }
+.travel-from-name,.travel-to-name { position: absolute; bottom: 3px; font-size: 13px; color: #d7e1eb; }
+.travel-from-name { left: 4%; }.travel-to-name { right: 4%; }
+@keyframes world-transfer { 0% { left: 7%; transform: translateY(12px) scale(.65); opacity: 0; } 15% { opacity: 1; } 48% { transform: translateY(-28px) scale(1.1); } 85% { opacity: 1; } 100% { left: 75%; transform: translateY(12px) scale(.45); opacity: 0; } }
+@keyframes world-depart { from { transform: scale(1); } to { transform: scale(.7); opacity: .45; } }
+@keyframes world-arrive { from { transform: scale(.65); opacity: .5; } to { transform: scale(1.1); opacity: 1; } }
+@media (max-width: 360px) { #expedition-title { font-size: 21px; gap: 7px; } #expedition-title .world-orb { width: 28px; height: 28px; } }
+@media (max-height: 520px) { #travel-dialog { padding: 14px; } #travel-dialog h2 { font-size: 24px; } #travel-scene { height: 125px; } #travel-dialog p { margin: 5px 0 10px; } #expedition-title .world-orb { width: 24px; height: 24px; } #expedition-title { gap: 6px; font-size: 20px; } }
+@media (prefers-reduced-motion: reduce) { .travel-ship,.travel-from,.travel-to { animation: none; } .travel-ship { left: 45%; } }
+
+@media (max-height: 520px) { .world-stop-number { display: none; } .world-stop::after { content: attr(data-step); font-size: 10px; line-height: 1; } }

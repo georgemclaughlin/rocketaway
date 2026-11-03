@@ -1,6 +1,6 @@
 import { CHECKPOINTS, milestoneHeight } from './expeditions.js';
 
-export const JOURNEY_NAMES = ['First clouds', 'Above the clouds', 'Thin air', 'Dark skies', 'Space', 'Final climb'];
+export const JOURNEY_NAMES = ['Liftoff', 'Climbing', 'High above', 'Dark skies', 'Deep sky', 'Departure'];
 export const altitudeLabel = altitude => `${Number((altitude/1000).toFixed(1))} km`;
 
 // Milestones describe the whole expedition, even while a single flight passes several.
