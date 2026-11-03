@@ -1,4 +1,4 @@
-import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js';
+import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=space-guide';
 
 export function researchButtonState(profile,selectedKit='scrapper') {
  const data=profile.research.data;
@@ -30,7 +30,7 @@ export function createResearchUI({getSession,getSelectedKit,onPurchase,canOpen})
     ? [{label:'Body weight',before:`${100-rank*3}%`,after:`${100-next*3}%`},{label:'Starting credits',before:160+rank*10,after:160+next*10}]
     : selected==='stager'
       ? [{label:'Booster power',before:`${100+rank*6}%`,after:`${100+next*6}%`}]
-      : [{label:'Burn time bonus',before:`+${rank*3}%`,after:`+${next*3}%`},{label:'Altitude pay bonus',before:`+${rank*5}%`,after:`+${next*5}%`}];
+      : [{label:'Burn time bonus',before:`+${rank*3}%`,after:`+${next*3}%`},{label:'Altitude credits bonus',before:`+${rank*5}%`,after:`+${next*5}%`}];
   $('research-steps').innerHTML=metrics.map(m=>`<li><span class="research-metric">${m.label}</span><strong>${complete?m.before:`<span class="research-before">${m.before}</span><span class="research-arrow" aria-label="becomes">→</span><span class="research-after">${m.after}</span>`}</strong></li>`).join('');
   $('research-timing').textContent=complete?`Permanent for every future ${track.name} rocket.`:part?`Free ${part.name} with every future ${track.name}. Your fitted parts stay as they are.`:selected==='scrapper'?`Starting credits arrive with your next Scrapper. Body weight excludes fuel.`:`Permanent for every future ${track.name} rocket.`;
   $('research-cost').textContent=locked?'Earn milestones by reaching new altitude goals.':complete?'Nothing else to buy for this build.':profile.research.data>=cost?`Cost: ${cost} points · You’ll have ${profile.research.data-cost} left`:`Cost: ${cost} points · You need ${cost-profile.research.data} more`;

@@ -1,9 +1,10 @@
-import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js';
-import { createFlight, stepFlight } from './engine.js';
+import { flightConditions } from './worlds.js?v=space-guide';
+import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=space-guide';
+import { createFlight, stepFlight } from './engine.js?v=space-guide';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
-  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0);
+  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic');
   if (estimates.has(key)) return estimates.get(key);
   const flight = createFlight(program.levels, quality, { plan: 'explorer', assembly: assemblySpecs(program) });
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);
@@ -72,7 +73,7 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
       button.disabled = !canEdit();
     }
     $('assembly-art').innerHTML = rocketArt(parts, slotId, false);
-    $('assembly-hint').textContent = 'EQUIPPED · tap a section to choose parts';
+    $('assembly-hint').textContent = flightConditions(program.launchWorld).label || 'EQUIPPED · tap a section to choose parts';
     for (const button of document.querySelectorAll('button[data-build-slot]')) {
       button.setAttribute('aria-pressed', button.dataset.buildSlot === slotId);
       button.querySelector('strong').textContent = parts[button.dataset.buildSlot].name;
@@ -88,7 +89,7 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('candidate-description').textContent = candidate.detail;
     $('candidate-height').textContent = `${(preview.height/1000).toFixed(1)} km`;
     const target = getTarget();
-    $('comparison-label').textContent = equipped ? 'Equipped estimate' : 'With this part';
+    $('comparison-label').textContent = equipped ? 'Equipped estimate' : target ? (preview.height>=target ? `After fitting: clears ${Number((target/1000).toFixed(1))} km` : `After fitting: ${((target-preview.height)/1000).toFixed(1)} km short`) : 'With this part';
     $('fitted-height').textContent = `~${(preview.previousHeight/1000).toFixed(1)} km`;
     const margin = target ? (preview.previousHeight-target)/1000 : null;
     $('fitted-readiness').textContent = target ? (margin >= 0 ? 'Within reach' : estimateHeight(program,1.2) >= target ? 'Aim for gold' : `${Math.abs(margin).toFixed(1)} km short`) : 'Estimated at 110% launch power';
@@ -99,14 +100,14 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('candidate-difference').title = 'Change compared with your equipped rocket';
     $('candidate-difference').dataset.change = equipped ? 'same' : difference >= 0 ? 'better' : 'worse';
     const burn = preview.stats.burn, weight = preview.stats.mass;
-    $('candidate-tradeoff').textContent = preview.stats.thrust/.5 < 1 ? 'Too heavy for this engine. Try a lighter tank.' : equipped ? `${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total` : `${preview.previousStats.burn.toFixed(1)} → ${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total`;
+    $('candidate-tradeoff').textContent = preview.stats.thrust/(preview.stats.gravity??.5) < 1 ? 'Too heavy for this engine. Try a lighter tank.' : equipped ? `${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total` : `${preview.previousStats.burn.toFixed(1)} → ${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total`;
     const stocked = !Array.isArray(program.stock)||program.stock.includes(candidateId)||owned;
     $('part-fit').textContent = !stocked ? 'Not stocked here' : equipped ? 'Fitted ✓' : owned ? 'Fit part · free' : program.credits >= candidate.price ? `Buy & fit · ✦ ${candidate.price}` : `Need ✦ ${candidate.price-program.credits} more`;
     $('shop-launch').firstChild.textContent = 'Launch rocket ';
     $('shop-launch').title = 'Launch the equipped rocket shown above';
     $('part-info-title').textContent = candidate.name;
     $('part-info-description').textContent = candidate.detail + (candidate.trait ? ` This run: ${candidate.trait.name.toLowerCase()} — ${candidate.trait.detail}.` : '');
-    $('part-info-stats').textContent = `${$('candidate-state').textContent}. With this part: ${burn.toFixed(1)}s fuel, ${weight.toFixed(2)} tonnes. Height estimates use 110% launch power; actual timing affects the result.`;
+    $('part-info-stats').textContent = `${$('candidate-state').textContent}. With this part: ${burn.toFixed(1)}s fuel, ${weight.toFixed(2)} tonnes. Height estimates use 110% launch power; actual timing affects the result. ${flightConditions(program.launchWorld).tip}`;
     $('part-fit').disabled = !canEdit() || !stocked || equipped || (!owned && program.credits < candidate.price);
   }
   function selectSlot(id) {

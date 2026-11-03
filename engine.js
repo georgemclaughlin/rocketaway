@@ -1,4 +1,4 @@
-import { newInventory, restoreInventory } from './parts.js';
+import { newInventory, restoreInventory } from './parts.js?v=space-guide';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [
@@ -109,7 +109,7 @@ export function stepFlight(flight, elapsed) {
     if (!powered) flight.coastTime += dt;
     if (!flight.boosted && flight.time >= flight.burn * .6) { flight.velocity += flight.kick; flight.boosted = true; if (flight.dryMass) flight.dryMass -= flight.stageMass; }
     const massFactor = flight.mass ? flight.mass / (flight.dryMass + flight.fuelMass * flight.fuel) : 1;
-    const acceleration = (powered ? flight.thrust * massFactor * flight.quality : 0) - .5 - flight.drag * flight.velocity * Math.abs(flight.velocity);
+    const acceleration = (powered ? flight.thrust * massFactor * flight.quality : 0) - (flight.gravity??.5) - flight.drag * flight.velocity * Math.abs(flight.velocity);
     flight.velocity += acceleration * dt;
     flight.altitude = Math.max(0, flight.altitude + flight.velocity * dt * 500);
     flight.peak = Math.max(flight.peak, flight.altitude);

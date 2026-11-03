@@ -1,14 +1,17 @@
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js';
-import { fittedParts, assemblySpecs } from './parts.js';
-import { EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=journey-records';
-import { MODULES } from './modifiers.js';
-import { createExpeditionUI } from './expedition-ui.js?v=journey-records';
-import { createBuilder } from './builder.js';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
-import { worldFor, destinationFor, WORLDS } from './worlds.js';
-import { createTravel } from './travel.js?v=tau-ending';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=research-states';
-import { launchRating } from './launch-feedback.js';
+import { createScienceUI } from './science-ui.js?v=space-guide';
+import { environmentLabel } from './science-data.js?v=space-guide';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=space-guide';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=space-guide';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=space-guide';
+import { KITS, EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=space-guide';
+import { MODULES } from './modifiers.js?v=space-guide';
+import { createExpeditionUI } from './expedition-ui.js?v=space-guide';
+import { createBuilder } from './builder.js?v=space-guide';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=space-guide';
+import { worldFor, destinationFor, WORLDS } from './worlds.js?v=space-guide';
+import { createTravel } from './travel.js?v=space-guide';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=space-guide';
+import { launchRating } from './launch-feedback.js?v=space-guide';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -107,6 +110,36 @@ $('menu-dialog').addEventListener('close', () => {
   if (menuPausedFlight && mode === 'paused') pause();
   menuPausedFlight = false;
 });
+const scienceUI=createScienceUI();
+function openReference(id) {
+  const resume=menuPausedFlight || mode==='flying';
+  menuPausedFlight=false;
+  if(mode==='flying')pause();
+  $('menu-dialog').close();
+  $(id).showModal();
+  $(id).addEventListener('close',()=>{if(resume&&mode==='paused')pause();},{once:true});
+}
+function openScience() {
+  const run=inExpedition()?expeditionSession.active:null;
+  const world=expeditionSession.mode==='classic'?0:currentScreen==='launchpad'&&run?run.difficulty:$('expedition').dataset.phase==='finale'?9:expeditionUI.getSelectedWorld();
+  const legacyWorld=run?.difficulty===1&&run.conditionsVersion!==1&&!['won','lost'].includes(run.status)?1:null;
+  scienceUI.render(world,currentScreen==='launchpad'?flight?.altitude||0:0,legacyWorld);
+  openReference('science-dialog');
+}
+for(const id of ['science-menu','world-briefing','flight-number'])$(id).addEventListener('click',openScience);
+$('records-menu').addEventListener('click',()=>{
+  const profile=expeditionSession.profile;
+  $('records-summary').textContent=profile.campaignComplete?'Tau Ceti reached. Your journey is complete.':`Road to Tau Ceti · ${profile.maxDifficulty} of 9 worlds cleared`;
+  $('records-content').innerHTML=journeyRecordsMarkup(profile);
+  $('records-note').textContent=profile.flightRecords.partial?'Older flights may be missing from these records.':'Your expedition records stay with you across retries and replays.';
+  openReference('records-dialog');
+});
+$('records-close').addEventListener('click',()=>$('records-dialog').close());
+function unlockNotice(result) {
+  const kits=(result.unlockedKits||[]).map(id=>KITS.find(k=>k.id===id)?.name).filter(Boolean);
+  const parts=(result.newParts||[]).map(id=>partById(id)?.name).filter(Boolean);
+  return [kits.length?`${kits.join(' + ')} unlocked for your next expedition!`:'',parts.length?`New stock: ${parts.slice(0,2).join(', ')}${parts.length>2?` +${parts.length-2} more`:''}.`:''].filter(Boolean).join(' ');
+}
 $('run-classic').addEventListener('click', () => {
   if (mode !== 'workshop') return;
   $('menu-dialog').close(); expeditionSession.mode = 'classic'; program = freeProgram;
@@ -216,6 +249,7 @@ function updateFlightHud() {
   $('altitude').textContent = (flight.altitude / 1000).toFixed(2);
   $('velocity').textContent = `${Math.max(0, Math.round(flight.velocity * 500)).toLocaleString()} m/s`;
   $('fuel').style.width = `${flight.fuel * 100}%`;
+  $('flight-number').textContent = `${environmentLabel(inExpedition()?expeditionSession.active.difficulty:0,flight.altitude)} ⓘ`;
   $('flight-status').textContent = flight.done ? 'APOGEE REACHED' : flight.phase === 'powered' ? 'ENGINES FIRING' : 'COASTING';
 }
 function cancelLaunch() {
@@ -283,6 +317,7 @@ function pause() {
     mode = 'paused'; $('overlay').hidden = false; $('report').hidden = true;
     $('result').hidden = false;
     $('result-eyebrow').textContent = 'TAKE A LITTLE SPACE'; $('result-title').textContent = 'Just floating.';
+    $('result-unlocks').hidden=true;
     $('result-description').textContent = 'Your mission will be right here.'; $('bonus-note').textContent = '';
     $('return').textContent = 'Keep flying'; $('pause').textContent = '▷ Resume'; $('pause').setAttribute('aria-label', 'Resume flight');
     syncScreens(); $('return').focus({ preventScroll: true }); announce('Flight paused.');
@@ -315,6 +350,8 @@ function finish() {
     $('bonus-note').textContent = `+${result.data} research points · spend in Research`;
     $('return').textContent = run.status==='won' ? `Travel to ${destinationFor(run).name} ↗` : run.status==='lost' ? `Retry ${worldFor(run).name} ↗` : 'Back to rocket ↗';
   }
+  $('result-unlocks').textContent=unlockNotice(result);
+  $('result-unlocks').hidden=!$('result-unlocks').textContent;
   const rating=launchRating(flight.quality);
   $('bonus-note').textContent += ` · ${rating.label} launch · ${rating.power}% power`;
   syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete'; tone(result.firstWin ? 1040 : 660, .35);

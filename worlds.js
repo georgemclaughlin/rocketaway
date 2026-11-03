@@ -13,6 +13,12 @@ export const WORLDS = [
 export const TAU_CETI = {name:'Tau Ceti',kind:'Another star. Journey complete.',color:'#ffe4a0',land:'#ffc668',star:true};
 export const worldFor = run => WORLDS[Math.max(0,Math.min(WORLDS.length-1,Math.floor(run?.difficulty||0)))];
 export const destinationFor = run => WORLDS[(run?.difficulty||0)+1] || TAU_CETI;
+// Arcade tuning: the Earth/Moon prototype changes decisions with simplified forces, not SI physics. Old runs retain their original model.
+export function flightConditions(world) {
+  return world===1
+    ? {gravity:.35,drag:0,label:'Low gravity · no air drag',tip:'Fuel and low weight matter. Nose drag has no effect here.'}
+    : {gravity:.5,drag:1,label:world===0?'Air drag · streamlined noses help':'',tip:world===0?'Streamlined noses cut air resistance. Balance fuel with engine power.':''};
+}
 export function worldMarkup(world, extraClass='') {
   return `<span class="world-orb ${world.star?'world-star':''} ${extraClass}" style="--world-color:${world.color};--world-land:${world.land}" aria-hidden="true"></span>`;
 }

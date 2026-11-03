@@ -1,5 +1,6 @@
-import { modifyAssembly } from './modifiers.js';
-import { researchModifiers } from './research.js';
+import { modifyAssembly } from './modifiers.js?v=space-guide';
+import { researchModifiers } from './research.js?v=space-guide';
+import { flightConditions } from './worlds.js?v=space-guide';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },
@@ -9,7 +10,7 @@ export const PART_SLOTS = [
 export const PARTS = [
   { id:'cap', slot:'aero', name:'Round cap', price:0, tier:0, mass:.10, drag:.018, pay:1, shape:'round', detail:'A simple, dependable nose cone.' },
   { id:'needle', slot:'aero', name:'Needle fairing', price:90, tier:2, mass:.08, drag:.010, pay:1, shape:'pointed', detail:'Light and slippery. Built for altitude.' },
-  { id:'lab', slot:'aero', name:'Science capsule', price:300, tier:4, mass:.30, drag:.016, pay:1.5, shape:'capsule', detail:'50% more altitude pay, with extra weight and drag.' },
+  { id:'lab', slot:'aero', name:'Science capsule', price:300, tier:4, mass:.30, drag:.016, pay:1.5, shape:'capsule', detail:'50% more altitude credits, with extra weight and drag.' },
   { id:'ceramic', slot:'aero', name:'Ceramic fairing', price:850, tier:6, mass:.16, drag:.006, pay:1, shape:'pointed', detail:'Very low drag for long coasts into space.' },
   { id:'pocket', slot:'tank', name:'Pocket tank', price:0, tier:0, mass:.22, fuelMass:.10, burn:4, height:32, detail:'Light enough for your first little engine.' },
   { id:'long', slot:'tank', name:'Long tank', price:100, tier:2, mass:.37, fuelMass:.22, burn:7, height:55, detail:'More fuel, but your engine has more to lift.' },
@@ -31,7 +32,7 @@ export const PART_TRAITS = [
   {id:'efficient',name:'Efficient',detail:'15% longer engine burn',slots:['engine'],stat:'efficiency',factor:1.15},
   {id:'capacity',name:'Extra capacity',detail:'15% more fuel',slots:['tank'],stat:'burn',factor:1.15},
   {id:'smooth',name:'Streamlined',detail:'20% less drag',slots:['aero'],stat:'drag',factor:.8},
-  {id:'science',name:'Research',detail:'25% more altitude pay',slots:['aero'],stat:'pay',factor:1.25},
+  {id:'science',name:'Survey bonus',detail:'25% more altitude credits',slots:['aero'],stat:'pay',factor:1.25},
   {id:'kick',name:'High output',detail:'20% more booster kick',slots:['boosters'],stat:'kick',factor:1.2},
 ];
 export function restorePartTraits(raw) {
@@ -89,8 +90,8 @@ export function fittedParts(program) {
 }
 export function assemblySpecs(program) {
   const parts=fittedParts(program), research=researchModifiers(program), baseMass=.5+Object.values(parts).reduce((sum,part)=>sum+part.mass,0);
-  const mass=(baseMass-parts.tank.fuelMass)*research.dry+parts.tank.fuelMass;
-  return modifyAssembly({thrust:parts.engine.thrust/mass,burn:parts.tank.burn*parts.engine.efficiency*research.burn,drag:parts.aero.drag,kick:parts.boosters.kick/mass*research.kick,
+  const mass=(baseMass-parts.tank.fuelMass)*research.dry+parts.tank.fuelMass,conditions=flightConditions(program.launchWorld);
+  return modifyAssembly({thrust:parts.engine.thrust/mass,burn:parts.tank.burn*parts.engine.efficiency*research.burn,drag:parts.aero.drag*conditions.drag,gravity:conditions.gravity,kick:parts.boosters.kick/mass*research.kick,
     mass,dryMass:mass-parts.tank.fuelMass,fuelMass:parts.tank.fuelMass,stageMass:parts.boosters.mass*.8*research.dry,pay:parts.aero.pay*research.pay,
     power:Object.values(parts).reduce((sum,part)=>sum+part.tier,0)},parts,program);
 }

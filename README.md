@@ -55,7 +55,7 @@ Each starting build has five permanent research ranks, costing 3, 5, 8, 12, and 
 | --- | --- | --- |
 | Scrapper | 3% less dry weight; 10 more starting credits | Rank 2: Ember; rank 4: Dart; rank 5: Needle |
 | Stagehand | 6% more booster kick | Rank 2: Long tank; rank 3: Ember; rank 4: Solid boosters; rank 5: Composite tank |
-| Scientist | 3% longer burn; 5% more altitude pay | Rank 2: Long tank; rank 4: Composite tank; rank 5: Dart |
+| Scientist | 3% longer burn; 5% more altitude credits | Rank 2: Long tank; rank 4: Composite tank; rank 5: Dart |
 
 Bonuses are additive across ranks and apply only when flying that build. A purchase updates the current matching rocket’s physics and estimates immediately. Starting credits and parts apply when the next rocket is created, so research never overwrites fitted parts mid-run. The starting-build illustrations and rank labels reflect those permanent unlocks. Higher-tier starting parts replace the earlier part in the same slot, while earlier unlocked parts remain owned for free refitting.
 
@@ -68,12 +68,12 @@ Existing saves receive a one-time research balance of 2 research points per reco
 3. Compare the estimated flight height against your current rocket. The estimate simulates a flight at **110% launch power**; actual timing changes the result. Larger tanks add fuel and weight, engines affect lift and efficiency, and nose cones reduce drag or carry science instruments.
 4. Choose **Buy & fit**, or **Fit part · free** for something you already own. The rocket changes visually. Side boosters fire and detach automatically during flight.
 5. Tap **Launch rocket**, then **Launch!** in the gold zone. There are no flight-plan settings or random event choices. Your assembly determines the flight.
-6. Collect the flight grant, altitude pay, milestone rewards, and any completed contract. **Improve rocket** returns to the hangar.
+6. Collect the flight grant, altitude credits, milestone rewards, and any completed contract. **Improve rocket** returns to the hangar.
 The first mission is **100 km**, the edge of space. Reaching it unlocks a **200 km** mission without resetting your rocket or inventory. Contracts reward precise launches, altitude, coasting, a science capsule, and side boosters. The rocket visibly reflects its parts; empty booster stages detach during flight. Altitude zones, a previous-best marker, and record celebrations mark your progress.
 
 **Speed ×1 / ×3** fast-forwards flights. **P / Escape** pauses or resumes. Switching away pauses active flights. Sound is optional and starts muted. Motion effects respect reduced-motion preferences.
 
-The destinations are real, but the launch bases, route, growing altitude targets (5% per world), and compressed interstellar travel are arcade fiction. These are arcade physics, not an orbital simulation. Component masses, fuel consumption, engine efficiency, drag, and staging affect the flight, but there is no manual steering or orbital maneuvering.
+The destinations are real, but the launch bases, route, altitude targets, and compressed interstellar travel are arcade fiction. These are arcade physics, not an orbital simulation. Component masses, fuel consumption, engine efficiency, drag, and staging affect the flight, but there is no manual steering or orbital maneuvering.
 
 ## Saved progress and reset
 
@@ -81,7 +81,7 @@ Credits, parts owned and fitted, contracts, milestones, best altitude, and fligh
 
 Older expedition saves keep their rocket, credits, and earned bonuses. Their former Ascent level maps directly to the corresponding world; previously unlocked levels become unlocked worlds. Pending module/route selections become a ready hangar. Previously flown milestones are credited once during migration. Already-earned legacy bonuses remain active for that run and can be inspected in the menu; new runs use physical part bonuses instead.
 
-Older upgrade-based saves retain credits, altitude, and milestones. Their upgrade levels unlock corresponding owned components automatically. Previous flight-plan and event settings are no longer used; flights use the same baseline tuning for consistent part comparisons.
+Older upgrade-based saves retain credits, altitude, and milestones. Their upgrade levels unlock corresponding owned components automatically. Previous flight-plan and event settings are no longer used; Free Flight keeps its original tuning. Existing expeditions keep their original physics and goals; new Moon expeditions use the Moon model.
 
 To start completely over, select **☰ → Reset entire game**, then confirm **Reset entire game**. This clears both modes: Free Flight credits, parts, records, and contracts, plus the current expedition, unlocked worlds and starting builds, discoveries, and run history. **Keep playing** or Escape cancels without changing either save. Only this game’s two save entries are reset; other browser data is untouched.
 
@@ -130,3 +130,16 @@ Rocket and world scenes use canvas and CSS. The pilot uses a bundled transparent
 ## Astronomy references
 
 World names and scene inspiration use real Solar System destinations; [NASA’s Solar System overview](https://science.nasa.gov/solar-system/) and [Titan facts](https://science.nasa.gov/saturn/moons/titan/facts/) provide background. Tau Ceti is the real stellar destination. No speculative planet is presented as a known landing site: the [NASA Exoplanet Archive entry for Tau Ceti](https://exoplanetarchive.ipac.caltech.edu/overview/tau%20cet) currently marks Tau Ceti e as refuted and flags other listed planets as controversial.
+
+
+## Space facts and world conditions
+
+Tap the atmospheric readout during flight, the conditions beneath the starting-build heading, or **☰ → World guide**. The guide pauses an active flight and resumes it when closed. Earth’s live readout uses approximate atmospheric boundaries at 12, 50, 80, 700 and 10,000 km, following [NASA’s atmospheric-layer overview](https://science.nasa.gov/earth/earth-atmosphere/earths-atmosphere-a-multi-layered-cake/). Boundaries vary, and the atmosphere fades gradually into space. Other worlds have their own environment descriptions; they do not reuse Earth’s layers.
+
+The guide links NASA sources for all nine launch worlds and Tau Ceti, including Titan’s methane rain, Europa’s sparse oxygen atmosphere and Tau Ceti’s distance of 11.9 light-years. Earth and Moon surface-gravity values come from [NASA’s Moon/Earth comparison](https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html). Source URLs and educational data are in `science-data.js`; `science-ui.js` renders the optional guide. No external requests are made unless a player opens a source link.
+
+New Moon expeditions have no air drag and reduced, arcade-scaled gravity. Light builds and fuel capacity are useful; a heavier low-drag fairing can reduce height. Moon milestones are 6, 20, 60, 150, 300 and 600 km. Existing Moon runs retain their original model and goals, including saved flights. Other worlds currently retain the standard game model. Real facts are explicitly separated from simplified flight forces, goals and travel times.
+
+**☰ → Journey records** remains available during optional replay. Part previews compare estimated height with the current goal, and flight reports announce newly stocked parts and starting-build unlocks. Altitude-credit bonuses are named separately from permanent research points.
+
+Run `checks/science.playwright.js` in an isolated Playwright session for guide navigation, pause/resume, layer readouts, new Moon setup, preview/result clarity and records across six viewport sizes. `tests/science.test.js` covers layer boundaries, contrasting Earth/Moon part choices, save compatibility, unlock notices and Moon progression.

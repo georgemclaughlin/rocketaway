@@ -1,4 +1,4 @@
-import { launchRating } from './launch-feedback.js';
+import { launchRating } from './launch-feedback.js?v=space-guide';
 
 const count=(value,max=1e9)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
 export const newFlightRecords=()=>({launches:0,perfectLaunches:0,highestAltitude:0,highestWorld:0,partial:false});

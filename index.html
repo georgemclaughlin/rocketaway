@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=journey-records">
-  <script type="module" src="./game.js?v=journey-records"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=space-guide">
+  <script type="module" src="./game.js?v=space-guide"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -30,7 +30,7 @@
     <section class="launch-site" id="launchpad" aria-label="Launch site">
       <div class="viewport">
         <canvas id="game" aria-label="Your assembled rocket. Tap its nose, tank, engine, or side boosters to choose parts. Flights are automatic."></canvas>
-        <div class="flight-top"><div><span class="label">ALTITUDE</span><strong><span id="altitude">0.00</span><small> km</small></strong><span id="launch-rating" class="launch-rating" hidden></span></div><div class="flight-number"><span class="label" id="flight-number">FLIGHT 01</span><span id="flight-status">ON THE PAD</span></div></div>
+        <div class="flight-top"><div><span class="label">ALTITUDE</span><strong><span id="altitude">0.00</span><small> km</small></strong><span id="launch-rating" class="launch-rating" hidden></span></div><div class="flight-number"><button class="label science-readout" id="flight-number" aria-label="Open world guide">FLIGHT 01</button><span id="flight-status">ON THE PAD</span></div></div>
         <div class="scene-tag" id="scene-tag">TAP ROCKET PARTS TO BUILD</div>
         <div class="flight-telemetry" id="telemetry" hidden><div><span class="label">FUEL</span><div class="fuel-track"><div id="fuel"></div></div></div><div><span class="label">VERTICAL SPEED</span><strong id="velocity">0 m/s</strong></div></div>
       </div>
@@ -63,7 +63,7 @@
       <p id="expedition-summary"></p>
       <div id="expedition-goal"></div>
       <div class="expedition-progress"><ol id="expedition-map" class="journey-steps" aria-label="The six milestones in this expedition"></ol><span id="expedition-stats"></span></div>
-      <div class="setup-heading"><h3 id="expedition-setup-title">Choose your starting rocket</h3></div>
+      <div class="setup-heading"><h3 id="expedition-setup-title">Choose your starting rocket</h3><button id="world-briefing" class="science-readout" aria-label="World conditions and space facts"></button></div>
       <div id="expedition-choices" class="expedition-choices"></div>
       <div id="expedition-footer" class="expedition-footer"></div>
 
@@ -72,7 +72,7 @@
           <section class="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1" id="result">
             <div class="eyebrow" id="result-eyebrow">FLIGHT REPORT</div><h2 id="result-title">A little closer.</h2><p id="result-description"></p>
             <div class="report" id="report"><div><span>PEAK ALTITUDE</span><strong id="final-altitude">0 km</strong></div><div><span>CREDITS EARNED</span><strong class="gold" id="earnings">+0</strong></div></div>
-            <p id="bonus-note" class="bonus-note"></p><button id="return" class="primary">Back to workshop <span aria-hidden="true">↗</span></button>
+            <p id="bonus-note" class="bonus-note"></p><p id="result-unlocks" hidden></p><button id="return" class="primary">Back to workshop <span aria-hidden="true">↗</span></button>
           </section>
         </div>
   </div>
@@ -84,9 +84,23 @@
     <details id="run-details"><summary>Bonuses from your saved run <span id="module-count"></span></summary><div id="menu-modules"></div></details>
     <button id="sound" class="small-button" aria-label="Turn sound on" aria-pressed="false">Sound <span id="sound-state">OFF</span></button>
     <button id="research-menu" class="small-button">Permanent research</button>
+    <button id="records-menu" class="small-button">Journey records</button>
+    <button id="science-menu" class="small-button">World guide · real space facts</button>
     <button id="run-abandon" class="small-button">End expedition</button>
     <button id="reset-all" class="reset-button" aria-label="Reset entire game">Reset entire game</button>
     <p id="menu-flight-note" hidden>Finish this flight before switching modes or resetting.</p>
+  </dialog>
+  <dialog id="records-dialog" class="reset-dialog reference-dialog" aria-labelledby="records-title">
+    <div class="menu-heading"><h2 id="records-title">Journey records</h2><button id="records-close" class="small-button" autofocus>Back</button></div>
+    <p id="records-summary"></p><div id="records-content"></div><p id="records-note"></p>
+  </dialog>
+  <dialog id="science-dialog" class="reset-dialog reference-dialog" aria-labelledby="science-title">
+    <div class="menu-heading"><h2 id="science-title">World guide</h2><button id="science-close" class="small-button" autofocus>Back</button></div>
+    <div class="science-select"><span id="science-world-art" aria-hidden="true"></span><label for="science-world">Explore a world</label><select id="science-world"></select></div>
+    <div class="science-body"><div><p id="science-environment"></p><div id="science-layers" role="group" aria-label="Earth’s atmospheric layers"></div><p id="science-boundaries">Approximate heights. Boundaries vary with latitude, weather and solar activity; the outer edge is gradual.</p></div>
+    <div><p id="science-fact"></p><p id="science-gravity"></p><p id="science-gameplay"></p></div></div>
+    <p class="science-sources"><a id="science-source" target="_blank" rel="noopener noreferrer">NASA facts ↗</a><a id="science-gravity-source" target="_blank" rel="noopener noreferrer">NASA gravity data ↗</a></p>
+    <p class="science-note">Real space facts. Flight physics, altitude goals and travel times are simplified for play.</p>
   </dialog>
   <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><button id="part-info-close" class="primary">Back to parts</button></dialog>
   <dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">

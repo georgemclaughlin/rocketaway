@@ -5,7 +5,7 @@ export const RESEARCH_TRACKS = [
   parts:[{rank:2,id:'ember',name:'Ember engine'},{rank:4,id:'dart',name:'Dart engine'},{rank:5,id:'needle',name:'Needle fairing'}]},
  {id:'stager',name:'Stagehand',theme:'Staged propulsion',unlock:3,benefit:rank=>`${rank*6}% stronger boosters`,
   parts:[{rank:2,id:'long',name:'Long tank'},{rank:3,id:'ember',name:'Ember engine'},{rank:4,id:'solids',name:'Solid boosters'},{rank:5,id:'composite',name:'Composite tank'}]},
- {id:'scientist',name:'Scientist',theme:'Long-range science',unlock:6,benefit:rank=>`${rank*3}% longer burn · ${rank*5}% more altitude pay`,
+ {id:'scientist',name:'Scientist',theme:'Long-range science',unlock:6,benefit:rank=>`${rank*3}% longer burn · ${rank*5}% more altitude credits`,
   parts:[{rank:2,id:'long',name:'Long tank'},{rank:4,id:'composite',name:'Composite tank'},{rank:5,id:'dart',name:'Dart engine'}]},
 ];
 const int=(value,max=1e7)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
