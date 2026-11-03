@@ -12,6 +12,7 @@ import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.j
 import { createTravel } from './travel.js?v=balanced-journeys';
 import { createResearchUI, researchButtonState } from './research-ui.js?v=balanced-journeys';
 import { launchRating } from './launch-feedback.js?v=balanced-journeys';
+import { FLIGHT_SPEEDS, advanceFlight } from './flight-playback.js?v=flight-speeds';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -302,14 +303,23 @@ function launch(resumeQuality) {
   $('launch-title').textContent = `${rating.label} launch${rating.tier==='off'?'.':'!'}`;
   $('launch-description').textContent = `${rating.power}% power · maximum 120%. Flight computer has control.`;
   $('flight-tools').hidden = false; $('telemetry').hidden = false; $('scene-tag').hidden = true;
-  $('speed').textContent = `Speed ×${speed}`; $('pause').textContent = 'Ⅱ Pause'; $('pause').setAttribute('aria-label', 'Pause flight');
+  renderSpeed(); $('pause').textContent = 'Ⅱ Pause'; $('pause').setAttribute('aria-label', 'Pause flight');
   syncScreens(); renderJourney();
   tone(180, .4, 'triangle', .075); updateFlightHud();
   announce(`${rating.label} launch. ${rating.power} percent power out of a maximum 120. Flight is automatic.`);
 }
 $('launch').addEventListener('click', () => mode === 'workshop' ? prepare() : mode === 'flying' ? finishEarly() : launch());
 $('shop-launch').addEventListener('click', prepare);
-$('speed').addEventListener('click', () => { speed = speed === 1 ? 3 : speed === 3 ? 8 : 1; $('speed').textContent = `Speed ×${speed}`; announce(`Flight speed ${speed} times.`); });
+function renderSpeed() {
+  const next = FLIGHT_SPEEDS[(FLIGHT_SPEEDS.indexOf(speed) + 1) % FLIGHT_SPEEDS.length];
+  $('speed').textContent = `Speed ×${speed}`;
+  $('speed').setAttribute('aria-label', `Flight speed ${speed} times. Change to ${next} times.`);
+  $('speed').title = 'Tap to cycle: ×1 → ×3 → ×8 → ×25 → ×100';
+}
+$('speed').addEventListener('click', () => {
+  speed = FLIGHT_SPEEDS[(FLIGHT_SPEEDS.indexOf(speed) + 1) % FLIGHT_SPEEDS.length];
+  renderSpeed(); announce(`Flight speed ${speed} times.`);
+});
 function showFlightNotice(title, detail) {
   $('launch-title').textContent = title; $('launch-description').textContent = detail;
   announce(`${title} ${detail}`);
@@ -659,7 +669,7 @@ function frame(now) {
   }
   if (mode === 'flying') {
     const wasBoosted = flight.boosted;
-    stepFlight(flight, dt * speed);
+    advanceFlight(flight, dt * speed);
     if (flight.boosted && !wasBoosted && flight.kick > 0) { tone(280, .25, 'triangle'); $('launch-eyebrow').textContent = 'STAGE SEPARATION'; showFlightNotice('Stage separation!', 'Boosters fired. Empty pods away.'); burst(width * .56, height * .55, '#b7cbd5', 18); }
     updateFlightHud();
     checkFlightMoments();
