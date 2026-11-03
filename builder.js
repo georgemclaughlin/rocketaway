@@ -3,7 +3,7 @@ import { createFlight, stepFlight } from './engine.js';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
-  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality;
+  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0);
   if (estimates.has(key)) return estimates.get(key);
   const flight = createFlight(program.levels, quality, { plan: 'explorer', assembly: assemblySpecs(program) });
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);

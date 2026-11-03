@@ -4,17 +4,18 @@ import { newProgram } from './engine.js';
 import { fittedParts, partById } from './parts.js';
 import { rocketArt } from './builder.js';
 import { worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js';
+import { researchLoadout } from './research.js';
 
 const kitBenefits = {
   scrapper: 'Credits to customize.',
   stager: 'Extra lift from boosters.',
   scientist: 'More pay. Better engine.',
 };
-const kitArt = Object.fromEntries(KITS.map(item => {
+function kitArt(item,profile) {
   const program = newProgram();
-  for (const id of item.parts) program.parts.equipped[partById(id).slot] = id;
-  return [item.id, rocketArt(fittedParts(program))];
-}));
+  for (const id of researchLoadout(profile,item).parts) program.parts.equipped[partById(id).slot] = id;
+  return rocketArt(fittedParts(program));
+}
 
 // Setup describes only the upcoming journey; the flight report covers the result.
 export function createExpeditionUI({ getSession, onBuild, onResume }) {
@@ -27,7 +28,7 @@ export function createExpeditionUI({ getSession, onBuild, onResume }) {
     $('expedition').dataset.ended=!!ended;
     $('expedition-step').textContent=hub?`EXPEDITION ${profile.runs+1} · NEW JOURNEY`:'EXPEDITION IN PROGRESS';
     $('expedition-title').textContent='Your rocket is ready';
-    $('expedition-setup-title').hidden=!hub;
+    document.querySelector('.setup-heading').hidden=!hub;
     $('expedition-setup-title').textContent='Choose a starting build';
     document.querySelector('.expedition-progress').hidden=true;
     $('expedition-goal').hidden=!hub;
@@ -50,8 +51,13 @@ export function createExpeditionUI({ getSession, onBuild, onResume }) {
       $('expedition').dataset.kits=kits.length;
       if(!kits.some(item=>item.id===kit))kit='scrapper';
       $('expedition-choices').style.setProperty('--choices',kits.length);
-      $('expedition-choices').innerHTML=kits.map(item=>`<button class="expedition-card kit-card" data-kit="${item.id}" aria-pressed="${kit===item.id}"><span class="card-icon kit-rocket">${kitArt[item.id]}</span><strong>${item.name}<span class="kit-check" aria-hidden="true">${kit===item.id?' ✓':''}</span></strong><p>${kitBenefits[item.id]}</p><b>${item.credits} starting credits</b></button>`).join('');
-      $('expedition-footer').innerHTML=`<p class="kit-unlock">${ended?'Fresh rocket, same journey. Worlds and starting builds stay unlocked.':'Build, upgrade, and leave Earth. Tau Ceti awaits.'}</p><div class="start-actions"><button id="run-start" class="primary">Build on ${world.name} ↗</button></div>`;
+      $('expedition-choices').innerHTML=kits.map(item=>{
+        const loadout=researchLoadout(profile,item);
+        const upgraded=loadout.parts.filter(id=>!item.parts.includes(id));
+        const latest=upgraded.at(-1);
+        return `<button class="expedition-card kit-card" data-kit="${item.id}" aria-pressed="${kit===item.id}"><span class="card-icon kit-rocket">${kitArt(item,profile)}</span><strong>${item.name}${loadout.rank?` <small>R${loadout.rank}</small>`:''}<span class="kit-check" aria-hidden="true">${kit===item.id?' ✓':''}</span></strong><p>${latest?`Starts with ${partById(latest).name}`:kitBenefits[item.id]}</p><b>${loadout.credits} starting credits</b></button>`;
+      }).join('');
+      $('expedition-footer').innerHTML=`<p class="kit-unlock">${ended?'Fresh rocket. Research, worlds, and starting builds stay yours.':'Build, upgrade, and leave Earth. Tau Ceti awaits.'}</p><div class="start-actions"><button id="run-start" class="primary">Build on ${world.name} ↗</button></div>`;
     } else {
       $('expedition-title').textContent=`Return to ${worldFor(run).name}`;
       $('expedition-summary').textContent='Your flight was saved. Resume from ignition with the same rocket and launch power.';

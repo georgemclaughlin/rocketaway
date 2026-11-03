@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#101325">
-  <meta name="description" content="Launch a little rocket, earn research credits, and build your way to outer space. A cozy launch-and-upgrade game.">
+  <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
   <script type="module" src="./game.js"></script>
@@ -12,12 +12,12 @@
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
   <header class="header">
     <a class="wordmark" href="./" aria-label="Rocket Away home"><span class="pilot-portrait" aria-hidden="true"><img src="./assets/astronaut.png" alt="" width="1024" height="1536"></span>rocket<span>away</span><sup>✦</sup></a>
-    <div class="wallet" aria-label="Research credits"><span>CREDITS</span><strong><i>✦</i> <span id="credits">0</span></strong></div>
+    <div class="wallet" aria-label="Rocket credits"><span>CREDITS</span><strong><i>✦</i> <span id="credits">0</span></strong></div>
     <button id="game-menu" class="icon-button" aria-label="Open game menu" aria-haspopup="dialog">☰</button>
   </header>
   <section class="mission" aria-label="Journey to 100 kilometers">
     <div id="journey" class="journey" hidden>
-      <div class="journey-heading"><strong id="journey-destination"></strong><span id="journey-count"></span></div>
+      <div class="journey-heading"><strong id="journey-destination"></strong><span class="journey-tools"><span id="journey-count"></span><button id="research-open" class="research-link" aria-label="Open permanent research lab">Lab · 0</button></span></div>
       <ol id="journey-steps" class="journey-steps" aria-label="Your expedition milestones"></ol>
       <div class="journey-footer"><strong id="journey-current"></strong><span id="journey-lives"></span></div>
     </div>
@@ -64,7 +64,7 @@
       <p id="expedition-summary"></p>
       <div id="expedition-goal"></div>
       <div class="expedition-progress"><ol id="expedition-map" class="journey-steps" aria-label="The six milestones in this expedition"></ol><span id="expedition-stats"></span></div>
-      <h3 id="expedition-setup-title">Choose your starting rocket</h3>
+      <div class="setup-heading"><h3 id="expedition-setup-title">Choose your starting rocket</h3><button id="research-hub" class="research-link" aria-label="Open permanent research lab">Lab · 0</button></div>
       <div id="expedition-choices" class="expedition-choices"></div>
       <div id="expedition-footer" class="expedition-footer"></div>
 
@@ -84,6 +84,7 @@
     <p class="menu-note">Each mode keeps its own rocket and credits.</p>
     <details id="run-details"><summary>Bonuses from your saved run <span id="module-count"></span></summary><div id="menu-modules"></div></details>
     <button id="sound" class="small-button" aria-label="Turn sound on" aria-pressed="false">Sound <span id="sound-state">OFF</span></button>
+    <button id="research-menu" class="small-button">Permanent research</button>
     <button id="run-abandon" class="small-button">End expedition</button>
     <button id="reset-all" class="reset-button" aria-label="Reset entire game">Reset entire game</button>
     <p id="menu-flight-note" hidden>Finish this flight before switching modes or resetting.</p>
@@ -92,9 +93,19 @@
   <dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">
     <div class="eyebrow">A FRESH START</div>
     <h2 id="reset-title">Reset the entire game?</h2>
-    <p id="reset-description">This clears all Free Flight progress and all expedition progress on this device: your current run, credits, parts, unlocked worlds, starting rockets, and run history. Both modes start fresh.</p>
+    <p id="reset-description">This clears all Free Flight progress and all expedition progress on this device: your current run, credits, parts, unlocked worlds, starting rockets, permanent research, and run history. Both modes start fresh.</p>
     <p class="reset-warning">This can’t be undone.</p>
     <div class="reset-actions"><button id="reset-cancel" class="small-button" autofocus>Keep playing</button><button id="reset-confirm" class="primary">Reset entire game</button></div>
+  </dialog>
+  <dialog id="research-dialog" aria-labelledby="research-title">
+    <div class="research-header"><div><div class="eyebrow">KEPT BETWEEN WORLDS</div><h2 id="research-title">Research lab</h2></div><button id="research-close" class="small-button">Back</button></div>
+    <div class="research-wallet"><strong id="research-balance">0 data</strong><span>+1 per flight · +2 per milestone · +4 new world</span></div>
+    <div id="research-tabs" role="group" aria-label="Rocket build to research"></div>
+    <div class="research-track-heading"><h3 id="research-track-title"></h3><span id="research-rank"></span></div>
+    <p id="research-benefit"></p><ol id="research-steps"></ol>
+    <p id="research-timing"></p><p id="research-active"></p>
+    <div id="research-status" role="status" aria-live="polite"></div>
+    <button id="research-buy" class="primary"></button>
   </dialog>
   <dialog id="travel-dialog" aria-labelledby="travel-title" aria-describedby="travel-caption">
     <div class="eyebrow">ROAD TO TAU CETI</div><h2 id="travel-title"></h2>

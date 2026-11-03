@@ -1,4 +1,5 @@
 import { modifyAssembly } from './modifiers.js';
+import { researchModifiers } from './research.js';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },
@@ -87,9 +88,10 @@ export function fittedParts(program) {
   return Object.fromEntries(PART_SLOTS.map(slot=>[slot.id,partForProgram(program,program.parts.equipped[slot.id])]));
 }
 export function assemblySpecs(program) {
-  const parts=fittedParts(program), mass=.5+Object.values(parts).reduce((sum,part)=>sum+part.mass,0);
-  return modifyAssembly({thrust:parts.engine.thrust/mass,burn:parts.tank.burn*parts.engine.efficiency,drag:parts.aero.drag,kick:parts.boosters.kick/mass,
-    mass,dryMass:mass-parts.tank.fuelMass,fuelMass:parts.tank.fuelMass,stageMass:parts.boosters.mass*.8,pay:parts.aero.pay,
+  const parts=fittedParts(program), research=researchModifiers(program), baseMass=.5+Object.values(parts).reduce((sum,part)=>sum+part.mass,0);
+  const mass=(baseMass-parts.tank.fuelMass)*research.dry+parts.tank.fuelMass;
+  return modifyAssembly({thrust:parts.engine.thrust/mass,burn:parts.tank.burn*parts.engine.efficiency*research.burn,drag:parts.aero.drag,kick:parts.boosters.kick/mass*research.kick,
+    mass,dryMass:mass-parts.tank.fuelMass,fuelMass:parts.tank.fuelMass,stageMass:parts.boosters.mass*.8*research.dry,pay:parts.aero.pay*research.pay,
     power:Object.values(parts).reduce((sum,part)=>sum+part.tier,0)},parts,program);
 }
 export function partStats(part) {

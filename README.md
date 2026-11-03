@@ -41,6 +41,24 @@ Parts and stock are seeded and saved. Reloading cannot reroll them. Reloading du
 
 In the menu, **End expedition** asks for confirmation. **Free Flight** lets you leave a run and return later. Opening the menu during a flight pauses it until the menu closes.
 
+## Permanent research
+
+**Lab** is available in the hangar journey bar, beside the starting-build selector, and in the menu. It shows permanent **data**, separate from the **credits** spent on the current rocket. No research screen is forced between flights.
+
+Each completed expedition flight earns 1 data, plus 2 per milestone cleared that flight and 4 for clearing a world for the first time. Even a miss earns data. Ending a run manually does not. Rewards are settled once and remain through losses, world changes, and browser reloads.
+
+Each starting build has five permanent research ranks, costing 3, 5, 8, 12, and 18 data. Spend on one specialization or spread research across the builds you use. Stagehand and Scientist research opens with the corresponding starting build.
+
+| Build | Bonus per rank | Better starting parts |
+| --- | --- | --- |
+| Scrapper | 3% less dry weight; 10 more starting credits | Rank 2: Ember; rank 4: Dart; rank 5: Needle |
+| Stagehand | 6% more booster kick | Rank 2: Long tank; rank 3: Ember; rank 4: Solid boosters; rank 5: Composite tank |
+| Scientist | 3% longer burn; 5% more altitude pay | Rank 2: Long tank; rank 4: Composite tank; rank 5: Dart |
+
+Bonuses are additive across ranks and apply only when flying that build. A purchase updates the current matching rocket’s physics and estimates immediately. Starting credits and parts apply when the next rocket is created, so research never overwrites fitted parts mid-run. The starting-build illustrations and rank labels reflect those permanent unlocks. Higher-tier starting parts replace the earlier part in the same slot, while earlier unlocked parts remain owned for free refitting.
+
+Existing saves receive a one-time research balance of 2 data per recorded milestone plus 4 per recorded win. Reloading does not repeat this grant. **Reset entire game** also clears research; ending a single expedition keeps it. Free Flight keeps its existing progression and is unaffected.
+
 ## Free Flight: build and fly
 
 1. Select **☰ → Free Flight**. In the hangar, select the nose cone, fuel tank, engine, or side boosters using the labeled rocket sections.
@@ -78,6 +96,8 @@ No build step, dependency installation, external assets, API keys, or backend ar
 - `expedition-ui.js` — world selection, starting rockets, and saved-flight recovery.
 - `worlds.js` — real-world route, scenery palettes, destination names, and progression strip.
 - `travel.js` — skippable, reduced-motion-aware travel celebration.
+- `research.js` — permanent research economy, rank effects, starting blueprints, and migration.
+- `research-ui.js` — optional research lab and purchase feedback.
 - `journey.js` — the shared milestone map, named stops, and live journey progress.
 - `modifiers.js` — legacy module/route effects retained for existing saves.
 - `engine.js` — flight physics, contracts, milestones, and save migration; legacy simulation helpers remain for regression checks.
@@ -91,6 +111,7 @@ With Playwright CLI installed and the local server running, use a fresh named br
 ```sh
 playwright-cli -s=rocketaway-tests open http://127.0.0.1:4173
 playwright-cli -s=rocketaway-tests run-code --filename=checks/journey.playwright.js
+playwright-cli -s=rocketaway-tests run-code --filename=checks/research.playwright.js
 playwright-cli -s=rocketaway-tests close
 ```
 

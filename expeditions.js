@@ -1,6 +1,7 @@
 import { newProgram, restoreProgram } from './engine.js';
 import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js';
 import { MODULES, ROUTES } from './modifiers.js';
+import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js';
 export const EXPEDITION_KEY = 'rocket-away-expeditions-v1';
 export const ASCENT_STEP = .05;
 export const CHECKPOINTS = [2500,10000,25000,55000,100000,160000];
@@ -10,7 +11,7 @@ export const KITS = [
   {id:'scientist',name:'Scientist',icon:'⌁',detail:'Science capsule + Ember · 100 credits',credits:100,parts:['lab','ember'],unlock:6},
 ];
 export function newExpeditions() {
-  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,campaignComplete:false,discoveries:[]},history:[]};
+  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,campaignComplete:false,discoveries:[],research:newResearch()},history:[]};
 }
 const int = (value,max=1e8) => Number.isFinite(value) ? Math.max(0,Math.min(max,Math.floor(value))) : 0;
 function rng(run) { let x=run.rng|0; x^=x<<13; x^=x>>>17; x^=x<<5; run.rng=x>>>0; return run.rng/4294967296; }
@@ -47,11 +48,13 @@ export function startExpedition(session,{seed,kit='scrapper',difficulty=0}={}) {
   if(!loadout || session.profile.totalGates<loadout.unlock) return false;
   difficulty=Math.min(int(difficulty,8),session.profile.maxDifficulty);
   const program=newProgram();
-  program.credits=loadout.credits; program.relics=[]; program.route=null; program.stock=[]; program.partTraits={};
+  const researched=researchLoadout(session.profile,loadout);
+  program.credits=researched.credits; program.relics=[]; program.route=null; program.stock=[]; program.partTraits={};
   const run={seed:(seed>>>0)||1,rng:(seed>>>0)||1,kit,difficulty,stage:0,strikes:0,status:'build',program,launchQuality:null,lastResult:null,recorded:false};
   for(const part of PARTS.filter(part=>part.price>0)) program.partTraits[part.id]=draw(run,PART_TRAITS.filter(trait=>trait.slots.includes(part.slot)),1)[0].id;
-  for(const id of loadout.parts) { program.parts.owned.push(id); program.parts.equipped[PARTS.find(part=>part.id===id).slot]=id; }
+  for(const id of researched.parts) { if(!program.parts.owned.includes(id))program.parts.owned.push(id); program.parts.equipped[PARTS.find(part=>part.id===id).slot]=id; }
   session.active=run; session.mode='expedition'; session.profile.runs++;
+  syncResearch(session);
   restock(run); return true;
 }
 export function beginExpeditionFlight(session,quality) {
@@ -74,9 +77,11 @@ export function settleExpedition(session,flight) {
   flight.settled=true;
   const altitude=Math.floor(flight.peak), target=checkpoint(run), stage=run.stage+1, oldBest=run.program.best;
   const {cleared,bonus}=advanceMilestones(session,altitude), success=cleared.length>0;
+  const firstWorld=run.stage===6 && (run.difficulty===8?!session.profile.campaignComplete:run.difficulty===session.profile.maxDifficulty);
+  const data=awardResearch(session,cleared.length,firstWorld);
   const flightPay=60+Math.floor(Math.min(altitude,500000)/220*flight.payMultiplier)+(flight.creditBonus||0), total=flightPay+bonus;
   run.program.credits+=total; run.program.best=Math.max(oldBest,altitude); run.program.flights++;
-  const result={altitude,target,success,total,flightPay,bonus,stage,power:Math.round((flight.quality||run.launchQuality)*100),cleared,nextTarget:run.stage<6?checkpoint(run):null,record:altitude>oldBest,improvement:Math.max(0,altitude-oldBest)};
+  const result={altitude,target,success,total,flightPay,bonus,data,stage,power:Math.round((flight.quality||run.launchQuality)*100),cleared,nextTarget:run.stage<6?checkpoint(run):null,record:altitude>oldBest,improvement:Math.max(0,altitude-oldBest)};
   run.lastResult=result; run.launchQuality=null; run.program.route=null;
   if(!success) run.strikes++;
   restock(run);
@@ -102,6 +107,7 @@ export function restoreExpeditions(raw) {
   const profile=raw.profile||{};
   session.profile.campaignComplete=profile.campaignComplete===true;
   for(const key of ['runs','wins','totalGates','bestStage','maxDifficulty']) session.profile[key]=int(profile[key],key==='bestStage'?6:key==='maxDifficulty'?8:1e8);
+  session.profile.research=restoreResearch(profile.research,session.profile);
   session.profile.discoveries=MODULES.filter(item=>Array.isArray(profile.discoveries)&&profile.discoveries.includes(item.id)).map(item=>item.id);
   session.history=(Array.isArray(raw.history)?raw.history:[]).slice(0,8).filter(item=>item&&Number.isFinite(item.seed)).map(item=>({seed:int(item.seed,4294967295),kit:KITS.some(kit=>kit.id===item.kit)?item.kit:'scrapper',stage:int(item.stage,6),won:item.won===true,difficulty:int(item.difficulty,8),modules:MODULES.filter(m=>Array.isArray(item.modules)&&item.modules.includes(m.id)).map(m=>m.id)}));
   if(session.history.some(item=>item.won&&item.difficulty===8)) session.profile.campaignComplete=true;
@@ -116,12 +122,13 @@ export function restoreExpeditions(raw) {
   const run={seed:int(input.seed,4294967295)||1,rng:int(input.rng,4294967295)||1,kit:input.kit,difficulty:int(input.difficulty,8),stage:int(input.stage,6),strikes:int(input.strikes,3),status:input.status,program,launchQuality:Number.isFinite(input.launchQuality)?Math.max(.9,Math.min(1.2,input.launchQuality)):(input.status==='flying'?1.1:null),lastResult:null,recorded:input.recorded===true};
   if(input.lastResult && Number.isFinite(input.lastResult.altitude)) {
     const r=input.lastResult;
-    run.lastResult={altitude:int(r.altitude),target:int(r.target),success:r.success===true,total:int(r.total),flightPay:int(r.flightPay),bonus:int(r.bonus),stage:int(r.stage,6),power:Number.isFinite(r.power)?Math.max(90,Math.min(120,Math.round(r.power))):null,cleared:Array.isArray(r.cleared)?r.cleared.filter(Number.isFinite).map(n=>int(n)):r.success?[int(r.target)]:[],nextTarget:run.stage<6?checkpoint(run):null,record:r.record===true,improvement:int(r.improvement)};
+    run.lastResult={altitude:int(r.altitude),target:int(r.target),success:r.success===true,total:int(r.total),flightPay:int(r.flightPay),bonus:int(r.bonus),data:int(r.data),stage:int(r.stage,6),power:Number.isFinite(r.power)?Math.max(90,Math.min(120,Math.round(r.power))):null,cleared:Array.isArray(r.cleared)?r.cleared.filter(Number.isFinite).map(n=>int(n)):r.success?[int(r.target)]:[],nextTarget:run.stage<6?checkpoint(run):null,record:r.record===true,improvement:int(r.improvement)};
   }
   if(run.stage>=6) run.status='won'; else if(run.strikes>=3) run.status='lost';
   if(run.status==='won' && run.difficulty===8) session.profile.campaignComplete=true;
   if(['draft','route'].includes(run.status) || (run.status==='debrief'&&!run.lastResult)) run.status='build';
   session.active=run;
+  syncResearch(session);
   if(raw.version===1 && !['won','lost'].includes(run.status)) {
     // Credit previously flown milestones once when upgrading an old save.
     const {bonus}=advanceMilestones(session,program.best); program.credits+=bonus;

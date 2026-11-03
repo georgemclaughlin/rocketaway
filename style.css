@@ -623,3 +623,62 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
 .travel-astronaut { flex: none; width: 56px; height: 84px; object-fit: contain; }
 #travel-dialog .travel-crew p { margin: 0; }
 @media (max-height: 520px) { .travel-crew { margin: 4px auto 8px; gap: 8px; } .travel-astronaut { width: 32px; height: 48px; } }
+
+.journey-tools { display: flex; align-items: center; gap: 7px; flex: none; }
+.research-link { border: 1px solid #53667b; border-radius: 5px; padding: 3px 6px; min-height: 24px; background: #223348; color: #c4d9e5; font-size: 11px; white-space: nowrap; }
+.research-ready { border-color: #d5bd7c; color: var(--gold); background: #393d37; }
+.setup-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid #43546a; }
+.setup-heading #expedition-setup-title { padding: 0; border: 0; }
+#research-dialog { width: min(620px,calc(100vw - 24px)); max-height: calc(100dvh - 24px); margin: auto; padding: 22px; border: 1px solid #65748e; border-radius: 14px; background: #192438; color: var(--ink); }
+#research-dialog[open] { display: grid; gap: 10px; grid-template-rows: repeat(5,auto) minmax(0,1fr) repeat(4,auto); }
+#research-dialog::backdrop { background: #080c1aeb; }
+.research-header,.research-wallet,.research-track-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.research-header h2 { font-size: 25px; margin: 4px 0 0; }
+.research-header .eyebrow { font-size: 10px; }
+.research-wallet strong { font-size: 19px; color: var(--gold); white-space: nowrap; }
+.research-wallet span { font-size: 12px; color: var(--muted); text-align: right; }
+#research-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+#research-tabs button { min-height: 36px; padding: 7px; }
+#research-tabs [aria-pressed="true"] { color: var(--gold); border-color: var(--gold); background: #3d4038; }
+.research-track-heading h3 { margin: 0; font-size: 17px; }
+#research-rank { font-size: 12px; white-space: nowrap; }
+#research-benefit { color: #b4d7c9; font-size: 13px; }
+#research-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-rows: repeat(5,minmax(0,1fr)); gap: 6px; }
+#research-steps li { display: flex; align-items: center; gap: 10px; border: 1px solid #3f526a; border-radius: 7px; padding: 7px 10px; min-height: 0; }
+#research-steps li > span { flex: none; width: 23px; height: 23px; display: grid; place-items: center; border-radius: 50%; background: #34465d; font-size: 12px; }
+#research-steps strong { font-size: 13px; font-weight: normal; }
+#research-steps small { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+#research-steps [data-earned="true"] { border-color: #719e8e; color: #b7e1c7; }
+#research-steps [data-earned="true"] > span { background: #3a6558; }
+#research-status { color: var(--gold); font-size: 12px; }
+#research-status:empty { display: none; }
+#research-buy { width: 100%; min-height: 44px; }
+@media (max-height: 700px) {
+ #research-dialog { padding: 12px; }
+ #research-dialog[open] { gap: 7px; }
+ .research-header h2 { font-size: 21px; }
+ #research-active { display: none; }
+ #research-steps { gap: 4px; }
+ #research-steps li { padding: 5px 7px; gap: 7px; }
+ #research-steps strong { font-size: 12px; }
+ #research-steps small { font-size: 10px; }
+ .research-wallet span { font-size: 11px; }
+ .research-track-heading h3 { font-size: 15px; }
+ #research-tabs button { min-height: 32px; padding: 5px; }
+ #research-timing,#research-benefit { font-size: 11px; }
+}
+@media (max-height: 520px) {
+ .expedition-panel[data-phase="hub"] .setup-heading { grid-column: 2; grid-row: 1; padding: 0; border: 0; }
+ .journey-tools { gap: 5px; }.journey-tools .research-link { min-height: 20px; padding: 1px 4px; }
+ #research-dialog { width: min(800px,calc(100vw - 24px)); }
+ #research-dialog[open] { grid-template-columns: minmax(180px,1fr) minmax(0,1.4fr); grid-template-rows: auto auto auto minmax(0,1fr) auto; gap: 7px 16px; }
+ .research-header { grid-column: 1; grid-row: 1; }
+ .research-wallet { grid-column: 1; grid-row: 2; }
+ #research-tabs { grid-column: 2; grid-row: 1; }
+ .research-track-heading { grid-column: 1; grid-row: 3; }
+ #research-benefit { grid-column: 1; grid-row: 4; }
+ #research-steps { grid-column: 2; grid-row: 2 / 5; }
+ #research-timing { grid-column: 1; grid-row: 5; }
+ #research-buy { grid-column: 2; grid-row: 5; }
+ #research-status { grid-column: 1 / -1; }
+}

@@ -7,6 +7,8 @@ import { createBuilder } from './builder.js';
 import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
 import { worldFor, destinationFor, WORLDS } from './worlds.js';
 import { createTravel } from './travel.js';
+import { createResearchUI } from './research-ui.js';
+import { RESEARCH_TRACKS, researchCost } from './research.js';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -38,6 +40,9 @@ const builder = createBuilder({ getProgram: () => program, canEdit: canBuild, ge
   announce(`${part.name} fitted. ${program.credits} credits remaining.`);
 } });
 const travelToNextWorld = createTravel(() => { workshop(); announce(expeditionSession.profile.campaignComplete ? 'Tau Ceti reached! All worlds are open to replay.' : `Arrived at ${destinationFor(expeditionSession.active).name}. Choose your starting rocket.`); });
+const researchUI=createResearchUI({getSession:()=>expeditionSession,canOpen:()=>mode==='workshop'&&expeditionSession.mode==='expedition'&&(!expeditionSession.active||['build','won','lost'].includes(expeditionSession.active.status)),onPurchase:()=>{persist();renderWorkshop();tone(820,.12);}});
+for(const id of ['research-open','research-hub'])$(id).addEventListener('click',()=>researchUI.open());
+$('research-menu').addEventListener('click',()=>{$('menu-dialog').close();researchUI.open();});
 function persist() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(freeProgram)); localStorage.setItem(EXPEDITION_KEY, JSON.stringify(expeditionSession)); storageAvailable = true; }
   catch { storageAvailable = false; }
@@ -64,6 +69,14 @@ function syncScreens() {
   $('run-classic').setAttribute('aria-pressed', !expeditionMode);
   $('run-expeditions').setAttribute('aria-pressed', expeditionMode);
   $('reset-all').disabled = mode !== 'workshop';
+  const data=expeditionSession.profile.research.data;
+  const affordable=RESEARCH_TRACKS.some(t=>expeditionSession.profile.totalGates>=t.unlock&&researchCost(expeditionSession.profile,t.id)!==null&&data>=researchCost(expeditionSession.profile,t.id));
+  for(const id of ['research-open','research-hub','research-menu']){
+    $(id).disabled=mode!=='workshop'||!expeditionMode||!!(run&&!['build','won','lost'].includes(run.status));
+    $(id).textContent=id==='research-menu'?`Permanent research · ${data} data`:`Lab · ${data}`;
+    if(id!=='research-menu')$(id).setAttribute('aria-label',`Permanent research lab, ${data} data${affordable?', upgrade available':''}`);
+    $(id).classList.toggle('research-ready',affordable);
+  }
   $('run-abandon').hidden = !inExpedition() || ['won','lost'].includes(run.status);
   $('run-abandon').disabled = mode !== 'workshop';
   $('menu-flight-note').hidden = mode === 'workshop';
@@ -172,7 +185,7 @@ function renderWorkshop() {
     $('contract-detail').textContent = reporting ? result.success ? `${result.cleared.length} milestone${result.cleared.length===1?'':'s'} cleared this flight` : 'Goal missed · rocket recovered' : `Best ${(program.best/1000).toFixed(1)} km · ${run.stage}/6 milestones`;
     $('contract-detail').title = 'Pass several milestones in one flight to clear them all.';
     $('contract-reward').textContent = `${3-run.strikes} misses left`;
-    if(result) $('hangar-status').textContent = `Last ${(result.altitude/1000).toFixed(1)} km${result.power ? ` · ${result.power}% power` : ''} · +${result.total} credits`;
+    if(result) $('hangar-status').textContent = `Last ${(result.altitude/1000).toFixed(1)} km${result.power ? ` · ${result.power}% power` : ''} · +${result.total} credits · +${result.data||0} data`;
   }
   renderJourney();
   expeditionUI.render();
@@ -288,7 +301,7 @@ function finish() {
     $('result-eyebrow').textContent = run.status === 'won' ? 'ALL MILESTONES CLEARED' : run.status === 'lost' ? 'EXPEDITION ENDED' : result.success ? `${count} MILESTONE${count===1?'':'S'} CLEARED` : 'GOAL MISSED';
     $('result-title').textContent = run.status === 'won' ? `${worldFor(run).name}, cleared!` : run.status === 'lost' ? 'A new build awaits.' : result.success ? 'Higher than before.' : 'Refit. Try again.';
     $('result-description').textContent = run.status === 'won' ? `Departure target reached: ${altitudeLabel(journeyState(run).goal)}. ${destinationFor(run).star ? 'Your journey to Tau Ceti is complete!' : `Next launchpad: ${destinationFor(run).name}. A fresh rocket, one step closer to Tau Ceti.`}` : run.status === 'lost' ? 'Your unlocked worlds and starting rockets are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
-    $('bonus-note').textContent = `${result.power}% launch power · Flight +${result.flightPay} · Milestones +${result.bonus}`;
+    $('bonus-note').textContent = `+${result.data} research data kept permanently · ${result.power}% launch power`;
     $('return').textContent = run.status==='won' ? `Travel to ${destinationFor(run).name} ↗` : run.status==='lost' ? `Retry ${worldFor(run).name} ↗` : 'Back to rocket ↗';
   }
   syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete'; tone(result.firstWin ? 1040 : 660, .35);
