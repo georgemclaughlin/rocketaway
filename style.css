@@ -615,3 +615,11 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
 @media (prefers-reduced-motion: reduce) { .travel-ship,.travel-from,.travel-to { animation: none; } .travel-ship { left: 45%; } }
 
 @media (max-height: 520px) { .world-stop-number { display: none; } .world-stop::after { content: attr(data-step); font-size: 10px; line-height: 1; } }
+
+/* The pilot portrait shares the header's existing footprint. */
+.pilot-portrait { position: relative; display: inline-block; flex: none; width: 36px; height: 38px; margin-right: 8px; overflow: hidden; border-radius: 50%; background: #2e4052; box-shadow: 0 0 0 1px #d8ba7866; }
+.pilot-portrait img { position: absolute; width: 76px; height: 114px; max-width: none; left: -22px; top: -2px; }
+.travel-crew { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px auto 14px; max-width: 440px; text-align: left; }
+.travel-astronaut { flex: none; width: 56px; height: 84px; object-fit: contain; }
+#travel-dialog .travel-crew p { margin: 0; }
+@media (max-height: 520px) { .travel-crew { margin: 4px auto 8px; gap: 8px; } .travel-astronaut { width: 32px; height: 48px; } }

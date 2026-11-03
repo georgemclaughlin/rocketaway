@@ -9,6 +9,8 @@ import { worldFor, destinationFor, WORLDS } from './worlds.js';
 import { createTravel } from './travel.js';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
+const astronautArt = new Image();
+astronautArt.src = new URL('./assets/astronaut.png', import.meta.url).href;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let currentScreen = 'workshop';
 let program = newProgram(), mode = 'workshop', flight = null, width = 0, height = 0;
@@ -382,6 +384,10 @@ function landscape(altitude) {
   ctx.fillStyle = '#d8b87c'; ctx.fillRect(x - 43, groundY - 110, 31, 4);
   ctx.strokeStyle = '#c5bba8'; ctx.beginPath(); ctx.moveTo(width * .84, groundY); ctx.lineTo(width * .84, groundY - 49); ctx.stroke();
   ctx.fillStyle = '#e4a38a'; ctx.beginPath(); ctx.moveTo(width * .84, groundY - 49); ctx.lineTo(width * .84 + 26, groundY - 42); ctx.lineTo(width * .84, groundY - 34); ctx.fill();
+  if (astronautArt.complete && astronautArt.naturalWidth) {
+    const crewHeight = Math.min(84, height * .22), crewWidth = crewHeight * astronautArt.naturalWidth / astronautArt.naturalHeight;
+    ctx.drawImage(astronautArt, 10, groundY - crewHeight + 4, crewWidth, crewHeight);
+  }
 }
 function drawScene() {
   if (!width || !height) return;
