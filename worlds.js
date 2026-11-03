@@ -15,10 +15,10 @@ export const worldFor = run => WORLDS[Math.max(0,Math.min(WORLDS.length-1,Math.f
 export const destinationFor = run => WORLDS[(run?.difficulty||0)+1] || TAU_CETI;
 // Flight forces and departure targets are tuned for play, not an SI/orbital model.
 // Versioned profiles keep already-started expeditions on their original rules.
-export const CONDITIONS_VERSION = 2;
+export const CONDITIONS_VERSION = 3;
 const EARTH = {gravity:.5,drag:1,label:'Air drag',brief:'Air resistance matters. Try a streamlined nose.',tip:'Streamlined noses cut air resistance. Balance fuel with engine power.',checkpoints:[2500,10000,25000,55000,100000,160000],grant:0,stockTier:2};
 const MOON = {gravity:.35,drag:0,label:'Low gravity · no air drag',brief:'No air drag. Spend on fuel and keep the rocket light.',tip:'Fuel and low weight matter. Nose drag has no effect here.',checkpoints:[6000,20000,60000,150000,300000,600000],grant:100,stockTier:4};
-const CONDITIONS = [
+const CONDITIONS_V2 = [
   EARTH, MOON,
   {gravity:.42,drag:.1,label:'Thin air · long coasts',brief:'Thin air lets boosts last. Try extra fuel or boosters.',tip:'Air drag is much weaker than on Earth. Fuel and staged boosts carry you farther; compare their extra weight.',checkpoints:[6000,25000,70000,160000,300000,500000],grant:220,stockTier:6},
   {gravity:.25,drag:0,label:'Very low gravity · near vacuum',brief:'A lighter rocket goes a long way in this weak gravity.',tip:'This is a shorter stop in near vacuum. Keep weight low; aerodynamic fairings give no drag benefit.',checkpoints:[15000,60000,180000,360000,650000,900000],grant:320,stockTier:6},
@@ -28,11 +28,27 @@ const CONDITIONS = [
   {gravity:.28,drag:0,label:'Weak gravity · long climb',brief:'A long climb needs fuel. Balance a bigger tank and engine.',tip:'Air drag is negligible in this simplified model. A large tank needs enough engine power; staged boosts offer another route.',checkpoints:[40000,160000,500000,1050000,1800000,2600000],grant:720,stockTier:6},
   {gravity:.30,drag:0,label:'Near vacuum · final launch',brief:'Your final launch: combine fuel, power and useful staging.',tip:'This last departure needs a developed build. Combine fuel capacity, engine power and staging; compare before fitting.',checkpoints:[50000,200000,550000,1100000,1900000,2800000],grant:820,stockTier:6},
 ];
+// The previous table remains immutable for runs already in progress.
+// New journeys limit first-launch purchasing power and leave room for earned refits.
+const BALANCED_LADDERS = [
+  [2500,10000,25000,55000,100000,160000],
+  [6000,50000,200000,600000,1200000,2000000],
+  [6000,35000,110000,250000,450000,750000],
+  [15000,150000,550000,1200000,2100000,3000000],
+  [20000,150000,550000,1100000,1800000,2500000],
+  [5000,15000,35000,65000,100000,150000],
+  [30000,180000,650000,1300000,2100000,2800000],
+  [40000,200000,700000,1400000,2200000,3000000],
+  [50000,200000,650000,1300000,2100000,2800000],
+];
+const STARTING_GRANTS = [0,0,100,100,140,220,180,200,220];
+const CONDITIONS = CONDITIONS_V2.map((conditions,index)=>({...conditions,checkpoints:BALANCED_LADDERS[index],grant:STARTING_GRANTS[index]}));
+CONDITIONS[3].tip='Weak gravity allows long coasts. Keep weight low, then develop fuel capacity and staging for the departure climb.';
 export function flightConditions(world,version=CONDITIONS_VERSION) {
   if(!Number.isInteger(world)||world<0||world>=CONDITIONS.length)return {...EARTH,label:'',brief:'',tip:'',grant:0};
   if(version===0)return {...EARTH,label:'Original flight conditions',brief:'This saved expedition keeps its original flight conditions.',tip:'This saved expedition keeps its original flight conditions.',grant:0};
   if(version===1)return world===1?{...MOON,grant:0}:world===0?EARTH:{...EARTH,label:'Original flight conditions',brief:'This saved expedition keeps its original flight conditions.',tip:'This saved expedition keeps its original flight conditions.',grant:0};
-  return CONDITIONS[world];
+  return (version===2?CONDITIONS_V2:CONDITIONS)[world];
 }
 export function worldMarkup(world, extraClass='') {
   return `<span class="world-orb ${world.star?'world-star':''} ${extraClass}" style="--world-color:${world.color};--world-land:${world.land}" aria-hidden="true"></span>`;

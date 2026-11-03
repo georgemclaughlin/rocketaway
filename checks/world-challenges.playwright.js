@@ -16,7 +16,7 @@ async page=>{
  await check('#workshop,#category-label,#comparison-label,#candidate-height,#part-fit,#shop-launch,.rocket-readiness','Titan build comparison');
  assert((await page.locator('#category-label').innerText()).includes('strong air drag'),'build reminder describes this world');
  // All old save generations retain their launch target and announce that their rules stay unchanged.
- for(const version of[0,1])for(const difficulty of[0,1,2,5]){
+ for(const version of[0,1,2])for(const difficulty of[0,1,2,5]){
   await page.evaluate(async({version,difficulty})=>{const e=await import('./expeditions.js'),s=e.newExpeditions();s.profile.maxDifficulty=difficulty;e.startExpedition(s,{seed:7,difficulty});s.active.conditionsVersion=version;delete s.active.program.conditionsVersion;localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));},{version,difficulty});await page.reload();
   const target=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')).active);
   assert(target.conditionsVersion===version,'old run version retained');

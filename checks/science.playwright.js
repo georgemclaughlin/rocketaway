@@ -15,7 +15,7 @@ async page=>{
  await page.locator('#science-close').click();
  // All starting builds plus Moon conditions must still fit the setup.
  await page.evaluate(async()=>{const e=await import('./expeditions.js'),s=e.newExpeditions();s.profile.maxDifficulty=1;s.profile.totalGates=6;localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();await page.locator('[data-world="1"]').click();
- assert((await page.locator('#expedition-summary').innerText()).includes('600 km'),'Moon briefing uses new departure target');
+ assert((await page.locator('#expedition-summary').innerText()).includes('2000 km'),'Moon briefing uses new departure target');
  await fits('#expedition,#run-start,.kit-card,#world-briefing','three builds');
  await page.locator('#run-start').click();await page.locator('[data-part="ember"]').click();
  assert((await page.locator('#comparison-label').innerText()).includes('After fitting: clears'),'preview compares with goal');

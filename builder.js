@@ -1,6 +1,6 @@
-import { flightConditions } from './worlds.js?v=world-challenges';
-import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=world-challenges';
-import { createFlight, stepFlight } from './engine.js?v=world-challenges';
+import { flightConditions } from './worlds.js?v=balanced-journeys';
+import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=balanced-journeys';
+import { createFlight, stepFlight } from './engine.js?v=balanced-journeys';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {

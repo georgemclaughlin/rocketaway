@@ -143,22 +143,31 @@ New expeditions use distinct world conditions. Mars has weak air resistance, mak
 | World | Departure target | Extra starting credits | Build challenge |
 | --- | ---: | ---: | --- |
 | Earth | 160 km | 0 | Balance lift, fuel and streamlining |
-| Moon | 600 km | 100 | Use fuel and low weight in vacuum |
-| Mars | 500 km | 220 | Extend coasts with fuel or staging |
-| Ceres | 900 km | 320 | A shorter stop in very weak gravity |
-| Europa | 2,000 km | 420 | Develop a longer-range vacuum build |
-| Titan | 150 km | 520 | Streamline against thick air |
-| Triton | 2,300 km | 620 | Reconsider heavy aerodynamic parts |
-| Pluto | 2,600 km | 720 | Balance large tanks and engine power |
-| Eris | 2,800 km | 820 | Combine fuel, power and staging |
+| Moon | 2,000 km | 0 | Use fuel and low weight in vacuum |
+| Mars | 750 km | 100 | Extend coasts with fuel or staging |
+| Ceres | 3,000 km | 100 | Develop a sustained climb in weak gravity |
+| Europa | 2,500 km | 140 | Develop a longer-range vacuum build |
+| Titan | 150 km | 220 | Streamline against thick air |
+| Triton | 2,800 km | 180 | Reconsider heavy aerodynamic parts |
+| Pluto | 3,000 km | 200 | Balance large tanks and engine power |
+| Eris | 2,800 km | 220 | Combine fuel, power and staging |
 
 The setup gives a practical sentence of advice before choosing a build. Starting-credit totals include world funding; later worlds offer advanced stock before the first launch. Funding is awarded once per new expedition, never on reload. Altitude-credit earnings scale with progress toward that world’s departure target, keeping vacuum flights from producing disproportionate rewards. New expeditions use stronger booster stages so Stagehand’s extra stage power can justify carrying them. These changes introduce neither another currency nor another required screen.
 
-Existing expeditions retain their previous physics, staging, goals, stock and earnings until the run ends. This includes both pre-science saves and the first Moon-specific model. The guide explains when a saved expedition is using earlier conditions. New runs use the current model; Free Flight physics stay unchanged.
+Existing expeditions retain their previous physics, staging, goals, stock and earnings until the run ends. This includes pre-science saves, the first Moon-specific model, and the earlier nine-world balance. The guide explains when a saved expedition is using earlier conditions. New runs use the current model; Free Flight physics stay unchanged.
 
 **☰ → Journey records** remains available during optional replay. Part previews compare estimated height with the current goal, and flight reports announce newly stocked parts and starting-build unlocks. Altitude-credit bonuses are named separately from permanent research points.
 
 Run `checks/science.playwright.js` in an isolated Playwright session for guide navigation, pause/resume, layer readouts, new Moon setup, preview/result clarity and records across six viewport sizes. `tests/science.test.js` covers layer boundaries, contrasting Earth/Moon part choices, save compatibility, unlock notices and Moon progression.
 
 
-`tests/world-progression.test.js` checks meaningful Mars/Titan part choices, funding integrity, both legacy models, normalized flight earnings, and full earned nine-world campaigns with each kit. `checks/world-challenges.playwright.js` checks all world briefings, funded budgets, old-save guides, fast flight controls and accurate coast skipping at six viewport sizes.
+`tests/world-progression.test.js` checks meaningful Mars/Titan part choices, funding integrity, all three legacy models, normalized flight earnings, and full earned nine-world campaigns with each kit. `checks/world-challenges.playwright.js` checks all world briefings, funded budgets, old-save guides, fast flight controls and accurate coast skipping at six viewport sizes.
+
+
+## Progression balance audit
+
+The opening-build audit enumerates every affordable combination of available and already-owned parts at maximum research and 120% launch power, over five seeds, three kits and nine worlds. This catches optimal-buying shortcuts that a cautious playthrough misses. Run `node checks/balance-audit.js` to reproduce the comparison: the previous balance allowed first-launch departure in 65 of 135 cases; the revised balance allows 10. Five of those remaining cases are fully researched Earth replays. These are simulated possibilities, not player telemetry or a predicted success rate.
+
+The revision reduces world funding and spaces later milestones around meaningful refits. Research bonuses and starter blueprints retain their power; goals are fixed for each world and do not rise when a player buys research. A strong flight can still clear every milestone it actually passes. Earth’s introductory ladder is unchanged. Existing runs retain their saved rules; new runs use balance version 3.
+
+The audit approach follows Anthony Pecorella’s [GDC talk on progression mathematics and optimal purchases](https://media.gdcvault.com/gdceurope2016/presentations/Pecorella_Anthony_Quest%20for%20Progress.pdf), especially slides 25–26. The goal of leaving intermediate upgrades useful also draws on the developers’ [Factorio pacing analysis](https://www.factorio.com/blog/post/fff-275). These inform the design; the numerical targets are specific to this game. Regression checks cover opening clear rates, unchanged earned power, fixed goals, legacy saves and full earned campaigns.

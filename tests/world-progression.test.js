@@ -36,15 +36,15 @@ test('each world offers a funded first choice, and displayed starting credits eq
   if(world>=2)assert.ok(p.stock.some(id=>PARTS.find(part=>part.id===id).tier>=4),'later stock should be available before launch');
  }
 });
-test('v0 and v1 expeditions keep old physics, goals, launch quality and earnings through reload',()=>{
- for(const version of[0,1])for(const world of[0,1,2,5,8]){
+test('v0, v1 and v2 expeditions keep old physics, goals, launch quality and earnings through reload',()=>{
+ for(const version of[0,1,2])for(const world of[0,1,2,5,8]){
   const s=start(world);s.active.conditionsVersion=version;
   const p=s.active.program;p.parts.equipped={aero:'needle',tank:'long',engine:'ember',boosters:'twins'};p.parts.owned.push('needle','long','ember','twins');
-  if(version===0){delete p.launchWorld;delete p.conditionsVersion;}else p.conditionsVersion=1;
+  if(version===0){delete p.launchWorld;delete p.conditionsVersion;}else p.conditionsVersion=version;
   const height=estimateHeight(p),target=milestoneHeight(s.active,5);beginExpeditionFlight(s,1.15);
   const saved=restoreExpeditions(copy(s));assert.equal(saved.active.status,'flying');assert.equal(saved.active.launchQuality,1.15);
   assert.equal(estimateHeight(saved.active.program),height);assert.equal(milestoneHeight(saved.active,5),target);
-  const expected=60+Math.floor(50000/220);
+  const expected=60+Math.floor(50000*(version>=2?160000/target:1)/220);
   assert.equal(settleExpedition(saved,{done:true,peak:50000,payMultiplier:1}).flightPay,expected);
   assert.equal(milestoneHeight(restoreExpeditions(copy(saved)).active,5),target);
  }
@@ -74,6 +74,6 @@ test('full journeys remain finishable with each kit through earned upgrades and 
    }
    assert.equal(s.active.status,'won',`${preferred}, seed ${seed}, world ${world}`);
   }
-  assert.ok(total>=18&&total<=40,`${preferred}: ${total} launches`);assert.equal(s.profile.campaignComplete,true);
+  assert.ok(total>=18&&total<=48,`${preferred}: ${total} launches`);assert.equal(s.profile.campaignComplete,true);
  }
 });

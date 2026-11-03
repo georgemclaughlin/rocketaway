@@ -46,7 +46,7 @@ test('a flight passing the top awards all milestones and unlocks the next diffic
  assert.equal(r.cleared.length,6);assert.equal(r.nextTarget,null);assert.equal(r.bonus,2460);
  assert.equal(s.active.status,'won');assert.equal(s.profile.wins,1);assert.equal(s.profile.totalGates,6);assert.equal(s.profile.maxDifficulty,1);assert.equal(s.history.length,1);
  assert.equal(abandonExpedition(s),false);assert.equal(startExpedition(s,{seed:1,kit:'scientist',difficulty:1}),true);
- assert.equal(s.active.program.parts.equipped.aero,'lab');assert.equal(s.active.difficulty,1);assert.equal(milestoneHeight(s.active,5),600000);
+ assert.equal(s.active.program.parts.equipped.aero,'lab');assert.equal(s.active.difficulty,1);assert.equal(milestoneHeight(s.active,5),2000000);
 });
 test('shop stock retains affordable upgrade steps, and owned parts always refit for free',()=>{
  for(let seed=1;seed<=20;seed++){

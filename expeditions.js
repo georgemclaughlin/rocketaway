@@ -1,9 +1,9 @@
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=world-challenges';
-import { newProgram, restoreProgram } from './engine.js?v=world-challenges';
-import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js?v=world-challenges';
-import { MODULES, ROUTES } from './modifiers.js?v=world-challenges';
-import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js?v=world-challenges';
-import { newFlightRecords, restoreFlightRecords, recordLaunch, recordFlightPeak } from './flight-records.js?v=world-challenges';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=balanced-journeys';
+import { newProgram, restoreProgram } from './engine.js?v=balanced-journeys';
+import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js?v=balanced-journeys';
+import { MODULES, ROUTES } from './modifiers.js?v=balanced-journeys';
+import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js?v=balanced-journeys';
+import { newFlightRecords, restoreFlightRecords, recordLaunch, recordFlightPeak } from './flight-records.js?v=balanced-journeys';
 export const EXPEDITION_KEY = 'rocket-away-expeditions-v1';
 export const ASCENT_STEP = .05;
 export const MOON_CHECKPOINTS = [6000,20000,60000,150000,300000,600000];
@@ -25,14 +25,14 @@ function draw(run,items,count) {
 }
 function restock(run) {
   run.program.stock = PART_SLOTS.flatMap(slot => {
-    const choices = PARTS.filter(part => part.slot===slot.id && !run.program.parts.owned.includes(part.id) && part.tier<=Math.min(6,Math.max(2+run.stage*2,run.conditionsVersion>=2?flightConditions(run.difficulty).stockTier:2)));
+    const choices = PARTS.filter(part => part.slot===slot.id && !run.program.parts.owned.includes(part.id) && part.tier<=Math.min(6,Math.max(2+run.stage*2,run.conditionsVersion>=2?flightConditions(run.difficulty,run.conditionsVersion).stockTier:2)));
     // Keep the cheapest next upgrade available; the second offer varies by run.
     const cheapest = [...choices].sort((a,b)=>a.price-b.price)[0];
     return cheapest ? [cheapest.id,...draw(run,choices.filter(part=>part!==cheapest),1).map(part=>part.id)] : [];
   });
 }
 export function milestoneHeight(run,index=run.stage) {
-  if(run.conditionsVersion>=2)return flightConditions(run.difficulty).checkpoints[Math.min(index,5)];
+  if(run.conditionsVersion>=2)return flightConditions(run.difficulty,run.conditionsVersion).checkpoints[Math.min(index,5)];
   if(run.difficulty===1 && run.conditionsVersion===1) return MOON_CHECKPOINTS[Math.min(index,5)];
   return Math.round(CHECKPOINTS[Math.min(index,5)]*(1+run.difficulty*ASCENT_STEP)/100)*100;
 }
@@ -138,7 +138,7 @@ export function restoreExpeditions(raw) {
   program.partTraits=restorePartTraits(input.program?.partTraits);
   program.stock=PARTS.filter(part=>Array.isArray(input.program?.stock)&&input.program.stock.includes(part.id)).map(part=>part.id);
   const run={seed:int(input.seed,4294967295)||1,rng:int(input.rng,4294967295)||1,kit:input.kit,difficulty:int(input.difficulty,8),stage:int(input.stage,6),strikes:int(input.strikes,3),status:input.status,program,launchQuality:Number.isFinite(input.launchQuality)?Math.max(.9,Math.min(1.2,input.launchQuality)):(input.status==='flying'?1.1:null),lastResult:null,recorded:input.recorded===true};
-  run.conditionsVersion=[1,CONDITIONS_VERSION].includes(input.conditionsVersion)?input.conditionsVersion:0;
+  run.conditionsVersion=[1,2,CONDITIONS_VERSION].includes(input.conditionsVersion)?input.conditionsVersion:0;
   // Preserve the physics and goals of already-started expeditions.
   if(run.conditionsVersion>=1){program.launchWorld=run.difficulty;program.conditionsVersion=run.conditionsVersion;}
   if(input.lastResult && Number.isFinite(input.lastResult.altitude)) {
