@@ -43,7 +43,7 @@ In the menu, **End expedition** asks for confirmation. **Free Flight** lets you 
 
 ## Permanent research
 
-**Research** is a large button beside **Launch rocket** in the hangar and **Build rocket** on the world screen. It shows your research point balance and an **Upgrade available** cue when you can afford an upgrade. Research is also available in the menu. **Research points** buy permanent upgrades; **credits** buy parts for the current rocket. No research screen is forced between flights.
+**Research** is a large button beside **Launch rocket** in the hangar and **Build rocket** on the world screen. It shows your research point balance. A bright green button names an upgrade for your selected rocket; a blue button says **Other rockets only** when another build has an affordable upgrade. A slate button says **Earn more points** when nothing is affordable. Opening Research takes you to an affordable upgrade, prioritizing the selected rocket. Research is also available in the menu. **Research points** buy permanent upgrades; **credits** buy parts for the current rocket. No research screen is forced between flights.
 
 Each completed expedition flight earns 1 research point, plus 2 per milestone cleared that flight and 4 for clearing a world for the first time. Even a miss earns a point. Ending a run manually does not. Rewards are settled once and remain through losses, world changes, and browser reloads.
 

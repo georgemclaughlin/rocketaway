@@ -1,12 +1,16 @@
 import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js';
 
-export function researchButtonState(profile) {
+export function researchButtonState(profile,selectedKit='scrapper') {
  const data=profile.research.data;
- const available=RESEARCH_TRACKS.some(t=>profile.totalGates>=t.unlock&&researchCost(profile,t.id)!==null&&data>=researchCost(profile,t.id));
- return {available,label:`<span class="research-button-title">Research <b>${data}</b></span><small>${available?'Upgrade available':'Permanent upgrades'}</small>`,ariaLabel:`Permanent research lab, ${data} research points${available?', upgrade available':''}`};
+ const affordable=RESEARCH_TRACKS.filter(t=>profile.totalGates>=t.unlock&&researchCost(profile,t.id)!==null&&data>=researchCost(profile,t.id));
+ const current=affordable.find(t=>t.id===selectedKit),available=affordable.length>0;
+ const state=current?'current':available?'other':'none';
+ const complete=RESEARCH_TRACKS.every(t=>researchCost(profile,t.id)===null);
+ const cue=current?`↑ Upgrade ${current.name}`:available?'↗ Other rockets only':complete?'All upgrades owned':'Earn more points';
+ return {available,state,targetKit:current?.id||affordable[0]?.id||selectedKit,label:`<span class="research-button-title">Research <b>${data}</b></span><small>${cue}</small>`,ariaLabel:`Permanent research lab, ${data} research points. ${current?`Upgrade available for your selected ${current.name} rocket`:available?'Upgrades available for other rockets only':complete?'All upgrades owned':'No affordable upgrades yet'}`};
 }
 
-export function createResearchUI({getSession,onPurchase,canOpen}) {
+export function createResearchUI({getSession,getSelectedKit,onPurchase,canOpen}) {
  const $=id=>document.getElementById(id);
  let selected='scrapper';
  const dialog=$('research-dialog');
@@ -35,7 +39,8 @@ export function createResearchUI({getSession,onPurchase,canOpen}) {
  }
  function open() {
   if(!canOpen())return;
-  selected=getSession().active?.kit||'scrapper';render();$('research-status').textContent='';dialog.showModal();$('research-close').focus();
+  const session=getSession();
+  selected=researchButtonState(session.profile,getSelectedKit()).targetKit;render();$('research-status').textContent='';dialog.showModal();$('research-close').focus();
  }
  $('research-close').addEventListener('click',()=>dialog.close());
  $('research-tabs').addEventListener('click',event=>{

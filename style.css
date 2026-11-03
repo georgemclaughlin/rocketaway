@@ -700,13 +700,14 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
 .hangar-actions,.expedition-footer .start-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: stretch; gap: 8px; min-width: 0; }
 .hangar-actions #shop-launch { display: flex; justify-content: center; gap: 6px; min-width: 0; width: 100%; padding: 10px 8px; }
 .expedition-footer .start-actions .primary { width: 100%; margin: 0; padding: 10px 8px; }
-.research-action { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 44px; padding: 5px 7px; border: 1px solid #a6d4cc; border-radius: 7px; background: #b1d9d2; color: #163c3b; box-shadow: 0 3px 0 #5c928a; }
+.research-action { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; min-height: 44px; padding: 5px 7px; border: 1px solid #8095af; border-radius: 7px; background: #26344b; color: #e1e9f4; box-shadow: 0 3px 0 #172338; }
 .research-button-title { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 14px; font-weight: bold; }
 .research-button-title b { padding: 1px 5px; border-radius: 9px; background: #163c3b; color: #e5f7ed; font-size: 11px; }
 .research-action small { font-size: 10px; line-height: 1.15; white-space: nowrap; }
-.research-action.research-ready { background: #d2f2cf; border-color: #e8ecae; color: #193c29; box-shadow: 0 3px 0 #7aa278,inset 0 0 0 1px #f1ffd9; }
+.research-action[data-research-state="current"] { background: #d2f2cf; border-color: #e8ecae; color: #193c29; box-shadow: 0 3px 0 #7aa278,inset 0 0 0 1px #f1ffd9; }
 .research-action.research-ready small { font-weight: bold; }
-.research-action:hover:not(:disabled) { background: #dcf5ed; }
+.research-action[data-research-state="other"] { background: #314b65; border-color: #85bbde; color: #e1efff; box-shadow: 0 3px 0 #1b3149; }
+.research-action:hover:not(:disabled) { filter: brightness(1.12); }
 .app[data-mode="classic"] #research-open { display: none; }
 .app[data-mode="classic"] .hangar-actions { grid-template-columns: minmax(0,1fr); }
 @media (max-height: 520px) { .expedition-footer .start-actions { min-width: 285px; } .research-button-title { font-size: 13px; } }

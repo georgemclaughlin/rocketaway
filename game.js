@@ -2,12 +2,12 @@ import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, create
 import { fittedParts, assemblySpecs } from './parts.js';
 import { EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js';
 import { MODULES } from './modifiers.js';
-import { createExpeditionUI } from './expedition-ui.js?v=research-clarity';
+import { createExpeditionUI } from './expedition-ui.js?v=research-states';
 import { createBuilder } from './builder.js';
 import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
 import { worldFor, destinationFor, WORLDS } from './worlds.js';
 import { createTravel } from './travel.js';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=research-clarity';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=research-states';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -39,7 +39,7 @@ const builder = createBuilder({ getProgram: () => program, canEdit: canBuild, ge
   announce(`${part.name} fitted. ${program.credits} credits remaining.`);
 } });
 const travelToNextWorld = createTravel(() => { workshop(); announce(expeditionSession.profile.campaignComplete ? 'Tau Ceti reached! All worlds are open to replay.' : `Arrived at ${destinationFor(expeditionSession.active).name}. Choose your starting rocket.`); });
-const researchUI=createResearchUI({getSession:()=>expeditionSession,canOpen:()=>mode==='workshop'&&expeditionSession.mode==='expedition'&&(!expeditionSession.active||['build','won','lost'].includes(expeditionSession.active.status)),onPurchase:()=>{persist();renderWorkshop();tone(820,.12);}});
+const researchUI=createResearchUI({getSession:()=>expeditionSession,getSelectedKit:()=>expeditionUI.getSelectedKit(),canOpen:()=>mode==='workshop'&&expeditionSession.mode==='expedition'&&(!expeditionSession.active||['build','won','lost'].includes(expeditionSession.active.status)),onPurchase:()=>{persist();renderWorkshop();tone(820,.12);}});
 $('research-open').addEventListener('click',()=>researchUI.open());
 $('expedition-footer').addEventListener('click',event=>{if(event.target.closest('#research-hub'))researchUI.open();});
 $('research-menu').addEventListener('click',()=>{$('menu-dialog').close();researchUI.open();});
@@ -70,7 +70,7 @@ function syncScreens() {
   $('run-expeditions').setAttribute('aria-pressed', expeditionMode);
   $('reset-all').disabled = mode !== 'workshop';
   const data=expeditionSession.profile.research.data;
-  const researchButton=researchButtonState(expeditionSession.profile);
+  const researchButton=researchButtonState(expeditionSession.profile,expeditionUI.getSelectedKit());
   for(const id of ['research-open','research-hub','research-menu']){
     if(!$(id))continue;
     $(id).disabled=mode!=='workshop'||!expeditionMode||!!(run&&!['build','won','lost'].includes(run.status));
@@ -78,6 +78,7 @@ function syncScreens() {
     else $(id).innerHTML=researchButton.label;
     if(id!=='research-menu')$(id).setAttribute('aria-label',researchButton.ariaLabel);
     $(id).classList.toggle('research-ready',researchButton.available);
+    $(id).dataset.researchState=researchButton.state;
   }
   $('run-abandon').hidden = !inExpedition() || ['won','lost'].includes(run.status);
   $('run-abandon').disabled = mode !== 'workshop';
