@@ -28,9 +28,9 @@ test('Earth rewards a streamlined fairing while the Moon rewards lower weight, u
 test('new Moon expeditions preserve their conditions and old Moon flights keep their original goals and physics',()=>{
  const s=newExpeditions();s.profile.maxDifficulty=1;startExpedition(s,{seed:51,difficulty:1});
  const restored=restoreExpeditions(copy(s));
- assert.equal(restored.active.conditionsVersion,1);assert.equal(milestoneHeight(restored.active,5),600000);
+ assert.equal(restored.active.conditionsVersion,2);assert.equal(milestoneHeight(restored.active,5),600000);
  assert.equal(estimateHeight(restored.active.program),estimateHeight(s.active.program));
- delete s.active.conditionsVersion;delete s.active.program.launchWorld;
+ delete s.active.conditionsVersion;delete s.active.program.launchWorld;delete s.active.program.conditionsVersion;
  beginExpeditionFlight(s,1.17);
  const legacy=restoreExpeditions(copy(s));
  assert.equal(legacy.active.status,'flying');assert.equal(legacy.active.launchQuality,1.17);

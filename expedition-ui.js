@@ -1,18 +1,18 @@
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=space-guide';
-import { flightConditions } from './worlds.js?v=space-guide';
-import { altitudeLabel } from './journey.js?v=space-guide';
-import { KITS, milestoneHeight, startExpedition } from './expeditions.js?v=space-guide';
-import { newProgram } from './engine.js?v=space-guide';
-import { fittedParts, partById } from './parts.js?v=space-guide';
-import { rocketArt } from './builder.js?v=space-guide';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=space-guide';
-import { researchLoadout } from './research.js?v=space-guide';
-import { researchButtonState } from './research-ui.js?v=space-guide';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=world-challenges';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=world-challenges';
+import { altitudeLabel } from './journey.js?v=world-challenges';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=world-challenges';
+import { newProgram } from './engine.js?v=world-challenges';
+import { fittedParts, partById } from './parts.js?v=world-challenges';
+import { rocketArt } from './builder.js?v=world-challenges';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=world-challenges';
+import { researchLoadout } from './research.js?v=world-challenges';
+import { researchButtonState } from './research-ui.js?v=world-challenges';
 
 const kitBenefits = {
   scrapper: 'Credits to customize.',
   stager: 'Extra lift from boosters.',
-  scientist: 'More credits. Better engine.',
+  scientist: 'More credits per flight.',
 };
 function kitArt(item,profile) {
   const program = newProgram();
@@ -60,23 +60,24 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore })
         difficulty=run?.status==='won'?Math.min(profile.maxDifficulty,run.difficulty+1):run?.difficulty||0;
       }
       const world=worldFor({difficulty}),next=destinationFor({difficulty});
-      $('world-briefing').textContent=`${flightConditions(difficulty).label || `${world.name} · space facts`} ⓘ`;
+      $('world-briefing').textContent=`${flightConditions(difficulty).brief} ⓘ`;
+      $('world-briefing').setAttribute('aria-label',`${flightConditions(difficulty).brief} Open world guide.`);
       $('expedition-step').textContent=profile.campaignComplete?'JOURNEY COMPLETE · OPTIONAL REPLAY':`ROAD TO TAU CETI · WORLD ${difficulty+1} / 9`;
       $('expedition-title').innerHTML=`${worldMarkup(world)}<span>Launch from ${world.name==='Moon'?'the Moon':world.name}</span>`;
-      $('expedition-summary').textContent=profile.campaignComplete?`Replay ${world.name} with a new build. Your Tau Ceti journey stays complete.`:`Reach ${altitudeLabel(milestoneHeight({difficulty,conditionsVersion:1},5))} → ${next.name}. Six milestones, three misses.`;
+      $('expedition-summary').textContent=profile.campaignComplete?`Replay ${world.name} with a new build. Your Tau Ceti journey stays complete.`:`Reach ${altitudeLabel(milestoneHeight({difficulty,conditionsVersion:CONDITIONS_VERSION},5))} → ${next.name}. Six milestones, three misses.`;
       $('expedition-goal').innerHTML=`<nav class="world-route" aria-label="Road to Tau Ceti. Select an unlocked world to replay.">${worldRoute(profile,difficulty)}</nav>`;
       const kits=KITS.filter(item=>profile.totalGates>=item.unlock);
       $('expedition').dataset.kits=kits.length;
       if(!kits.some(item=>item.id===kit))kit='scrapper';
       $('expedition-choices').style.setProperty('--choices',kits.length);
       $('expedition-choices').innerHTML=kits.map(item=>{
-        const loadout=researchLoadout(profile,item);
+        const loadout=expeditionLoadout(profile,item,difficulty);
         const upgraded=loadout.parts.filter(id=>!item.parts.includes(id));
         const latest=upgraded.at(-1);
         return `<button class="expedition-card kit-card" data-kit="${item.id}" aria-pressed="${kit===item.id}"><span class="card-icon kit-rocket">${kitArt(item,profile)}</span><strong>${item.name}${loadout.rank?` <small>R${loadout.rank}</small>`:''}<span class="kit-check" aria-hidden="true">${kit===item.id?' ✓':''}</span></strong><p>${latest?`Starts with ${partById(latest).name}`:kitBenefits[item.id]}</p><b>${loadout.credits} starting credits</b></button>`;
       }).join('');
       const researchButton=researchButtonState(profile,kit);
-      $('expedition-footer').innerHTML=`<p class="kit-unlock">${ended?'Fresh rocket. Research, worlds, and starting builds stay yours.':'Build, upgrade, and leave Earth. Tau Ceti awaits.'}</p><div class="start-actions"><button id="research-hub" class="research-action ${researchButton.available?'research-ready':''}" data-research-state="${researchButton.state}" aria-label="${researchButton.ariaLabel}">${researchButton.label}</button><button id="run-start" class="primary">Build rocket ↗</button></div>`;
+      $('expedition-footer').innerHTML=`<p class="kit-unlock">${flightConditions(difficulty).grant?`Starting credits include ${flightConditions(difficulty).grant} world funding.`:ended?'Fresh rocket. Your research stays yours.':'Build, upgrade, and leave Earth. Tau Ceti awaits.'}</p><div class="start-actions"><button id="research-hub" class="research-action ${researchButton.available?'research-ready':''}" data-research-state="${researchButton.state}" aria-label="${researchButton.ariaLabel}">${researchButton.label}</button><button id="run-start" class="primary">Build rocket ↗</button></div>`;
     } else {
       $('expedition-title').textContent=`Return to ${worldFor(run).name}`;
       $('expedition-summary').textContent='Your flight was saved. Resume from ignition with the same rocket and launch power.';

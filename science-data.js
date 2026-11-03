@@ -9,10 +9,10 @@ export const EARTH_LAYERS = [
 export const SCIENCE_WORLDS = [
   {name:'Earth',label:'Layered atmosphere',fact:'Earth’s atmosphere thins gradually. Space does not begin at a sudden wall of air.',gravity:9.80,source:'https://science.nasa.gov/earth/earth-atmosphere/earths-atmosphere-a-multi-layered-cake/'},
   {name:'Moon',label:'Near vacuum',fact:'The Moon has an extremely sparse exosphere. Its surface gravity is about one-sixth of Earth’s.',gravity:1.62,source:'https://science.nasa.gov/moon/facts/'},
-  {name:'Mars',label:'Thin atmosphere',fact:'Mars has a thin atmosphere, mostly carbon dioxide. Suspended dust gives its sky a reddish haze.',source:'https://science.nasa.gov/mars/facts/'},
+  {name:'Mars',label:'Thin atmosphere',gravity:3.73,gravitySource:'https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html',fact:'Mars has a thin atmosphere, mostly carbon dioxide. Suspended dust gives its sky a reddish haze.',source:'https://science.nasa.gov/mars/facts/'},
   {name:'Ceres',label:'Very thin atmosphere',fact:'Scientists have found evidence of water vapor around Ceres, possibly from ice turning directly into gas.',source:'https://science.nasa.gov/dwarf-planets/ceres/facts/'},
   {name:'Europa',label:'Trace oxygen',fact:'Europa has an extremely thin oxygen atmosphere. It is far too sparse to breathe.',source:'https://europa.nasa.gov/resources/193/deep-dive-on-jupiters-moon-europa-infographic/'},
-  {name:'Titan',label:'Thick atmosphere',fact:'Titan’s thick atmosphere is mostly nitrogen. Its clouds can rain methane, which fills lakes and seas.',source:'https://science.nasa.gov/saturn/moons/titan/facts/'},
+  {name:'Titan',label:'Thick atmosphere',fact:'Titan’s thick atmosphere is mostly nitrogen. Its clouds can rain methane, which fills lakes and seas. Surface air pressure is about 60% higher than Earth’s.',source:'https://science.nasa.gov/saturn/moons/titan/facts/'},
   {name:'Triton',label:'Thin atmosphere',fact:'Triton’s thin atmosphere is mostly nitrogen, with small amounts of methane.',source:'https://science.nasa.gov/neptune/moons/triton/'},
   {name:'Pluto',label:'Thin atmosphere',fact:'Pluto’s thin atmosphere contains nitrogen, methane and carbon monoxide. Surface ice can turn directly into gas.',source:'https://science.nasa.gov/dwarf-planets/pluto/facts/'},
   {name:'Eris',label:'Deep cold',fact:'Eris is a distant dwarf planet. Its estimated surface temperature is roughly −243°C to −217°C.',source:'https://science.nasa.gov/dwarf-planets/eris/'},

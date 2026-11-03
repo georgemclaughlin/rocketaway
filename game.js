@@ -1,17 +1,17 @@
-import { createScienceUI } from './science-ui.js?v=space-guide';
-import { environmentLabel } from './science-data.js?v=space-guide';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=space-guide';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=space-guide';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=space-guide';
-import { KITS, EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=space-guide';
-import { MODULES } from './modifiers.js?v=space-guide';
-import { createExpeditionUI } from './expedition-ui.js?v=space-guide';
-import { createBuilder } from './builder.js?v=space-guide';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=space-guide';
-import { worldFor, destinationFor, WORLDS } from './worlds.js?v=space-guide';
-import { createTravel } from './travel.js?v=space-guide';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=space-guide';
-import { launchRating } from './launch-feedback.js?v=space-guide';
+import { createScienceUI } from './science-ui.js?v=world-challenges';
+import { environmentLabel } from './science-data.js?v=world-challenges';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=world-challenges';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=world-challenges';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=world-challenges';
+import { KITS, EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=world-challenges';
+import { MODULES } from './modifiers.js?v=world-challenges';
+import { createExpeditionUI } from './expedition-ui.js?v=world-challenges';
+import { createBuilder } from './builder.js?v=world-challenges';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=world-challenges';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=world-challenges';
+import { createTravel } from './travel.js?v=world-challenges';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=world-challenges';
+import { launchRating } from './launch-feedback.js?v=world-challenges';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -122,7 +122,7 @@ function openReference(id) {
 function openScience() {
   const run=inExpedition()?expeditionSession.active:null;
   const world=expeditionSession.mode==='classic'?0:currentScreen==='launchpad'&&run?run.difficulty:$('expedition').dataset.phase==='finale'?9:expeditionUI.getSelectedWorld();
-  const legacyWorld=run?.difficulty===1&&run.conditionsVersion!==1&&!['won','lost'].includes(run.status)?1:null;
+  const legacyWorld=run&&run.conditionsVersion<CONDITIONS_VERSION&&!['won','lost'].includes(run.status)?run.difficulty:null;
   scienceUI.render(world,currentScreen==='launchpad'?flight?.altitude||0:0,legacyWorld);
   openReference('science-dialog');
 }
@@ -228,7 +228,7 @@ function renderWorkshop() {
   renderJourney();
   expeditionUI.render();
   builder.render();
-  if (mode === 'workshop') $('flight-number').textContent = `FLIGHT ${String(program.flights + 1).padStart(2, '0')}`;
+  if (mode === 'workshop') { $('flight-number').textContent = `FLIGHT ${String(program.flights + 1).padStart(2, '0')}`; $('flight-number').setAttribute('aria-label','Open world guide'); }
   syncScreens();
 }
 let lastRocket = null;
@@ -249,7 +249,9 @@ function updateFlightHud() {
   $('altitude').textContent = (flight.altitude / 1000).toFixed(2);
   $('velocity').textContent = `${Math.max(0, Math.round(flight.velocity * 500)).toLocaleString()} m/s`;
   $('fuel').style.width = `${flight.fuel * 100}%`;
-  $('flight-number').textContent = `${environmentLabel(inExpedition()?expeditionSession.active.difficulty:0,flight.altitude)} ⓘ`;
+  const environment=environmentLabel(inExpedition()?expeditionSession.active.difficulty:0,flight.altitude);
+  $('flight-number').textContent = `${environment} ⓘ`;
+  $('flight-number').setAttribute('aria-label',`${environment}. Open world guide.`);
   $('flight-status').textContent = flight.done ? 'APOGEE REACHED' : flight.phase === 'powered' ? 'ENGINES FIRING' : 'COASTING';
 }
 function cancelLaunch() {
@@ -263,7 +265,7 @@ function cancelLaunch() {
 }
 $('cancel-launch').addEventListener('click', cancelLaunch);
 function finishEarly() {
-  if (mode !== 'flying' || !inExpedition() || flight.peak < checkpoint(expeditionSession.active)) return;
+  if (mode !== 'flying' || !inExpedition() || (flight.phase==='powered' && flight.peak < checkpoint(expeditionSession.active))) return;
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);
   if (flight.done) finish();
 }
@@ -307,7 +309,7 @@ function launch(resumeQuality) {
 }
 $('launch').addEventListener('click', () => mode === 'workshop' ? prepare() : mode === 'flying' ? finishEarly() : launch());
 $('shop-launch').addEventListener('click', prepare);
-$('speed').addEventListener('click', () => { speed = speed === 1 ? 3 : 1; $('speed').textContent = `Speed ×${speed}`; announce(`Flight speed ${speed} times.`); });
+$('speed').addEventListener('click', () => { speed = speed === 1 ? 3 : speed === 3 ? 8 : 1; $('speed').textContent = `Speed ×${speed}`; announce(`Flight speed ${speed} times.`); });
 function showFlightNotice(title, detail) {
   $('launch-title').textContent = title; $('launch-description').textContent = detail;
   announce(`${title} ${detail}`);
@@ -619,6 +621,7 @@ function checkFlightMoments() {
   if (inExpedition()) {
     const run = expeditionSession.active, journey = journeyState(run,flight.peak);
     renderJourney();
+    if(flight.phase==='coasting') { $('launch').disabled=false; $('launch').textContent='See result ↗'; }
     if (flight.peak >= checkpoint(run)) {
       $('flight-status').textContent = `${journey.reached} OF 6 MILESTONES`;
       $('launch').disabled = false; $('launch').textContent = 'See result ↗';
@@ -636,6 +639,7 @@ function checkFlightMoments() {
     recordShown = true; showFlightNotice('A new personal best!', 'Keep going. There’s more sky up there.');
     burst(width * .56, height * .48, '#f6d47b', 38); tone(1040, .2);
   }
+  if(inExpedition())return;
   const zones = [[1000,'Through the clouds','The ground is getting rather small.'],[10000,'Above the weather','Next stop: the stratosphere.'],[25000,'The stratosphere','You’re flying higher than the airliners.'],[50000,'Halfway to space','The sky is starting to change.'],[100000,'Hello, outer space!','A tiny rocket. An enormous achievement.'],[200000,'Satellite country!','You have a whole planet beneath you.']];
   for (let i = zones.length - 1; i >= 0; i--) {
     if (flight.altitude >= zones[i][0] && zoneSeen < zones[i][0]) {

@@ -1,7 +1,7 @@
 // Run in an isolated Playwright CLI session; fixtures replace only that browser's saves.
 async page=>{
  const assert=(v,m)=>{if(!v)throw Error(m);},errors=[];page.on('pageerror',e=>errors.push(e.message));
- const full=await page.evaluate(async()=>{const e=await import('./expeditions.js'),r=await import('./research.js'),s=e.newExpeditions();for(let world=0;world<9;world++){e.startExpedition(s,{seed:world+1,difficulty:world});e.beginExpeditionFlight(s,.95);e.settleExpedition(s,{done:true,peak:1000,payMultiplier:1});e.continueExpedition(s);e.beginExpeditionFlight(s,1.2);e.settleExpedition(s,{done:true,peak:world===3?1450000:e.milestoneHeight(s.active,5)+50000,payMultiplier:1});}for(const kit of ['scrapper','stager','scientist'])for(let i=0;i<5;i++)r.buyResearch(s,kit);return s;});
+ const full=await page.evaluate(async()=>{const e=await import('./expeditions.js'),r=await import('./research.js'),s=e.newExpeditions();for(let world=0;world<9;world++){e.startExpedition(s,{seed:world+1,difficulty:world});e.beginExpeditionFlight(s,.95);e.settleExpedition(s,{done:true,peak:1000,payMultiplier:1});e.continueExpedition(s);e.beginExpeditionFlight(s,1.2);e.settleExpedition(s,{done:true,peak:world===3?4500000:e.milestoneHeight(s.active,5)+50000,payMultiplier:1});}for(const kit of ['scrapper','stager','scientist'])for(let i=0;i<5;i++)r.buyResearch(s,kit);return s;});
  for(const legacy of [false,true]){
   const state=JSON.parse(JSON.stringify(full));if(legacy)delete state.profile.flightRecords;
   await page.evaluate(s=>localStorage.setItem('rocket-away-expeditions-v1',JSON.stringify(s)),state);await page.reload();
@@ -9,7 +9,7 @@ async page=>{
   assert(await page.locator('[data-record="launches"] b').innerText()===(legacy?'2':'18'),'launch total');
   assert(await page.locator('[data-record="perfect"] b').innerText()===(legacy?'1':'9'),'perfect count');
   assert((await page.locator('[data-record="highest"]').innerText()).includes(legacy?'Eris':'Ceres'),'record world');
-  if(!legacy)assert((await page.locator('[data-record="highest"] b').innerText()).replace(',','').includes('1450'),'record altitude across worlds');
+  if(!legacy)assert((await page.locator('[data-record="highest"] b').innerText()).replace(',','').includes('4500'),'record altitude across worlds');
   assert(await page.locator('[data-record="upgrades"] b').innerText()==='15','upgrades');
   assert((await page.locator('#ending-record-note').innerText()).includes('Older flights')===legacy,'incomplete history explained');
   for(const [width,height]of [[320,568],[375,667],[390,844],[667,375],[844,390],[1366,768]]){

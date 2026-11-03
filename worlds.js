@@ -13,11 +13,26 @@ export const WORLDS = [
 export const TAU_CETI = {name:'Tau Ceti',kind:'Another star. Journey complete.',color:'#ffe4a0',land:'#ffc668',star:true};
 export const worldFor = run => WORLDS[Math.max(0,Math.min(WORLDS.length-1,Math.floor(run?.difficulty||0)))];
 export const destinationFor = run => WORLDS[(run?.difficulty||0)+1] || TAU_CETI;
-// Arcade tuning: the Earth/Moon prototype changes decisions with simplified forces, not SI physics. Old runs retain their original model.
-export function flightConditions(world) {
-  return world===1
-    ? {gravity:.35,drag:0,label:'Low gravity · no air drag',tip:'Fuel and low weight matter. Nose drag has no effect here.'}
-    : {gravity:.5,drag:1,label:world===0?'Air drag · streamlined noses help':'',tip:world===0?'Streamlined noses cut air resistance. Balance fuel with engine power.':''};
+// Flight forces and departure targets are tuned for play, not an SI/orbital model.
+// Versioned profiles keep already-started expeditions on their original rules.
+export const CONDITIONS_VERSION = 2;
+const EARTH = {gravity:.5,drag:1,label:'Air drag',brief:'Air resistance matters. Try a streamlined nose.',tip:'Streamlined noses cut air resistance. Balance fuel with engine power.',checkpoints:[2500,10000,25000,55000,100000,160000],grant:0,stockTier:2};
+const MOON = {gravity:.35,drag:0,label:'Low gravity · no air drag',brief:'No air drag. Spend on fuel and keep the rocket light.',tip:'Fuel and low weight matter. Nose drag has no effect here.',checkpoints:[6000,20000,60000,150000,300000,600000],grant:100,stockTier:4};
+const CONDITIONS = [
+  EARTH, MOON,
+  {gravity:.42,drag:.1,label:'Thin air · long coasts',brief:'Thin air lets boosts last. Try extra fuel or boosters.',tip:'Air drag is much weaker than on Earth. Fuel and staged boosts carry you farther; compare their extra weight.',checkpoints:[6000,25000,70000,160000,300000,500000],grant:220,stockTier:6},
+  {gravity:.25,drag:0,label:'Very low gravity · near vacuum',brief:'A lighter rocket goes a long way in this weak gravity.',tip:'This is a shorter stop in near vacuum. Keep weight low; aerodynamic fairings give no drag benefit.',checkpoints:[15000,60000,180000,360000,650000,900000],grant:320,stockTier:6},
+  {gravity:.33,drag:0,label:'Low gravity · near vacuum',brief:'A longer vacuum climb. Try fuel and staged boosts.',tip:'There is negligible air drag. Larger tanks and boosters can extend your coast; compare their weight.',checkpoints:[20000,90000,350000,750000,1300000,2000000],grant:420,stockTier:6},
+  {gravity:.32,drag:2.4,label:'Thick air · strong drag',brief:'Thick air slows you down. Streamline before adding power.',tip:'Air resistance is strong. A streamlined nose and a longer burn often beat a short burst of extra power.',checkpoints:[5000,15000,35000,65000,100000,150000],grant:520,stockTier:6},
+  {gravity:.30,drag:0,label:'Very thin air · long coasts',brief:'Back to near vacuum. Trade the heavy fairing for fuel.',tip:'Air drag is negligible in this simplified model. Reconsider heavy aerodynamic parts and extend your fuel supply.',checkpoints:[30000,120000,450000,950000,1600000,2300000],grant:620,stockTier:6},
+  {gravity:.28,drag:0,label:'Weak gravity · long climb',brief:'A long climb needs fuel. Balance a bigger tank and engine.',tip:'Air drag is negligible in this simplified model. A large tank needs enough engine power; staged boosts offer another route.',checkpoints:[40000,160000,500000,1050000,1800000,2600000],grant:720,stockTier:6},
+  {gravity:.30,drag:0,label:'Near vacuum · final launch',brief:'Your final launch: combine fuel, power and useful staging.',tip:'This last departure needs a developed build. Combine fuel capacity, engine power and staging; compare before fitting.',checkpoints:[50000,200000,550000,1100000,1900000,2800000],grant:820,stockTier:6},
+];
+export function flightConditions(world,version=CONDITIONS_VERSION) {
+  if(!Number.isInteger(world)||world<0||world>=CONDITIONS.length)return {...EARTH,label:'',brief:'',tip:'',grant:0};
+  if(version===0)return {...EARTH,label:'Original flight conditions',brief:'This saved expedition keeps its original flight conditions.',tip:'This saved expedition keeps its original flight conditions.',grant:0};
+  if(version===1)return world===1?{...MOON,grant:0}:world===0?EARTH:{...EARTH,label:'Original flight conditions',brief:'This saved expedition keeps its original flight conditions.',tip:'This saved expedition keeps its original flight conditions.',grant:0};
+  return CONDITIONS[world];
 }
 export function worldMarkup(world, extraClass='') {
   return `<span class="world-orb ${world.star?'world-star':''} ${extraClass}" style="--world-color:${world.color};--world-land:${world.land}" aria-hidden="true"></span>`;

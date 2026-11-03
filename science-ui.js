@@ -1,5 +1,5 @@
-import { EARTH_LAYERS, SCIENCE_WORLDS, GRAVITY_SOURCE, earthLayerAt } from './science-data.js?v=space-guide';
-import { WORLDS, TAU_CETI, worldMarkup, flightConditions } from './worlds.js?v=space-guide';
+import { EARTH_LAYERS, SCIENCE_WORLDS, GRAVITY_SOURCE, earthLayerAt } from './science-data.js?v=world-challenges';
+import { WORLDS, TAU_CETI, worldMarkup, flightConditions } from './worlds.js?v=world-challenges';
 export function createScienceUI() {
   const $=id=>document.getElementById(id);
   let world=0,layer=0,legacyWorld=null;
@@ -17,10 +17,10 @@ export function createScienceUI() {
     $('science-gravity').hidden=!info.gravity;
     $('science-gravity').textContent=info.gravity?`Real surface gravity: ${info.gravity.toFixed(2)} m/s²${world===1?' · Earth: 9.80 m/s²':''}`:'';
     const conditions=flightConditions(world);
-    $('science-gameplay').textContent=world===9?'Your journey ends at this distant star.':world===0||world===1?`${world===legacyWorld?'This saved expedition keeps its original flight conditions. ':''}New expeditions: ${conditions.tip}`:'These facts describe the real world. This destination currently uses the standard arcade flight model.';
+    $('science-gameplay').textContent=world===9?'Your journey ends at this distant star.':`${world===legacyWorld?'This saved expedition keeps its original flight conditions. ':''}New expeditions: ${conditions.tip}`;
     $('science-source').href=info.source;
     $('science-gravity-source').hidden=!info.gravity;
-    $('science-gravity-source').href=GRAVITY_SOURCE;
+    $('science-gravity-source').href=info.gravitySource||GRAVITY_SOURCE;
   }
   $('science-world').addEventListener('change',()=>{world=Number($('science-world').value);layer=0;render();});
   $('science-layers').addEventListener('click',event=>{const button=event.target.closest('[data-layer]');if(button){layer=Number(button.dataset.layer);render();$('science-layers').querySelector(`[data-layer="${layer}"]`).focus();}});

@@ -22,8 +22,9 @@ test('a low retry cannot erase cleared milestones, and completion has no next ta
  const done=journeyState(run,170000);assert.equal(done.reached,6);assert.equal(done.next,null);
  assert.equal((journeyMarkup(done).match(/aria-current="step"/g)||[]).length,0);
 });
-test('journey labels and finish line follow the selected Ascent difficulty',()=>{
+test('journey labels follow new world targets and preserve legacy Ascent targets',()=>{
  const run=start();run.difficulty=8;
- const state=journeyState(run);assert.equal(state.next.altitude,3500);assert.equal(state.goal,224000);
- assert.match(journeyMarkup(state),/224 km/);
+ const state=journeyState(run);assert.equal(state.next.altitude,50000);assert.equal(state.goal,2800000);
+ assert.match(journeyMarkup(state),/2800 km/);
+ run.conditionsVersion=1;const old=journeyState(run);assert.equal(old.next.altitude,3500);assert.equal(old.goal,224000);
 });

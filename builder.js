@@ -1,10 +1,10 @@
-import { flightConditions } from './worlds.js?v=space-guide';
-import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=space-guide';
-import { createFlight, stepFlight } from './engine.js?v=space-guide';
+import { flightConditions } from './worlds.js?v=world-challenges';
+import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=world-challenges';
+import { createFlight, stepFlight } from './engine.js?v=world-challenges';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
-  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic');
+  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1);
   if (estimates.has(key)) return estimates.get(key);
   const flight = createFlight(program.levels, quality, { plan: 'explorer', assembly: assemblySpecs(program) });
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);
@@ -53,7 +53,7 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
   let slotId = 'engine', candidateId = null, shelfSlot = null;
   $('assembly-slots').innerHTML = PART_SLOTS.map(slot => `<button class="assembly-slot slot-${slot.id}" data-build-slot="${slot.id}" aria-pressed="false"><span>${slot.name}</span><strong></strong></button>`).join('');
   function render() {
-    const program = getProgram(), parts = fittedParts(program);
+    const program = getProgram(), parts = fittedParts(program),conditions=flightConditions(program.launchWorld,program.conditionsVersion??1);
     if (partById(candidateId)?.slot !== slotId) candidateId = program.parts.equipped[slotId];
     const candidate = partForProgram(program, candidateId), preview = previewPart(program, candidateId);
     const equipped = program.parts.equipped[slotId] === candidateId;
@@ -73,14 +73,14 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
       button.disabled = !canEdit();
     }
     $('assembly-art').innerHTML = rocketArt(parts, slotId, false);
-    $('assembly-hint').textContent = flightConditions(program.launchWorld).label || 'EQUIPPED · tap a section to choose parts';
+    $('assembly-hint').textContent = flightConditions(program.launchWorld,program.conditionsVersion??1).label || 'EQUIPPED · tap a section to choose parts';
     for (const button of document.querySelectorAll('button[data-build-slot]')) {
       button.setAttribute('aria-pressed', button.dataset.buildSlot === slotId);
       button.querySelector('strong').textContent = parts[button.dataset.buildSlot].name;
       button.setAttribute('aria-label', `${button.querySelector('span').textContent}: ${parts[button.dataset.buildSlot].name}, equipped`);
       button.disabled = !canEdit();
     }
-    $('category-label').textContent = `${PART_SLOTS.find(slot => slot.id === slotId).name} · browse parts`;
+    $('category-label').textContent = `${PART_SLOTS.find(slot => slot.id === slotId).name} · ${slotId==='aero'&&program.launchWorld!==undefined?(conditions.drag===0?'weight matters':conditions.drag>1?'strong air drag':'air drag'):'browse parts'}`;
     $('candidate-position').textContent = `${options.findIndex(part => part.id === candidateId)+1} / ${options.length}`;
     $('candidate-state').textContent = equipped ? 'ON YOUR ROCKET' : owned ? 'OWNED · FREE TO FIT' : 'NEW PART';
     $('candidate-name').textContent = candidate.name;
@@ -92,22 +92,23 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('comparison-label').textContent = equipped ? 'Equipped estimate' : target ? (preview.height>=target ? `After fitting: clears ${Number((target/1000).toFixed(1))} km` : `After fitting: ${((target-preview.height)/1000).toFixed(1)} km short`) : 'With this part';
     $('fitted-height').textContent = `~${(preview.previousHeight/1000).toFixed(1)} km`;
     const margin = target ? (preview.previousHeight-target)/1000 : null;
-    $('fitted-readiness').textContent = target ? (margin >= 0 ? 'Within reach' : estimateHeight(program,1.2) >= target ? 'Aim for gold' : `${Math.abs(margin).toFixed(1)} km short`) : 'Estimated at 110% launch power';
-    $('fitted-readiness').dataset.ready = margin === null || margin >= 0;
+    $('fitted-readiness').textContent = target ? (margin >= 0 ? 'Within reach' : estimateHeight(program,1.2) >= target ? 'Gold can reach it' : `${Math.abs(margin).toFixed(1)} km short`) : 'Estimated at 110% launch power';
+    $('fitted-readiness').dataset.ready = margin === null || margin >= 0 ? 'true' : estimateHeight(program,1.2)>=target?'timing':'false';
+    $('fitted-readiness').title = 'Estimates use 110% power. Gold timing can give up to 120%.';
     document.querySelector('.part-comparison').hidden = equipped;
     const difference = (preview.height-preview.previousHeight)/1000;
     $('candidate-difference').textContent = equipped ? 'Current rocket' : `${difference >= 0 ? '+' : ''}${difference.toFixed(1)} km`;
     $('candidate-difference').title = 'Change compared with your equipped rocket';
     $('candidate-difference').dataset.change = equipped ? 'same' : difference >= 0 ? 'better' : 'worse';
     const burn = preview.stats.burn, weight = preview.stats.mass;
-    $('candidate-tradeoff').textContent = preview.stats.thrust/(preview.stats.gravity??.5) < 1 ? 'Too heavy for this engine. Try a lighter tank.' : equipped ? `${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total` : `${preview.previousStats.burn.toFixed(1)} → ${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total`;
+    $('candidate-tradeoff').textContent = preview.stats.thrust/(preview.stats.gravity??.5) < 1 ? 'Too heavy for this engine. Try a lighter tank.' : slotId==='aero'&&conditions.drag===0?`No air drag here · ${weight.toFixed(2)}t total`:equipped ? `${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total` : `${preview.previousStats.burn.toFixed(1)} → ${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total`;
     const stocked = !Array.isArray(program.stock)||program.stock.includes(candidateId)||owned;
     $('part-fit').textContent = !stocked ? 'Not stocked here' : equipped ? 'Fitted ✓' : owned ? 'Fit part · free' : program.credits >= candidate.price ? `Buy & fit · ✦ ${candidate.price}` : `Need ✦ ${candidate.price-program.credits} more`;
     $('shop-launch').firstChild.textContent = 'Launch rocket ';
     $('shop-launch').title = 'Launch the equipped rocket shown above';
     $('part-info-title').textContent = candidate.name;
     $('part-info-description').textContent = candidate.detail + (candidate.trait ? ` This run: ${candidate.trait.name.toLowerCase()} — ${candidate.trait.detail}.` : '');
-    $('part-info-stats').textContent = `${$('candidate-state').textContent}. With this part: ${burn.toFixed(1)}s fuel, ${weight.toFixed(2)} tonnes. Height estimates use 110% launch power; actual timing affects the result. ${flightConditions(program.launchWorld).tip}`;
+    $('part-info-stats').textContent = `${$('candidate-state').textContent}. With this part: ${burn.toFixed(1)}s fuel, ${weight.toFixed(2)} tonnes. Height estimates use 110% launch power; actual timing affects the result. ${flightConditions(program.launchWorld,program.conditionsVersion??1).tip}`;
     $('part-fit').disabled = !canEdit() || !stocked || equipped || (!owned && program.credits < candidate.price);
   }
   function selectSlot(id) {

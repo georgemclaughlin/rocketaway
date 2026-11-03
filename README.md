@@ -24,9 +24,9 @@ The game fits the viewport and shows one phase at a time on phones and desktop. 
 
 Fresh games open on **Earth**, the first world on the **Road to Tau Ceti**. Choose a starting rocket, then follow **hangar → launch → results → the same hangar**. There are no module drafts or route selections between flights. Existing saves resume their chosen mode; **☰ → Road to Tau Ceti** returns from Free Flight. Each mode keeps its own rocket and credits.
 
-- **An altitude ladder, not six separate missions.** Standard milestones are 2.5, 10, 25, 55, 100, and 160 km. Every milestone passed in a flight counts and pays once. For example, reaching 13 km clears the first two and makes 25 km the next goal.
+- **An altitude ladder, not six separate missions.** Earth’s milestones are 2.5, 10, 25, 55, 100, and 160 km; other worlds have their own ladders. Every milestone passed in a flight counts and pays once. For example, reaching 13 km clears the first two and makes 25 km the next goal.
 - **Three misses end the run.** A flight below the next goal uses one miss but still earns credits. Both success and failure return directly to your rocket. Its parts stay fitted, earnings are ready to spend, and the next goal stays visible.
-- **Variation lives in the parts.** Each paid part gets a fixed bonus for that run: lighter construction, extra thrust, longer burn, lower drag, more research pay, or stronger boosters. The selector shows the bonus; it affects physics only while that part is fitted. Bonuses never reroll or change on an owned part.
+- **Variation lives in the parts.** Each paid part gets a fixed bonus for that run: lighter construction, extra thrust, longer burn, lower drag, more altitude credits, or stronger boosters. The selector shows the bonus; it affects physics only while that part is fitted. Bonuses never reroll or change on an owned part.
 - **Useful shop offers.** Stock refreshes after each flight and higher tiers open as you clear milestones. Each category keeps its cheapest available unowned upgrade in stock, plus a varying second offer. Owned parts always refit for free. Previewing a part leaves the equipped rocket and its main estimate unchanged.
 - **Travel through real worlds.** The route is **Earth → Moon → Mars → Ceres → Europa → Titan → Triton → Pluto → Eris → Tau Ceti**. Clear all six milestones on a world to unlock the next launchpad. Each world has its own sky, terrain palette, and departure target; airless worlds have dark skies without cloud banks. The world strip shows names, cleared stops, and the current selection. Unlocked worlds can be replayed.
 - **A departure worth celebrating.** A winning report offers **Travel to [destination]**. Your assembled rocket flies between the two worlds in a short starfield animation, then opens the next world's build screen. Travel can be skipped or dismissed with Escape; reduced-motion mode uses a brief static arrival. Results and unlocks are saved before travel, so refreshing cannot lose progress or award it twice.
@@ -71,7 +71,7 @@ Existing saves receive a one-time research balance of 2 research points per reco
 6. Collect the flight grant, altitude credits, milestone rewards, and any completed contract. **Improve rocket** returns to the hangar.
 The first mission is **100 km**, the edge of space. Reaching it unlocks a **200 km** mission without resetting your rocket or inventory. Contracts reward precise launches, altitude, coasting, a science capsule, and side boosters. The rocket visibly reflects its parts; empty booster stages detach during flight. Altitude zones, a previous-best marker, and record celebrations mark your progress.
 
-**Speed ×1 / ×3** fast-forwards flights. **P / Escape** pauses or resumes. Switching away pauses active flights. Sound is optional and starts muted. Motion effects respect reduced-motion preferences.
+**Speed ×1 / ×3 / ×8** fast-forwards flights and keeps your choice between launches during the visit. In expeditions, **See result** becomes available after the engines finish, or earlier when you pass the next milestone. It simulates the remaining flight and awards the actual outcome; a missed goal still counts as a miss. **P / Escape** pauses or resumes. Switching away pauses active flights. Sound is optional and starts muted. Motion effects respect reduced-motion preferences.
 
 The destinations are real, but the launch bases, route, altitude targets, and compressed interstellar travel are arcade fiction. These are arcade physics, not an orbital simulation. Component masses, fuel consumption, engine efficiency, drag, and staging affect the flight, but there is no manual steering or orbital maneuvering.
 
@@ -138,8 +138,27 @@ Tap the atmospheric readout during flight, the conditions beneath the starting-b
 
 The guide links NASA sources for all nine launch worlds and Tau Ceti, including Titan’s methane rain, Europa’s sparse oxygen atmosphere and Tau Ceti’s distance of 11.9 light-years. Earth and Moon surface-gravity values come from [NASA’s Moon/Earth comparison](https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html). Source URLs and educational data are in `science-data.js`; `science-ui.js` renders the optional guide. No external requests are made unless a player opens a source link.
 
-New Moon expeditions have no air drag and reduced, arcade-scaled gravity. Light builds and fuel capacity are useful; a heavier low-drag fairing can reduce height. Moon milestones are 6, 20, 60, 150, 300 and 600 km. Existing Moon runs retain their original model and goals, including saved flights. Other worlds currently retain the standard game model. Real facts are explicitly separated from simplified flight forces, goals and travel times.
+New expeditions use distinct world conditions. Mars has weak air resistance, making fuel and staged boosts useful; Titan has strong air resistance, making streamlining valuable. NASA describes [Mars’s thin atmosphere and surface gravity](https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html) and [Titan’s thick atmosphere](https://science.nasa.gov/saturn/moons/titan/facts/). The Moon and outer worlds use negligible drag, with different low-gravity tuning and departure targets. These game forces are deliberately compressed and simplified, not literal scientific ratios. Educational facts and real units in the guide remain separate from the game model.
+
+| World | Departure target | Extra starting credits | Build challenge |
+| --- | ---: | ---: | --- |
+| Earth | 160 km | 0 | Balance lift, fuel and streamlining |
+| Moon | 600 km | 100 | Use fuel and low weight in vacuum |
+| Mars | 500 km | 220 | Extend coasts with fuel or staging |
+| Ceres | 900 km | 320 | A shorter stop in very weak gravity |
+| Europa | 2,000 km | 420 | Develop a longer-range vacuum build |
+| Titan | 150 km | 520 | Streamline against thick air |
+| Triton | 2,300 km | 620 | Reconsider heavy aerodynamic parts |
+| Pluto | 2,600 km | 720 | Balance large tanks and engine power |
+| Eris | 2,800 km | 820 | Combine fuel, power and staging |
+
+The setup gives a practical sentence of advice before choosing a build. Starting-credit totals include world funding; later worlds offer advanced stock before the first launch. Funding is awarded once per new expedition, never on reload. Altitude-credit earnings scale with progress toward that world’s departure target, keeping vacuum flights from producing disproportionate rewards. New expeditions use stronger booster stages so Stagehand’s extra stage power can justify carrying them. These changes introduce neither another currency nor another required screen.
+
+Existing expeditions retain their previous physics, staging, goals, stock and earnings until the run ends. This includes both pre-science saves and the first Moon-specific model. The guide explains when a saved expedition is using earlier conditions. New runs use the current model; Free Flight physics stay unchanged.
 
 **☰ → Journey records** remains available during optional replay. Part previews compare estimated height with the current goal, and flight reports announce newly stocked parts and starting-build unlocks. Altitude-credit bonuses are named separately from permanent research points.
 
 Run `checks/science.playwright.js` in an isolated Playwright session for guide navigation, pause/resume, layer readouts, new Moon setup, preview/result clarity and records across six viewport sizes. `tests/science.test.js` covers layer boundaries, contrasting Earth/Moon part choices, save compatibility, unlock notices and Moon progression.
+
+
+`tests/world-progression.test.js` checks meaningful Mars/Titan part choices, funding integrity, both legacy models, normalized flight earnings, and full earned nine-world campaigns with each kit. `checks/world-challenges.playwright.js` checks all world briefings, funded budgets, old-save guides, fast flight controls and accurate coast skipping at six viewport sizes.

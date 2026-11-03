@@ -1,4 +1,4 @@
-import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=space-guide';
+import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=world-challenges';
 
 export function researchButtonState(profile,selectedKit='scrapper') {
  const data=profile.research.data;
@@ -27,7 +27,7 @@ export function createResearchUI({getSession,getSelectedKit,onPurchase,canOpen})
   $('research-rank').textContent=`${rank} / 5 owned`;
   $('research-benefit').textContent=locked?`Clear ${track.unlock-profile.totalGates} more milestones to unlock ${track.name}.`:complete?`All bonuses stay with your ${track.name} rockets.`:`For ${track.name} rockets only. ${matches?'Stat bonuses apply now.':'Bonuses apply when you choose this build.'}`;
   const metrics=selected==='scrapper'
-    ? [{label:'Body weight',before:`${100-rank*3}%`,after:`${100-next*3}%`},{label:'Starting credits',before:160+rank*10,after:160+next*10}]
+    ? [{label:'Body weight',before:`${100-rank*3}%`,after:`${100-next*3}%`},{label:'Base starting credits',before:160+rank*10,after:160+next*10}]
     : selected==='stager'
       ? [{label:'Booster power',before:`${100+rank*6}%`,after:`${100+next*6}%`}]
       : [{label:'Burn time bonus',before:`+${rank*3}%`,after:`+${next*3}%`},{label:'Altitude credits bonus',before:`+${rank*5}%`,after:`+${next*5}%`}];

@@ -88,10 +88,10 @@ test('Free Flight is untouched and chosen mode survives an empty or active hub r
  s.mode='classic';assert.deepEqual(restoreExpeditions(copy(s)),s);
 });
 
-test('the highest Ascent remains reachable without legacy modules, including weaker part rolls',()=>{
+test('legacy highest Ascent remains reachable without legacy modules, including weaker part rolls',()=>{
  for(const seed of [8,20,48]){
   const s=newExpeditions();s.profile.maxDifficulty=8;startExpedition(s,{seed:seed*1640531527,difficulty:8});
-  const p=s.active.program;p.credits=10000;p.stock=['ceramic','jumbo','mammoth'];
+  s.active.conditionsVersion=1;const p=s.active.program;p.conditionsVersion=1;p.credits=10000;p.stock=['ceramic','jumbo','mammoth'];
   for(const id of p.stock)assert.equal(fitPart(p,id),true);
   const f=createFlight(p.levels,1.18,{plan:'explorer',assembly:assemblySpecs(p)});while(!f.done)stepFlight(f,.05);
   assert.ok(f.peak>=milestoneHeight(s.active,5),`seed ${seed}: ${f.peak}`);

@@ -35,7 +35,7 @@ async page=>{
  assert((await page.locator('#result-unlocks').innerText()).includes('New stock'),'midflight stock notice');
  await fits('#result,#return,#result-unlocks','ongoing expedition report');
  // Completed journey records remain accessible after choosing replay, without changing progress.
- await page.evaluate(async()=>{const e=await import('./expeditions.js'),s=e.newExpeditions();s.profile.maxDifficulty=8;e.startExpedition(s,{seed:1,difficulty:8});e.beginExpeditionFlight(s,1.2);e.settleExpedition(s,{done:true,peak:250000,payMultiplier:1});localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();await page.locator('#ending-explore').click();
+ await page.evaluate(async()=>{const e=await import('./expeditions.js'),s=e.newExpeditions();s.profile.maxDifficulty=8;e.startExpedition(s,{seed:1,difficulty:8});e.beginExpeditionFlight(s,1.2);e.settleExpedition(s,{done:true,peak:e.milestoneHeight(s.active,5)+1000,payMultiplier:1});localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();await page.locator('#ending-explore').click();
  await page.locator('#game-menu').click();await page.locator('#records-menu').click();assert((await page.locator('#records-summary').innerText()).includes('Tau Ceti reached'),'completion can be revisited');
  assert(await page.locator('#records-content [data-record="launches"] b').innerText()==='1','record values');await fits('#records-dialog,#records-close,#records-content','records');await page.locator('#records-close').click();
  await page.reload();assert(await page.locator('#run-start').isVisible(),'reference keeps replay selection');
