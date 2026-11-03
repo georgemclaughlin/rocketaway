@@ -31,3 +31,13 @@ test('fast playback stops for encounters and leaves completed flights untouched'
  const finished=moonFlight();while(!finished.done)advanceFlight(finished,5);
  const saved=structuredClone(finished);advanceFlight(finished,5);assert.deepEqual(finished,saved);
 });
+
+test('irregular phone frames preserve flight outcome when changing speed',()=>{
+ const baseline=moonFlight();while(!baseline.done)stepFlight(baseline,.05);
+ const flight=moonFlight(),frames=[.013,.021,.008,.05,.017,.033];let i=0;
+ while(!flight.done&&i<200000){
+  advanceFlight(flight,frames[i%frames.length]*FLIGHT_SPEEDS[Math.floor(i/17)%FLIGHT_SPEEDS.length]);i++;
+ }
+ assert.ok(flight.done);
+ assert.ok(Math.abs(flight.peak-baseline.peak)<baseline.peak*.003,'frame boundary variation stays below 0.3%');
+});
