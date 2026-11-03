@@ -18,7 +18,7 @@ python3 -m http.server 4173 --bind 0.0.0.0
 
 Open **http://127.0.0.1:4173** on this computer. A phone on the same Wi-Fi can use `http://<your-computer-LAN-IP>:4173`. An HTTP server is needed for JavaScript modules.
 
-The game fits the viewport and shows one phase at a time on phones and desktop. The hangar is home between launches; launch timing and flight take over the screen. The **☰ menu** holds mode switching, sound, ending a run, and resetting the game.
+The game fits the viewport and shows one phase at a time on phones and desktop. The hangar is home between launches; launch timing and flight take over the screen. Speed and Pause sit in the bottom control bar, clear of the rocket and planets. The **☰ menu** holds mode switching, sound, ending a run, and resetting the game.
 
 ## Road to Tau Ceti
 

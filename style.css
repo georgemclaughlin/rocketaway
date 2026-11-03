@@ -60,7 +60,8 @@ canvas { display: block; width: 100%; height: 100%; }
 .launch-rating[data-rating="great"] { color: #c2f0d0; }
 .launch-rating[data-rating="off"] { color: #ffd1bd; }
 .scene-tag { position: absolute; bottom: 19px; left: 24px; color: #f2ebd6bf; font: 8px monospace; letter-spacing: 1.4px; }
-.flight-tools { position: absolute; top: 80px; right: 20px; display: flex; gap: 8px; }
+.flight-tools { display: flex; flex: 1; gap: 8px; min-width: 0; }
+.flight-tools .small-button { flex: 1; min-width: 0; padding-inline: 6px; white-space: nowrap; }
 .small-button { min-height: 40px; padding: 9px 11px; border: 1px solid #d4e4f43d; border-radius: 6px; background: #131d34c9; color: white; font-size: 11px; }
 .small-button:hover { background: #34415b; }
 .flight-telemetry { position: absolute; bottom: 23px; left: 24px; right: 24px; display: flex; align-items: center; justify-content: space-between; }
@@ -69,6 +70,9 @@ canvas { display: block; width: 100%; height: 100%; }
 .fuel-track { width: 120px; height: 5px; margin-top: 10px; overflow: hidden; border-radius: 4px; background: #e5e5e533; }
 #fuel { width: 100%; height: 100%; background: var(--gold); }
 .launch-console { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 18px 22px; min-width: 0; }
+.launch-actions { display: flex; align-items: stretch; gap: 8px; min-width: 0; }
+.launch-actions:has(.flight-tools:not([hidden])) #launch:disabled { display: none; }
+.launch-actions:has(.flight-tools:not([hidden])) #launch { width: auto; min-width: 0; padding: 10px 8px; gap: 6px; font-size: 11px; }
 .eyebrow { color: var(--gold); font: 8px monospace; letter-spacing: 1.1px; }
 .launch-copy { min-width: 0; }
 .launch-copy h2 { margin: 8px 0 5px; font-size: 18px; letter-spacing: -.5px; }
@@ -297,12 +301,7 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
   .icon-button { width: 44px; }
   .flight-top { top: 16px; left: 16px; right: 16px; }
   .flight-top strong { font-size: 26px; }
-  .flight-tools { right: 16px; }
   .flight-telemetry { left: 16px; right: 16px; }
-}
-@media (max-width: 600px) {
-  .flight-tools { flex-direction: column; width: 80px; right: 12px; gap: 6px; }
-  .flight-tools .small-button { min-width: 0; padding-inline: 6px; }
 }
 @media (max-height: 700px) and (min-height: 521px) {
   .app { grid-template-rows: 44px 48px minmax(0,1fr); gap: 6px; padding-top: max(4px,env(safe-area-inset-top)); padding-bottom: max(6px,env(safe-area-inset-bottom)); }
@@ -409,7 +408,6 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
   .launch-copy h2 { font-size: 17px; margin: 0; }
   .flight-top { top: 10px; left: 16px; right: 16px; }
   .flight-top strong { font-size: 22px; }
-  .flight-tools { top: 50px; right: 16px; }
   .flight-telemetry { bottom: 12px; left: 16px; right: 16px; }
   .flight-telemetry strong { margin-top: 4px; }
   .result { max-width: 650px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px 22px; padding: 18px; text-align: left; }

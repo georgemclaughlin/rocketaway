@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=tau-ending">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=flight-bar">
   <script type="module" src="./game.js?v=tau-ending"></script>
 </head>
 <body>
@@ -32,13 +32,12 @@
         <canvas id="game" aria-label="Your assembled rocket. Tap its nose, tank, engine, or side boosters to choose parts. Flights are automatic."></canvas>
         <div class="flight-top"><div><span class="label">ALTITUDE</span><strong><span id="altitude">0.00</span><small> km</small></strong><span id="launch-rating" class="launch-rating" hidden></span></div><div class="flight-number"><span class="label" id="flight-number">FLIGHT 01</span><span id="flight-status">ON THE PAD</span></div></div>
         <div class="scene-tag" id="scene-tag">TAP ROCKET PARTS TO BUILD</div>
-        <div class="flight-tools" id="flight-tools" hidden><button id="speed" class="small-button" aria-label="Change flight speed">Speed ×1</button><button id="pause" class="small-button" aria-label="Pause flight">Ⅱ Pause</button></div>
         <div class="flight-telemetry" id="telemetry" hidden><div><span class="label">FUEL</span><div class="fuel-track"><div id="fuel"></div></div></div><div><span class="label">VERTICAL SPEED</span><strong id="velocity">0 m/s</strong></div></div>
       </div>
       <div class="launch-console">
         <div class="launch-copy"><div class="eyebrow" id="launch-eyebrow">READY WHEN YOU ARE</div><h2 id="launch-title">Great things start small.</h2><p id="launch-description">A little rocket with a very big ambition.</p></div>
         <div id="timing" class="timing" hidden><div class="timing-label"><button id="cancel-launch" type="button" aria-label="Cancel launch and return to build">‹ Back</button><span>LAUNCH TIMING</span><b id="timing-quality">100%</b></div><div class="timing-track"><div class="sweet-spot"></div><div id="needle"></div></div><span class="timing-help">Aim for the center · 120% maximum power.</span></div>
-        <button class="primary" id="launch">Prepare launch <span aria-hidden="true">↗</span></button>
+        <div class="launch-actions"><div class="flight-tools" id="flight-tools" hidden><button id="speed" class="small-button" aria-label="Change flight speed">Speed ×1</button><button id="pause" class="small-button" aria-label="Pause flight">Ⅱ Pause</button></div><button class="primary" id="launch">Prepare launch <span aria-hidden="true">↗</span></button></div>
       </div>
     </section>
     <aside class="workshop" id="workshop" aria-labelledby="workshop-title">
