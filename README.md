@@ -18,7 +18,7 @@ python3 -m http.server 4173 --bind 0.0.0.0
 
 Open **http://127.0.0.1:4173** on this computer. A phone on the same Wi-Fi can use `http://<your-computer-LAN-IP>:4173`. An HTTP server is needed for JavaScript modules.
 
-The game fits the viewport and shows one phase at a time on phones and desktop. The hangar is home between launches; launch timing and flight take over the screen. Speed and Pause sit in the bottom control bar, clear of the rocket and planets. The **☰ menu** holds mode switching, sound, ending a run, and resetting the game.
+The game fits the viewport and shows one phase at a time on phones and desktop. The hangar is home between launches; launch timing and flight take over the screen. Fast Forward and Pause sit in the bottom control bar, clear of the rocket and planets. The **☰ menu** holds mode switching, sound, ending a run, and resetting the game.
 
 ## Road to Tau Ceti
 
@@ -71,7 +71,7 @@ Existing saves receive a one-time research balance of 2 research points per reco
 6. Collect the flight grant, altitude credits, milestone rewards, and any completed contract. **Improve rocket** returns to the hangar.
 The first mission is **100 km**, the edge of space. Reaching it unlocks a **200 km** mission without resetting your rocket or inventory. Contracts reward precise launches, altitude, coasting, a science capsule, and side boosters. The rocket visibly reflects its parts; empty booster stages detach during flight. Altitude zones, a previous-best marker, and record celebrations mark your progress.
 
-**Speed ×1 / ×3 / ×8 / ×25 / ×100** cycles through flight speeds when tapped. The faster settings shorten long low-gravity coasts. It fast-forwards flights and keeps your choice between launches during the visit. In expeditions, **See result** becomes available after the engines finish, or earlier when you pass the next milestone. It simulates the remaining flight and awards the actual outcome; a missed goal still counts as a miss. **P / Escape** pauses or resumes. Switching away pauses active flights. Sound is optional and starts muted. Motion effects respect reduced-motion preferences.
+**▶▶ Fast** toggles fast forward on or off. It adapts to the remaining flight so the result arrives in about six seconds, including on low-gravity worlds. Shorter flights are never slowed down. Tap again for normal speed; the choice stays on between launches during the visit. Pausing also pauses fast forward. In expeditions, **See result** becomes available after the engines finish, or earlier when you pass the next milestone. It simulates the remaining flight and awards the actual outcome; a missed goal still counts as a miss. **P / Escape** pauses or resumes. Switching away pauses active flights. Sound is optional and starts muted. Motion effects respect reduced-motion preferences.
 
 The destinations are real, but the launch bases, route, altitude targets, and compressed interstellar travel are arcade fiction. These are arcade physics, not an orbital simulation. Component masses, fuel consumption, engine efficiency, drag, and staging affect the flight, but there is no manual steering or orbital maneuvering.
 

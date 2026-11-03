@@ -24,12 +24,12 @@ async page=>{
  }
  // A flight that cannot reach the next milestone can finish its coast without waiting.
  const expected=await page.evaluate(async()=>{const e=await import('./expeditions.js'),b=await import('./builder.js'),s=e.newExpeditions();s.profile.maxDifficulty=8;e.startExpedition(s,{seed:1,difficulty:8});s.active.stage=5;const peak=b.estimateHeight(s.active.program,1.1);e.beginExpeditionFlight(s,1.1);localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));return peak;});await page.reload();await page.locator('#run-resume').click();
- await page.locator('#speed').click();await page.locator('#speed').click();assert((await page.locator('#speed').innerText()).includes('8'),'third speed is 8x');
+ await page.locator('#speed').click();assert(await page.locator('#speed').getAttribute('aria-pressed')==='true','fast forward enabled');
  await page.waitForFunction(()=>!document.querySelector('#launch').disabled,null,{timeout:10000});
  await page.locator('#pause').click();await check('#launch,#speed,#pause,.launch-actions','coasting controls');await page.locator('#return').click();await page.locator('#launch').click();
  const settled=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
  assert(Math.abs(settled.active.lastResult.altitude-expected)<=Math.max(10,expected*.001),'skip matches the flight estimate within frame integration tolerance');assert(settled.active.strikes===1,'skip records the miss honestly');assert(settled.active.program.flights===1,'settles once');
  await check('#result,#result-description,#return','large target miss');
- await page.locator('#return').click();await page.locator('#shop-launch').click();await page.locator('#launch').click();assert((await page.locator('#speed').innerText()).includes('8'),'speed kept for next flight');
- assert(!errors.length,JSON.stringify(errors));return {passed:'Nine world briefings, funded budgets, Titan parts, old saves, ×8 speed, accurate coast skip before a missed target, six layouts',errors};
+ await page.locator('#return').click();await page.locator('#shop-launch').click();await page.locator('#launch').click();assert(await page.locator('#speed').getAttribute('aria-pressed')==='true','fast forward kept for next flight');
+ assert(!errors.length,JSON.stringify(errors));return {passed:'Nine world briefings, funded budgets, Titan parts, old saves, adaptive fast forward, accurate coast skip before a missed target, six layouts',errors};
 }

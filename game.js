@@ -12,7 +12,7 @@ import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.j
 import { createTravel } from './travel.js?v=balanced-journeys';
 import { createResearchUI, researchButtonState } from './research-ui.js?v=balanced-journeys';
 import { launchRating } from './launch-feedback.js?v=balanced-journeys';
-import { FLIGHT_SPEEDS, advanceFlight } from './flight-playback.js?v=flight-speeds';
+import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=constant-fast-forward';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -20,7 +20,7 @@ astronautArt.src = new URL('./assets/astronaut-cartoon.png?v=2', import.meta.url
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let currentScreen = 'workshop';
 let program = newProgram(), mode = 'workshop', flight = null, width = 0, height = 0;
-let ambientTime = 0, lastTime = 0, armTime = 0, timingPosition = .5, speed = 1, stars = [], soundEnabled = false, audio, storageAvailable = true;
+let ambientTime = 0, lastTime = 0, armTime = 0, timingPosition = .5, fastForward = false, playbackRate = 1, stars = [], soundEnabled = false, audio, storageAvailable = true;
 let flightMilestonesShown = 0, lastJourneyKey = '';
 let particles = [], recordBefore = 0, recordShown = false, zoneSeen = 0;
 try { program = restoreProgram(JSON.parse(localStorage.getItem(SAVE_KEY))); } catch { storageAvailable = false; }
@@ -290,6 +290,7 @@ function launch(resumeQuality) {
   showScreen('launchpad');
   persist();
   flight = createFlight(program.levels, quality, { plan: program.plan, contractIndex: program.contracts, assembly: assemblySpecs(program) }); mode = 'flying';
+  playbackRate = fastForward ? fastForwardRate(flight) : 1;
   recordBefore = program.best; flightMilestonesShown = inExpedition() ? expeditionSession.active.stage : 0; recordShown = false; zoneSeen = 0; particles = [];
   $('timing').hidden = true; document.querySelector('.launch-console').classList.remove('arming');
   $('launch').disabled = true; $('launch').textContent = 'Flight in progress';
@@ -311,14 +312,15 @@ function launch(resumeQuality) {
 $('launch').addEventListener('click', () => mode === 'workshop' ? prepare() : mode === 'flying' ? finishEarly() : launch());
 $('shop-launch').addEventListener('click', prepare);
 function renderSpeed() {
-  const next = FLIGHT_SPEEDS[(FLIGHT_SPEEDS.indexOf(speed) + 1) % FLIGHT_SPEEDS.length];
-  $('speed').textContent = `Speed ×${speed}`;
-  $('speed').setAttribute('aria-label', `Flight speed ${speed} times. Change to ${next} times.`);
-  $('speed').title = 'Tap to cycle: ×1 → ×3 → ×8 → ×25 → ×100';
+  $('speed').textContent = fastForward ? '▶▶ Fast ✓' : '▶▶ Fast';
+  $('speed').setAttribute('aria-pressed', String(fastForward));
+  $('speed').setAttribute('aria-label', fastForward ? 'Fast forward on. Return to normal speed.' : `Fast forward. Finish the remaining flight in about ${FAST_FORWARD_SECONDS} seconds.`);
+  $('speed').title = fastForward ? 'Fast forward on · tap for normal speed' : `Fast forward · about ${FAST_FORWARD_SECONDS} seconds to the result`;
 }
 $('speed').addEventListener('click', () => {
-  speed = FLIGHT_SPEEDS[(FLIGHT_SPEEDS.indexOf(speed) + 1) % FLIGHT_SPEEDS.length];
-  renderSpeed(); announce(`Flight speed ${speed} times.`);
+  fastForward = !fastForward;
+  playbackRate = fastForward ? fastForwardRate(flight) : 1;
+  renderSpeed(); announce(fastForward ? `Fast forward. About ${FAST_FORWARD_SECONDS} seconds to the result.` : 'Normal flight speed.');
 });
 function showFlightNotice(title, detail) {
   $('launch-title').textContent = title; $('launch-description').textContent = detail;
@@ -405,7 +407,7 @@ $('reset-confirm').addEventListener('click', () => {
   expeditionUI.reset();
   program = newProgram(); freeProgram = program;
   builder.selectSlot('engine');
-  speed = 1;
+  fastForward = false; playbackRate = 1;
   persist();
   workshop(); showScreen('expedition'); $('run-start').focus({ preventScroll: true });
   announce('Entire game reset. Free Flight and expeditions are ready for a fresh start.');
@@ -669,7 +671,7 @@ function frame(now) {
   }
   if (mode === 'flying') {
     const wasBoosted = flight.boosted;
-    advanceFlight(flight, dt * speed);
+    advanceFlight(flight, dt * playbackRate);
     if (flight.boosted && !wasBoosted && flight.kick > 0) { tone(280, .25, 'triangle'); $('launch-eyebrow').textContent = 'STAGE SEPARATION'; showFlightNotice('Stage separation!', 'Boosters fired. Empty pods away.'); burst(width * .56, height * .55, '#b7cbd5', 18); }
     updateFlightHud();
     checkFlightMoments();
