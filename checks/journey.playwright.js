@@ -44,7 +44,7 @@ const checkFlights = async page => {
   await page.locator('#return').click();
   assert(await page.locator('#travel-dialog').isVisible(),'travel opens');
   assert((await page.locator('#travel-title').innerText()).includes(difficulty===0?'Moon':'Tau Ceti'),'correct destination');
-  
+
   if(method==='skip')await page.locator('#travel-skip').click();
   await page.locator('#run-start').waitFor({state:'visible',timeout:6000});
   const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
