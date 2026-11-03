@@ -6,12 +6,12 @@
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=research-clarity">
-  <script type="module" src="./game.js?v=research-clarity"></script>
+  <script type="module" src="./game.js?v=pilot-cartoon-2"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
   <header class="header">
-    <a class="wordmark" href="./" aria-label="Rocket Away home"><span class="pilot-portrait" aria-hidden="true"><img src="./assets/astronaut-cartoon.png" alt="" width="1024" height="1536"></span>rocket<span>away</span><sup>✦</sup></a>
+    <a class="wordmark" href="./" aria-label="Rocket Away home"><span class="pilot-portrait" aria-hidden="true"><img src="./assets/astronaut-cartoon.png?v=2" alt="" width="1024" height="1536"></span>rocket<span>away</span><sup>✦</sup></a>
     <div class="wallet" aria-label="Rocket credits"><span>CREDITS</span><strong><i>✦</i> <span id="credits">0</span></strong></div>
     <button id="game-menu" class="icon-button" aria-label="Open game menu" aria-haspopup="dialog">☰</button>
   </header>
@@ -112,7 +112,7 @@
   <dialog id="travel-dialog" aria-labelledby="travel-title" aria-describedby="travel-caption">
     <div class="eyebrow">ROAD TO TAU CETI</div><h2 id="travel-title"></h2>
     <div id="travel-scene" aria-hidden="true"></div>
-    <div class="travel-crew"><img class="travel-astronaut" src="./assets/astronaut-cartoon.png" alt="A smiling cartoon astronaut waving" width="1024" height="1536"><p id="travel-caption"></p></div><button id="travel-skip" class="small-button">Skip travel →</button>
+    <div class="travel-crew"><img class="travel-astronaut" src="./assets/astronaut-cartoon.png?v=2" alt="A smiling cartoon astronaut waving" width="1024" height="1536"><p id="travel-caption"></p></div><button id="travel-skip" class="small-button">Skip travel →</button>
   </dialog>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
 </main>
