@@ -5,7 +5,7 @@ import { fittedParts, partById } from './parts.js';
 import { rocketArt } from './builder.js';
 import { worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js';
 import { researchLoadout } from './research.js';
-import { researchButtonState } from './research-ui.js?v=research-actions';
+import { researchButtonState } from './research-ui.js?v=research-clarity';
 
 const kitBenefits = {
   scrapper: 'Credits to customize.',

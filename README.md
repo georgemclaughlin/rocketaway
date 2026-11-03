@@ -43,11 +43,13 @@ In the menu, **End expedition** asks for confirmation. **Free Flight** lets you 
 
 ## Permanent research
 
-**Research** is a large button beside **Launch rocket** in the hangar and **Build rocket** on the world screen. It shows your data balance and an **Upgrade available** cue when you can afford a rank. Research is also available in the menu. It shows permanent **data**, separate from the **credits** spent on the current rocket. No research screen is forced between flights.
+**Research** is a large button beside **Launch rocket** in the hangar and **Build rocket** on the world screen. It shows your research point balance and an **Upgrade available** cue when you can afford an upgrade. Research is also available in the menu. **Research points** buy permanent upgrades; **credits** buy parts for the current rocket. No research screen is forced between flights.
 
-Each completed expedition flight earns 1 data, plus 2 per milestone cleared that flight and 4 for clearing a world for the first time. Even a miss earns data. Ending a run manually does not. Rewards are settled once and remain through losses, world changes, and browser reloads.
+Each completed expedition flight earns 1 research point, plus 2 per milestone cleared that flight and 4 for clearing a world for the first time. Even a miss earns a point. Ending a run manually does not. Rewards are settled once and remain through losses, world changes, and browser reloads.
 
-Each starting build has five permanent research ranks, costing 3, 5, 8, 12, and 18 data. Spend on one specialization or spread research across the builds you use. Stagehand and Scientist research opens with the corresponding starting build.
+The lab highlights your current rocket and shows one next upgrade at a time, with before-and-after stats, its price, and the points you will have left. Starter parts are labeled for future rockets.
+
+Each starting build has five permanent research ranks, costing 3, 5, 8, 12, and 18 research points. Spend on one specialization or spread research across the builds you use. Stagehand and Scientist research opens with the corresponding starting build.
 
 | Build | Bonus per rank | Better starting parts |
 | --- | --- | --- |
@@ -57,7 +59,7 @@ Each starting build has five permanent research ranks, costing 3, 5, 8, 12, and 
 
 Bonuses are additive across ranks and apply only when flying that build. A purchase updates the current matching rocket’s physics and estimates immediately. Starting credits and parts apply when the next rocket is created, so research never overwrites fitted parts mid-run. The starting-build illustrations and rank labels reflect those permanent unlocks. Higher-tier starting parts replace the earlier part in the same slot, while earlier unlocked parts remain owned for free refitting.
 
-Existing saves receive a one-time research balance of 2 data per recorded milestone plus 4 per recorded win. Reloading does not repeat this grant. **Reset entire game** also clears research; ending a single expedition keeps it. Free Flight keeps its existing progression and is unaffected.
+Existing saves receive a one-time research balance of 2 research points per recorded milestone plus 4 per recorded win. Reloading does not repeat this grant. **Reset entire game** also clears research; ending a single expedition keeps it. Free Flight keeps its existing progression and is unaffected.
 
 ## Free Flight: build and fly
 

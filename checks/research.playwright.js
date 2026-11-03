@@ -13,7 +13,11 @@ const checkLab = async page => {
    assert(!bad.length,JSON.stringify({width,height,kit,bad}));
   }
  }
- await page.setViewportSize({width:390,height:844});await page.locator('[data-research-tab="scrapper"]').click();await page.locator('#research-buy').click();await page.locator('#research-buy').click();
+ await page.setViewportSize({width:320,height:568});await page.locator('[data-research-tab="scrapper"]').click();
+ assert((await page.locator('#research-balance').innerText()).includes('60 research points'),'currency explained');
+ assert((await page.locator('#research-cost').innerText()).includes('have 57 left'),'balance after purchase preview');
+ await page.locator('#research-buy').click();await page.locator('#research-buy').click();
+ assert(await page.locator('#research-dialog').evaluate(e=>e.scrollHeight<=e.clientHeight+2),'next upgrade and purchase feedback fit smallest phone');
  assert((await page.locator('#research-balance').innerText()).includes('52'),'costs paid');
  await page.locator('#research-close').click();assert(await page.locator('#fitted-height').innerText()!==before,'estimate updates');
  let save=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));assert(save.active.program.parts.equipped.engine==='spark','no replacement of fitted parts');

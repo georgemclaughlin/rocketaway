@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=research-actions">
-  <script type="module" src="./game.js?v=research-actions"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=research-clarity">
+  <script type="module" src="./game.js?v=research-clarity"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -98,13 +98,15 @@
     <div class="reset-actions"><button id="reset-cancel" class="small-button" autofocus>Keep playing</button><button id="reset-confirm" class="primary">Reset entire game</button></div>
   </dialog>
   <dialog id="research-dialog" aria-labelledby="research-title">
-    <div class="research-header"><div><div class="eyebrow">KEPT BETWEEN WORLDS</div><h2 id="research-title">Research lab</h2></div><button id="research-close" class="small-button">Back</button></div>
-    <div class="research-wallet"><strong id="research-balance">0 data</strong><span>+1 per flight · +2 per milestone · +4 new world</span></div>
-    <div id="research-tabs" role="group" aria-label="Rocket build to research"></div>
-    <div class="research-track-heading"><h3 id="research-track-title"></h3><span id="research-rank"></span></div>
-    <p id="research-benefit"></p><ol id="research-steps"></ol>
-    <p id="research-timing"></p><p id="research-active"></p>
-    <div id="research-status" role="status" aria-live="polite"></div>
+    <div class="research-header"><div><div class="eyebrow">PERMANENT ROCKET UPGRADES</div><h2 id="research-title">Research lab</h2></div><button id="research-close" class="small-button">Back</button></div>
+    <div class="research-wallet"><strong id="research-balance">You have 0 research points</strong><span>Upgrades last across worlds and retries.</span></div>
+    <div class="research-selector"><span>Choose a rocket to improve</span><div id="research-tabs" role="group" aria-label="Rocket build to research"></div></div>
+    <section class="research-offer" aria-labelledby="research-track-title">
+      <div class="research-track-heading"><span id="research-offer-label">NEXT UPGRADE</span><span id="research-rank"></span></div>
+      <h3 id="research-track-title"></h3><p id="research-benefit"></p><ol id="research-steps"></ol><p id="research-timing"></p>
+    </section>
+    <p id="research-earning">Earn points: flight +1 · milestone +2 · new world +4</p>
+    <p id="research-cost"></p><div id="research-status" role="status" aria-live="polite"></div>
     <button id="research-buy" class="primary"></button>
   </dialog>
   <dialog id="travel-dialog" aria-labelledby="travel-title" aria-describedby="travel-caption">

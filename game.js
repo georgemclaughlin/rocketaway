@@ -2,12 +2,12 @@ import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, create
 import { fittedParts, assemblySpecs } from './parts.js';
 import { EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js';
 import { MODULES } from './modifiers.js';
-import { createExpeditionUI } from './expedition-ui.js?v=research-actions';
+import { createExpeditionUI } from './expedition-ui.js?v=research-clarity';
 import { createBuilder } from './builder.js';
 import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
 import { worldFor, destinationFor, WORLDS } from './worlds.js';
 import { createTravel } from './travel.js';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=research-actions';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=research-clarity';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -74,7 +74,7 @@ function syncScreens() {
   for(const id of ['research-open','research-hub','research-menu']){
     if(!$(id))continue;
     $(id).disabled=mode!=='workshop'||!expeditionMode||!!(run&&!['build','won','lost'].includes(run.status));
-    if(id==='research-menu')$(id).textContent=`Permanent research · ${data} data`;
+    if(id==='research-menu')$(id).textContent=`Permanent research · ${data} points`;
     else $(id).innerHTML=researchButton.label;
     if(id!=='research-menu')$(id).setAttribute('aria-label',researchButton.ariaLabel);
     $(id).classList.toggle('research-ready',researchButton.available);
@@ -187,7 +187,7 @@ function renderWorkshop() {
     $('contract-detail').textContent = reporting ? result.success ? `${result.cleared.length} milestone${result.cleared.length===1?'':'s'} cleared this flight` : 'Goal missed · rocket recovered' : `Best ${(program.best/1000).toFixed(1)} km · ${run.stage}/6 milestones`;
     $('contract-detail').title = 'Pass several milestones in one flight to clear them all.';
     $('contract-reward').textContent = `${3-run.strikes} misses left`;
-    if(result) $('hangar-status').textContent = `Last ${(result.altitude/1000).toFixed(1)} km${result.power ? ` · ${result.power}% power` : ''} · +${result.total} credits · +${result.data||0} data`;
+    if(result) $('hangar-status').textContent = `Last ${(result.altitude/1000).toFixed(1)} km${result.power ? ` · ${result.power}% power` : ''} · +${result.total} credits · +${result.data||0} research points`;
   }
   renderJourney();
   expeditionUI.render();
@@ -303,7 +303,7 @@ function finish() {
     $('result-eyebrow').textContent = run.status === 'won' ? 'ALL MILESTONES CLEARED' : run.status === 'lost' ? 'EXPEDITION ENDED' : result.success ? `${count} MILESTONE${count===1?'':'S'} CLEARED` : 'GOAL MISSED';
     $('result-title').textContent = run.status === 'won' ? `${worldFor(run).name}, cleared!` : run.status === 'lost' ? 'A new build awaits.' : result.success ? 'Higher than before.' : 'Refit. Try again.';
     $('result-description').textContent = run.status === 'won' ? `Departure target reached: ${altitudeLabel(journeyState(run).goal)}. ${destinationFor(run).star ? 'Your journey to Tau Ceti is complete!' : `Next launchpad: ${destinationFor(run).name}. A fresh rocket, one step closer to Tau Ceti.`}` : run.status === 'lost' ? 'Your unlocked worlds and starting rockets are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
-    $('bonus-note').textContent = `+${result.data} research data kept permanently · ${result.power}% launch power`;
+    $('bonus-note').textContent = `+${result.data} research points · spend in Research · ${result.power}% launch power`;
     $('return').textContent = run.status==='won' ? `Travel to ${destinationFor(run).name} ↗` : run.status==='lost' ? `Retry ${worldFor(run).name} ↗` : 'Back to rocket ↗';
   }
   syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete'; tone(result.firstWin ? 1040 : 660, .35);
