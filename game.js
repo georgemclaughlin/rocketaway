@@ -1,12 +1,12 @@
 import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js';
 import { fittedParts, assemblySpecs } from './parts.js';
-import { EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js';
+import { EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=tau-ending';
 import { MODULES } from './modifiers.js';
-import { createExpeditionUI } from './expedition-ui.js?v=research-states';
+import { createExpeditionUI } from './expedition-ui.js?v=tau-ending';
 import { createBuilder } from './builder.js';
 import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
 import { worldFor, destinationFor, WORLDS } from './worlds.js';
-import { createTravel } from './travel.js';
+import { createTravel } from './travel.js?v=tau-ending';
 import { createResearchUI, researchButtonState } from './research-ui.js?v=research-states';
 import { launchRating } from './launch-feedback.js';
 const $ = id => document.getElementById(id);
@@ -29,6 +29,7 @@ const canBuild = () => mode === 'workshop' && (expeditionSession.mode === 'class
 if (expeditionSession.mode === 'expedition') currentScreen = 'expedition';
 if (inExpedition()) { continueExpedition(expeditionSession); program = expeditionSession.active.program; currentScreen = expeditionSession.active.status === 'build' ? 'workshop' : 'expedition'; }
 const expeditionUI = createExpeditionUI({ getSession: () => expeditionSession,
+  onExplore: () => persist(),
   onBuild: () => { continueExpedition(expeditionSession); expeditionSession.mode = 'expedition'; program = expeditionSession.active.program; persist(); renderWorkshop(); builder.selectSlot('engine'); showScreen('workshop'); $('workshop-title').focus({ preventScroll: true }); },
   onResume: () => { expeditionSession.mode = 'expedition'; program = expeditionSession.active.program; launch(expeditionSession.active.launchQuality); }
 });
@@ -39,7 +40,7 @@ const builder = createBuilder({ getProgram: () => program, canEdit: canBuild, ge
   $('hangar-status').textContent = `${part.name} fitted. Ready to test.`;
   announce(`${part.name} fitted. ${program.credits} credits remaining.`);
 } });
-const travelToNextWorld = createTravel(() => { workshop(); announce(expeditionSession.profile.campaignComplete ? 'Tau Ceti reached! All worlds are open to replay.' : `Arrived at ${destinationFor(expeditionSession.active).name}. Choose your starting rocket.`); });
+const travelToNextWorld = createTravel(() => { workshop(); announce(expeditionSession.active?.difficulty===8 ? 'Tau Ceti reached. Your journey is complete. Take a moment to enjoy it.' : `Arrived at ${destinationFor(expeditionSession.active).name}. Choose your starting rocket.`); });
 const researchUI=createResearchUI({getSession:()=>expeditionSession,getSelectedKit:()=>expeditionUI.getSelectedKit(),canOpen:()=>mode==='workshop'&&expeditionSession.mode==='expedition'&&(!expeditionSession.active||['build','won','lost'].includes(expeditionSession.active.status)),onPurchase:()=>{persist();renderWorkshop();tone(820,.12);}});
 $('research-open').addEventListener('click',()=>researchUI.open());
 $('expedition-footer').addEventListener('click',event=>{if(event.target.closest('#research-hub'))researchUI.open();});
@@ -310,7 +311,7 @@ function finish() {
     const count = result.cleared.length;
     $('result-eyebrow').textContent = run.status === 'won' ? 'ALL MILESTONES CLEARED' : run.status === 'lost' ? 'EXPEDITION ENDED' : result.success ? `${count} MILESTONE${count===1?'':'S'} CLEARED` : 'GOAL MISSED';
     $('result-title').textContent = run.status === 'won' ? `${worldFor(run).name}, cleared!` : run.status === 'lost' ? 'A new build awaits.' : result.success ? 'Higher than before.' : 'Refit. Try again.';
-    $('result-description').textContent = run.status === 'won' ? `Departure target reached: ${altitudeLabel(journeyState(run).goal)}. ${destinationFor(run).star ? 'Your journey to Tau Ceti is complete!' : `Next launchpad: ${destinationFor(run).name}. A fresh rocket, one step closer to Tau Ceti.`}` : run.status === 'lost' ? 'Your unlocked worlds and starting rockets are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
+    $('result-description').textContent = run.status === 'won' ? `Departure target reached: ${altitudeLabel(journeyState(run).goal)}. ${destinationFor(run).star ? 'The last launchpad is behind you. One final crossing to Tau Ceti.' : `Next launchpad: ${destinationFor(run).name}. A fresh rocket, one step closer to Tau Ceti.`}` : run.status === 'lost' ? 'Your unlocked worlds and starting rockets are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
     $('bonus-note').textContent = `+${result.data} research points · spend in Research`;
     $('return').textContent = run.status==='won' ? `Travel to ${destinationFor(run).name} ↗` : run.status==='lost' ? `Retry ${worldFor(run).name} ↗` : 'Back to rocket ↗';
   }

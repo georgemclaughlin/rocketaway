@@ -5,6 +5,17 @@ import { newExpeditions, startExpedition, beginExpeditionFlight, settleExpeditio
 const copy=value=>JSON.parse(JSON.stringify(value));
 const win=session=>{beginExpeditionFlight(session,1.2);return settleExpedition(session,{done:true,peak:milestoneHeight(session.active,5)+100,payMultiplier:1});};
 
+test('the ending waits for an explicit exploration choice and that choice survives reload',()=>{
+ const s=newExpeditions();s.profile.maxDifficulty=8;startExpedition(s,{seed:1,difficulty:8});win(s);
+ assert.equal(s.profile.endingAcknowledged,false);
+ assert.equal(restoreExpeditions(copy(s)).profile.endingAcknowledged,false);
+ s.profile.endingAcknowledged=true;
+ assert.equal(restoreExpeditions(copy(s)).profile.endingAcknowledged,true);
+ startExpedition(s,{seed:2,difficulty:8});win(s);assert.equal(s.profile.endingAcknowledged,false);
+ delete s.profile.endingAcknowledged;
+ const old=restoreExpeditions(copy(s));assert.equal(old.profile.campaignComplete,true);assert.equal(old.profile.endingAcknowledged,false);
+});
+
 test('nine real launch worlds lead to Tau Ceti, a star rather than a launch surface',()=>{
  assert.deepEqual(WORLDS.map(w=>w.name),['Earth','Moon','Mars','Ceres','Europa','Titan','Triton','Pluto','Eris']);
  assert.equal(worldFor({difficulty:0}).name,'Earth');assert.equal(destinationFor({difficulty:0}).name,'Moon');

@@ -11,7 +11,7 @@ export const KITS = [
   {id:'scientist',name:'Scientist',icon:'⌁',detail:'Science capsule + Ember · 100 credits',credits:100,parts:['lab','ember'],unlock:6},
 ];
 export function newExpeditions() {
-  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,campaignComplete:false,discoveries:[],research:newResearch()},history:[]};
+  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,campaignComplete:false,endingAcknowledged:false,discoveries:[],research:newResearch()},history:[]};
 }
 const int = (value,max=1e8) => Number.isFinite(value) ? Math.max(0,Math.min(max,Math.floor(value))) : 0;
 function rng(run) { let x=run.rng|0; x^=x<<13; x^=x>>>17; x^=x<<5; run.rng=x>>>0; return run.rng/4294967296; }
@@ -67,7 +67,7 @@ function recordRun(session) {
   if(run.recorded) return;
   run.recorded=true;
   if(run.status==='won') { session.profile.wins++; session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,run.difficulty+1)); }
-  if(run.status==='won' && run.difficulty===8) session.profile.campaignComplete=true;
+  if(run.status==='won' && run.difficulty===8) { session.profile.campaignComplete=true; session.profile.endingAcknowledged=false; }
   session.history.unshift({seed:run.seed,kit:run.kit,stage:run.stage,won:run.status==='won',difficulty:run.difficulty,modules:[...run.program.relics]});
   session.history=session.history.slice(0,8);
 }
@@ -106,6 +106,7 @@ export function restoreExpeditions(raw) {
   session.mode=raw.mode==='classic'?'classic':'expedition';
   const profile=raw.profile||{};
   session.profile.campaignComplete=profile.campaignComplete===true;
+  session.profile.endingAcknowledged=profile.endingAcknowledged===true;
   for(const key of ['runs','wins','totalGates','bestStage','maxDifficulty']) session.profile[key]=int(profile[key],key==='bestStage'?6:key==='maxDifficulty'?8:1e8);
   session.profile.research=restoreResearch(profile.research,session.profile);
   session.profile.discoveries=MODULES.filter(item=>Array.isArray(profile.discoveries)&&profile.discoveries.includes(item.id)).map(item=>item.id);

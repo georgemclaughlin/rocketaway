@@ -46,7 +46,7 @@ const checkFlights = async page => {
   assert((await page.locator('#travel-title').innerText()).includes(difficulty===0?'Moon':'Tau Ceti'),'correct destination');
 
   if(method==='skip')await page.locator('#travel-skip').click();
-  await page.locator('#run-start').waitFor({state:'visible',timeout:6000});
+  await page.locator(difficulty===8?'#ending-explore':'#run-start').waitFor({state:'visible',timeout:6000});
   const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
   assert(after.profile.wins===before.profile.wins,'travel does not pay twice');
   assert(after.profile.maxDifficulty===(difficulty===0?1:8),'unlock correct');
@@ -57,8 +57,8 @@ const checkFlights = async page => {
    assert((await page.locator('#journey-destination').innerText()).includes('Moon → Mars'),'new world journey');
    await page.locator('#shop-launch').click();
   }else{
-   assert((await page.locator('#expedition-step').innerText()).includes('TAU CETI REACHED'),'campaign celebration');
-   await page.reload();assert((await page.locator('#expedition-step').innerText()).includes('TAU CETI REACHED'),'completion survives reload');
+   assert((await page.locator('#expedition-step').innerText()).includes('JOURNEY COMPLETE'),'campaign celebration');
+   await page.reload();assert(await page.locator('#ending-explore').isVisible(),'ending survives reload');
   }
  }
  assert(!errors.length,JSON.stringify(errors));
