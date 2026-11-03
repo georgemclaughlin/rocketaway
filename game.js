@@ -12,7 +12,7 @@ import { RESEARCH_TRACKS, researchCost } from './research.js';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
-astronautArt.src = new URL('./assets/astronaut.png', import.meta.url).href;
+astronautArt.src = new URL('./assets/astronaut-cartoon.png', import.meta.url).href;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let currentScreen = 'workshop';
 let program = newProgram(), mode = 'workshop', flight = null, width = 0, height = 0;

@@ -123,7 +123,7 @@ The live game is hosted at [georgemclaughlin.github.io/rocketaway](https://georg
 
 Progress is stored only in the player’s browser. The game has no analytics or external services. Saves are separate for each site address and do not transfer automatically from a local preview to the hosted game.
 
-Rocket and world scenes use canvas and CSS. The pilot uses a bundled transparent illustration in `assets/astronaut.png`, generated with the built-in image-generation tool. Only the finished artwork is included. Audio is synthesized locally.
+Rocket and world scenes use canvas and CSS. The pilot uses a bundled transparent illustration in `assets/astronaut-cartoon.png`, generated with the built-in image-generation tool. Only the finished artwork is included. Audio is synthesized locally.
 
 ## Astronomy references
 
