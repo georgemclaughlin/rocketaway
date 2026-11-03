@@ -1,5 +1,5 @@
 import { altitudeLabel } from './journey.js';
-import { KITS, milestoneHeight, startExpedition } from './expeditions.js?v=tau-ending';
+import { KITS, milestoneHeight, startExpedition } from './expeditions.js?v=journey-records';
 import { newProgram } from './engine.js';
 import { fittedParts, partById } from './parts.js';
 import { rocketArt } from './builder.js';
@@ -45,8 +45,17 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore })
         document.querySelector('.setup-heading').hidden=true;
         $('expedition-goal').hidden=true;$('expedition-stats').hidden=true;
         const upgrades=Object.values(profile.research.levels).reduce((sum,n)=>sum+n,0);
-        $('expedition-choices').innerHTML=`<div class="finale-vista" aria-hidden="true"><div class="finale-rays"></div>${worldMarkup(TAU_CETI,'finale-star')}<div class="finale-rocket">${rocketArt(fittedParts(run?.program||newProgram()))}</div><span class="finale-signal">SIGNAL RECEIVED · TAU CETI</span></div><div class="finale-message"><img src="./assets/astronaut-cartoon.png?v=2" width="64" height="96" alt="Your astronaut waving"><div><strong>Look how far you’ve come.</strong><p>You built, launched, and kept going. Every small step brought you here.</p></div></div><div class="finale-route" aria-label="All nine launch worlds cleared">${WORLDS.map(w=>`<span title="${w.name} cleared" aria-label="${w.name} cleared">${worldMarkup(w)}<b aria-hidden="true">✓</b></span>`).join('')}</div><div class="finale-stats"><span><b>9 / 9</b> worlds cleared</span><span><b>${profile.runs}</b> expeditions</span><span><b>${upgrades}</b> research upgrades</span></div>`;
-        $('expedition-footer').innerHTML='<p>Your journey is complete. Keep your upgrades and revisit any world when you’re ready.</p><button id="ending-explore" class="primary">Explore cleared worlds ↗</button>';
+        const records=profile.flightRecords;
+        const stats=[
+          ['launches',records.launches.toLocaleString(),records.partial?'Recorded launches':'Total launches'],
+          ['highest',`${(records.highestAltitude/1000).toLocaleString(undefined,{maximumFractionDigits:1})} <small>km</small>`,`Highest flight · ${worldFor({difficulty:records.highestWorld}).name}`],
+          ['perfect',records.perfectLaunches.toLocaleString(),'Perfect launches'],
+          ['worlds','9 / 9','Worlds cleared'],
+          ['expeditions',profile.runs.toLocaleString(),'Expeditions'],
+          ['upgrades',upgrades.toLocaleString(),'Research upgrades'],
+        ];
+        $('expedition-choices').innerHTML=`<div class="finale-vista" aria-hidden="true"><div class="finale-rays"></div>${worldMarkup(TAU_CETI,'finale-star')}<div class="finale-rocket">${rocketArt(fittedParts(run?.program||newProgram()))}</div><span class="finale-signal">SIGNAL RECEIVED · TAU CETI</span></div><div class="finale-message"><img src="./assets/astronaut-cartoon.png?v=2" width="64" height="96" alt="Your astronaut waving"><div><strong>Look how far you’ve come.</strong><p>You built, launched, and kept going. Every small step brought you here.</p></div></div><div class="finale-route" aria-label="All nine launch worlds cleared">${WORLDS.map(w=>`<span title="${w.name} cleared" aria-label="${w.name} cleared">${worldMarkup(w)}<b aria-hidden="true">✓</b></span>`).join('')}</div><div class="finale-stats" aria-label="Your journey records">${stats.map(([id,value,label])=>`<div data-record="${id}"><b>${value}</b><span>${label}</span></div>`).join('')}</div>`;
+        $('expedition-footer').innerHTML=`<p id="ending-record-note">${records.partial?'Older flights may be missing from these records.':'Your journey is complete. Keep your upgrades and revisit any world when you’re ready.'}</p><button id="ending-explore" class="primary">Explore cleared worlds ↗</button>`;
         return;
       }
       const key=run?`${profile.runs}/${run.seed}/${run.status}`:'fresh';

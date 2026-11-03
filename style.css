@@ -737,8 +737,11 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
 .finale-route > span { position: relative; }
 .finale-route .world-orb { width: 20px; height: 20px; }
 .finale-route b { position: absolute; bottom: -2px; right: -4px; color: #ccf1c9; font-size: 10px; text-shadow: 0 1px 3px #000; }
-.finale-stats { display: flex; justify-content: space-around; gap: 8px; text-align: center; color: #b9c6d7; font-size: 11px; }
-.finale-stats b { display: block; color: #ffe4a0; font-size: 19px; margin-bottom: 2px; }
+.finale-stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; text-align: center; color: #c5d0df; font-size: 11px; }
+.finale-stats > div { min-width: 0; padding: 8px 4px; border: 1px solid #4d5062; border-radius: 7px; background: #11192c70; }
+.finale-stats b { display: block; color: #ffe4a0; font-size: 20px; margin-bottom: 4px; white-space: nowrap; }
+.finale-stats b small { font-size: 11px; font-weight: normal; }
+.finale-stats > div > span { display: block; line-height: 1.2; }
 #travel-dialog[data-interstellar="true"] { border-color: #cbb080; background: radial-gradient(ellipse at 75% 35%,#4e4050,#111528 70%); }
 [data-interstellar="true"] .travel-from,[data-interstellar="true"] .travel-ship { animation-duration: 5.2s; }
 [data-interstellar="true"] .travel-to { animation: tau-beacon 5.2s ease-out both; }
@@ -749,9 +752,11 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
  .expedition-panel[data-phase="finale"] { padding: 12px; gap: 7px; }
  [data-phase="finale"] #expedition-title { font-size: 24px; }
  [data-phase="finale"] .expedition-choices { gap: 7px; }
- .finale-message img { width: 36px; height: 54px; }
- .finale-message strong { font-size: 14px; }.finale-message p { font-size: 11px; }
+ .finale-message img { width: 28px; height: 42px; }
+ .finale-rocket { width: 44px; height: 60px; }
+ .finale-message strong { font-size: 14px; }.finale-message p { display: none; }
  .finale-stats { font-size: 10px; }.finale-stats b { font-size: 17px; }
+ .finale-stats > div { padding: 6px 3px; }
 }
 @media (max-height: 520px) and (min-width: 601px) {
  .expedition-panel[data-phase="finale"] { grid-template-columns: minmax(0,1fr) minmax(0,1.3fr); grid-template-rows: auto auto minmax(0,1fr); gap: 8px 18px; }

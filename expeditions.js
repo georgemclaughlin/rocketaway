@@ -2,6 +2,7 @@ import { newProgram, restoreProgram } from './engine.js';
 import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js';
 import { MODULES, ROUTES } from './modifiers.js';
 import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js';
+import { newFlightRecords, restoreFlightRecords, recordLaunch, recordFlightPeak } from './flight-records.js';
 export const EXPEDITION_KEY = 'rocket-away-expeditions-v1';
 export const ASCENT_STEP = .05;
 export const CHECKPOINTS = [2500,10000,25000,55000,100000,160000];
@@ -11,7 +12,7 @@ export const KITS = [
   {id:'scientist',name:'Scientist',icon:'⌁',detail:'Science capsule + Ember · 100 credits',credits:100,parts:['lab','ember'],unlock:6},
 ];
 export function newExpeditions() {
-  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,campaignComplete:false,endingAcknowledged:false,discoveries:[],research:newResearch()},history:[]};
+  return {version:2,mode:'expedition',active:null,profile:{runs:0,wins:0,totalGates:0,bestStage:0,maxDifficulty:0,campaignComplete:false,endingAcknowledged:false,discoveries:[],research:newResearch(),flightRecords:newFlightRecords()},history:[]};
 }
 const int = (value,max=1e8) => Number.isFinite(value) ? Math.max(0,Math.min(max,Math.floor(value))) : 0;
 function rng(run) { let x=run.rng|0; x^=x<<13; x^=x>>>17; x^=x<<5; run.rng=x>>>0; return run.rng/4294967296; }
@@ -60,7 +61,8 @@ export function startExpedition(session,{seed,kit='scrapper',difficulty=0}={}) {
 export function beginExpeditionFlight(session,quality) {
   const run=session.active;
   if(!run || run.status!=='build' || !Number.isFinite(quality)) return false;
-  run.launchQuality=Math.max(.9,Math.min(1.2,quality)); run.status='flying'; return true;
+  run.launchQuality=Math.max(.9,Math.min(1.2,quality)); run.status='flying';
+  recordLaunch(session.profile,run.launchQuality);return true;
 }
 function recordRun(session) {
   const run=session.active;
@@ -81,6 +83,7 @@ export function settleExpedition(session,flight) {
   const data=awardResearch(session,cleared.length,firstWorld);
   const flightPay=60+Math.floor(Math.min(altitude,500000)/220*flight.payMultiplier)+(flight.creditBonus||0), total=flightPay+bonus;
   run.program.credits+=total; run.program.best=Math.max(oldBest,altitude); run.program.flights++;
+  recordFlightPeak(session.profile,altitude,run.difficulty);
   const result={altitude,target,success,total,flightPay,bonus,data,stage,power:Math.round((flight.quality||run.launchQuality)*100),cleared,nextTarget:run.stage<6?checkpoint(run):null,record:altitude>oldBest,improvement:Math.max(0,altitude-oldBest)};
   run.lastResult=result; run.launchQuality=null; run.program.route=null;
   if(!success) run.strikes++;
@@ -108,6 +111,7 @@ export function restoreExpeditions(raw) {
   session.profile.campaignComplete=profile.campaignComplete===true;
   session.profile.endingAcknowledged=profile.endingAcknowledged===true;
   for(const key of ['runs','wins','totalGates','bestStage','maxDifficulty']) session.profile[key]=int(profile[key],key==='bestStage'?6:key==='maxDifficulty'?8:1e8);
+  session.profile.flightRecords=restoreFlightRecords(profile.flightRecords,null,session.profile.runs);
   session.profile.research=restoreResearch(profile.research,session.profile);
   session.profile.discoveries=MODULES.filter(item=>Array.isArray(profile.discoveries)&&profile.discoveries.includes(item.id)).map(item=>item.id);
   session.history=(Array.isArray(raw.history)?raw.history:[]).slice(0,8).filter(item=>item&&Number.isFinite(item.seed)).map(item=>({seed:int(item.seed,4294967295),kit:KITS.some(kit=>kit.id===item.kit)?item.kit:'scrapper',stage:int(item.stage,6),won:item.won===true,difficulty:int(item.difficulty,8),modules:MODULES.filter(m=>Array.isArray(item.modules)&&item.modules.includes(m.id)).map(m=>m.id)}));
@@ -129,6 +133,7 @@ export function restoreExpeditions(raw) {
   if(run.status==='won' && run.difficulty===8) session.profile.campaignComplete=true;
   if(['draft','route'].includes(run.status) || (run.status==='debrief'&&!run.lastResult)) run.status='build';
   session.active=run;
+  session.profile.flightRecords=restoreFlightRecords(profile.flightRecords,run,session.profile.runs);
   syncResearch(session);
   if(raw.version===1 && !['won','lost'].includes(run.status)) {
     // Credit previously flown milestones once when upgrading an old save.

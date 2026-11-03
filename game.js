@@ -1,8 +1,8 @@
 import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js';
 import { fittedParts, assemblySpecs } from './parts.js';
-import { EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=tau-ending';
+import { EXPEDITION_KEY, newExpeditions, restoreExpeditions, checkpoint, beginExpeditionFlight, settleExpedition, continueExpedition, abandonExpedition } from './expeditions.js?v=journey-records';
 import { MODULES } from './modifiers.js';
-import { createExpeditionUI } from './expedition-ui.js?v=tau-ending';
+import { createExpeditionUI } from './expedition-ui.js?v=journey-records';
 import { createBuilder } from './builder.js';
 import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
 import { worldFor, destinationFor, WORLDS } from './worlds.js';
