@@ -8,6 +8,7 @@ import { journeyState, journeyMarkup, altitudeLabel } from './journey.js';
 import { worldFor, destinationFor, WORLDS } from './worlds.js';
 import { createTravel } from './travel.js';
 import { createResearchUI, researchButtonState } from './research-ui.js?v=research-states';
+import { launchRating } from './launch-feedback.js';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -233,6 +234,7 @@ function finishEarly() {
 }
 function prepare() {
   if (!canBuild()) return;
+  $('launch-rating').hidden = true;
   mode = 'arming'; armTime = 0; timingPosition = 0;
   showScreen('launchpad');
   $('timing').hidden = false; document.querySelector('.launch-console').classList.add('arming');
@@ -253,15 +255,20 @@ function launch(resumeQuality) {
   recordBefore = program.best; flightMilestonesShown = inExpedition() ? expeditionSession.active.stage : 0; recordShown = false; zoneSeen = 0; particles = [];
   $('timing').hidden = true; document.querySelector('.launch-console').classList.remove('arming');
   $('launch').disabled = true; $('launch').textContent = 'Flight in progress';
-  $('launch-eyebrow').textContent = quality >= 1.14 ? 'BEAUTIFUL TIMING' : 'LIFTOFF!';
-  $('launch-title').textContent = quality >= 1.14 ? 'That’s how you make an entrance.' : 'Up, up, and a little further.';
-  $('launch-description').textContent = `${Math.round(quality * 100)}% launch power. Flight computer has control.`;
+  const rating=launchRating(quality);
+  $('launch-rating').textContent = `${rating.label} · ${rating.power}%`;
+  $('launch-rating').dataset.rating = rating.tier;
+  $('launch-rating').title = `Launch timing: ${rating.label}. ${rating.power}% power; maximum 120%.`;
+  $('launch-rating').setAttribute('aria-label', $('launch-rating').title);
+  $('launch-rating').hidden = false;
+  $('launch-eyebrow').textContent = 'LAUNCH TIMING';
+  $('launch-title').textContent = `${rating.label} launch${rating.tier==='off'?'.':'!'}`;
+  $('launch-description').textContent = `${rating.power}% power · maximum 120%. Flight computer has control.`;
   $('flight-tools').hidden = false; $('telemetry').hidden = false; $('scene-tag').hidden = true;
   $('speed').textContent = `Speed ×${speed}`; $('pause').textContent = 'Ⅱ Pause'; $('pause').setAttribute('aria-label', 'Pause flight');
   syncScreens(); renderJourney();
   tone(180, .4, 'triangle', .075); updateFlightHud();
-  if (quality >= 1.17) showFlightNotice('Perfect ignition!', `${Math.round(quality * 100)}% power · let’s make this count`);
-  announce(`Lift off at ${Math.round(quality * 100)} percent power. Flight is automatic.`);
+  announce(`${rating.label} launch. ${rating.power} percent power out of a maximum 120. Flight is automatic.`);
 }
 $('launch').addEventListener('click', () => mode === 'workshop' ? prepare() : mode === 'flying' ? finishEarly() : launch());
 $('shop-launch').addEventListener('click', prepare);
@@ -304,9 +311,11 @@ function finish() {
     $('result-eyebrow').textContent = run.status === 'won' ? 'ALL MILESTONES CLEARED' : run.status === 'lost' ? 'EXPEDITION ENDED' : result.success ? `${count} MILESTONE${count===1?'':'S'} CLEARED` : 'GOAL MISSED';
     $('result-title').textContent = run.status === 'won' ? `${worldFor(run).name}, cleared!` : run.status === 'lost' ? 'A new build awaits.' : result.success ? 'Higher than before.' : 'Refit. Try again.';
     $('result-description').textContent = run.status === 'won' ? `Departure target reached: ${altitudeLabel(journeyState(run).goal)}. ${destinationFor(run).star ? 'Your journey to Tau Ceti is complete!' : `Next launchpad: ${destinationFor(run).name}. A fresh rocket, one step closer to Tau Ceti.`}` : run.status === 'lost' ? 'Your unlocked worlds and starting rockets are kept.' : result.success ? `Journey progress: ${result.stage-1} → ${run.stage} of 6 milestones. Next: ${journeyState(run).next.name} at ${altitudeLabel(result.nextTarget)}.` : `Still working toward ${journeyState(run).next.name} at ${altitudeLabel(result.target)}. Your ${run.stage} cleared milestone${run.stage===1?'':'s'} stay cleared.`;
-    $('bonus-note').textContent = `+${result.data} research points · spend in Research · ${result.power}% launch power`;
+    $('bonus-note').textContent = `+${result.data} research points · spend in Research`;
     $('return').textContent = run.status==='won' ? `Travel to ${destinationFor(run).name} ↗` : run.status==='lost' ? `Retry ${worldFor(run).name} ↗` : 'Back to rocket ↗';
   }
+  const rating=launchRating(flight.quality);
+  $('bonus-note').textContent += ` · ${rating.label} launch · ${rating.power}% power`;
   syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete'; tone(result.firstWin ? 1040 : 660, .35);
   announce(`${result.firstWin ? 'Mission complete! ' : ''}Peak altitude ${(result.altitude / 1000).toFixed(2)} kilometers. Earned ${result.total} credits.`);
 }
