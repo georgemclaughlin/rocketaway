@@ -1,8 +1,8 @@
-import { flightConditions } from './worlds.js?v=roguelite-live-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=roguelite-live-1';
-import { createFlight, stepFlight } from './engine.js?v=roguelite-live-1';
-import { partInsight } from './part-insights.js?v=roguelite-live-1';
-import { abilityDescription } from './experimental.js?v=roguelite-live-1';
+import { flightConditions } from './worlds.js?v=mobile-builder-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=mobile-builder-1';
+import { createFlight, stepFlight } from './engine.js?v=mobile-builder-1';
+import { partInsight } from './part-insights.js?v=mobile-builder-1';
+import { abilityDescription } from './experimental.js?v=mobile-builder-1';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
@@ -52,19 +52,30 @@ function partArt(part) {
 
 export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => null, getTargetLabel=()=>'', getReserved=()=>null, onReserve=()=>{} }) {
   const $ = id => document.getElementById(id);
-  let slotId = 'engine', candidateId = null, shelfSlot = null, experimental=false;
+  let slotId = 'engine', candidateId = null, shelfSlot = null;
+  function keepPreviewVisible() {
+    const shelf=$('part-shelf'),selected=shelf.querySelector('[aria-pressed="true"]');
+    if(!selected||!shelf.clientWidth)return;
+    const bounds=shelf.getBoundingClientRect(),part=selected.getBoundingClientRect();
+    if(part.left<bounds.left)shelf.scrollLeft+=part.left-bounds.left;
+    else if(part.right>bounds.right)shelf.scrollLeft+=part.right-bounds.right;
+  }
+  new ResizeObserver(keepPreviewVisible).observe($('part-shelf'));
   $('assembly-slots').innerHTML = PART_SLOTS.map(slot => `<button class="assembly-slot slot-${slot.id}" data-build-slot="${slot.id}" aria-pressed="false"><span>${slot.name}</span><strong></strong></button>`).join('');
   function render() {
     const program = getProgram(), parts = fittedParts(program),conditions=flightConditions(program.launchWorld,program.conditionsVersion??1);
     if (partById(candidateId)?.slot !== slotId) candidateId = program.parts.equipped[slotId];
-    if(program.rulesVersion!==1)experimental=false;
-    const options = catalogFor(program).filter(part => part.slot === slotId&&!!part.ability===experimental);
+    const prototype=program.rulesVersion===1;
+    const available=part=>!Array.isArray(program.stock)||program.stock.includes(part.id)||program.parts.owned.includes(part.id);
+    const options = catalogFor(program).filter(part => part.slot === slotId && (!prototype||available(part)));
+    document.querySelector('.part-picker').dataset.unified=prototype;
     if(!options.some(p=>p.id===candidateId))candidateId=options[0]?.id||program.parts.equipped[slotId];
     const candidate = partForProgram(program, candidateId), preview = previewPart(program, candidateId);
     const equipped = program.parts.equipped[slotId] === candidateId, owned = program.parts.owned.includes(candidateId);
-    if (shelfSlot !== slotId+'/'+experimental+'/'+program.rulesVersion) {
-      $('part-shelf').innerHTML = options.map(part => `<button class="shelf-part" data-part="${part.id}" aria-label="Preview ${part.name}">${partArt(part)}<span class="shelf-name">${part.name.replace(/ engine| tank| fairing| capsule| boosters| cluster/g, '')}</span><small></small></button>`).join('');
-      shelfSlot = slotId+'/'+experimental+'/'+program.rulesVersion;
+    const shelfKey=slotId+'/'+options.map(part=>part.id).join('/');
+    if (shelfSlot !== shelfKey) {
+      $('part-shelf').innerHTML = options.map(part => `<button class="shelf-part" data-part="${part.id}" data-experimental="${!!part.ability}" aria-label="Preview ${part.name}${part.ability?', experimental':''}">${partArt(part)}<span class="shelf-name">${part.name.replace(/ engine| tank| fairing| capsule| boosters| cluster/g, '')}</span><small></small></button>`).join('');
+      shelfSlot = shelfKey;
     }
     for (const button of $('part-shelf').querySelectorAll('[data-part]')) {
       const part = partById(button.dataset.part), fitted = program.parts.equipped[slotId] === part.id;
@@ -84,7 +95,8 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
       button.disabled = !canEdit();
     }
     $('category-label').textContent = `${PART_SLOTS.find(slot => slot.id === slotId).name} · ${slotId==='aero'&&program.launchWorld!==undefined?(conditions.drag===0?'weight matters':conditions.drag>1?'strong air drag':'air drag'):'browse parts'}`;
-    $('candidate-position').textContent = `${options.findIndex(part => part.id === candidateId)+1} / ${options.length}`;
+    if(prototype)$('category-label').textContent = `${PART_SLOTS.find(slot => slot.id === slotId).name} · available parts`;
+    $('candidate-position').textContent = prototype ? `${options.length} options ↔` : `${options.findIndex(part => part.id === candidateId)+1} / ${options.length}`;
     $('candidate-state').textContent = equipped ? 'ON YOUR ROCKET' : owned ? 'OWNED · FREE TO FIT' : 'NEW PART';
     $('candidate-name').textContent = candidate.name;
     $('candidate-trait').hidden = !candidate.trait;
@@ -113,25 +125,21 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('part-info-description').textContent = candidate.detail + (candidate.trait ? ` This run: ${candidate.trait.name.toLowerCase()} — ${candidate.trait.detail}.` : '');
     $('part-info-stats').textContent = `${$('candidate-state').textContent}. With this part: ${burn.toFixed(1)}s fuel, ${weight.toFixed(2)} tonnes. Height estimates use 110% launch power; actual timing affects the result. ${flightConditions(program.launchWorld,program.conditionsVersion??1).tip}`;
     $('part-fit').disabled = !canEdit() || !stocked || equipped || (!owned && program.credits < candidate.price);
-    if($('experimental-browse')) {
-      const prototype=program.rulesVersion===1;
-      $('prototype-builder-tools').hidden=!prototype;
-      $('experimental-browse').setAttribute('aria-pressed',experimental);
-      $('experimental-browse').textContent=experimental?'Standard parts':'Experimental parts';
-      $('experimental-browse').disabled=!canEdit();
-      $('reserve-part').hidden=!candidate.ability||owned||!stocked;
-      $('reserve-part').textContent=getReserved()===candidateId?'Reserved ✓':'Reserve offer';
-      $('reserve-part').setAttribute('aria-pressed',getReserved()===candidateId);
-      $('reserve-part').disabled=!canEdit();
-      if(candidate.ability) {
-        $('candidate-description').textContent=abilityDescription(candidate,preview.stats);
-        $('candidate-trait').hidden=false;$('candidate-trait').textContent=candidate.detail;
-      }
+    $('part-reservation').hidden=!candidate.ability||owned||!stocked;
+    $('reserve-part').textContent=getReserved()===candidateId?'Reserved · release offer':'Reserve offer · free';
+    $('reserve-part').setAttribute('aria-pressed',getReserved()===candidateId);
+    $('reserve-part').disabled=!canEdit();
+    if(candidate.ability) {
+      $('candidate-description').textContent=abilityDescription(candidate,preview.stats);
+      $('candidate-trait').hidden=false;$('candidate-trait').textContent=candidate.detail;
+      $('part-info-description').textContent=`Experimental part. ${candidate.detail}`;
     }
+    requestAnimationFrame(keepPreviewVisible);
   }
+
   function selectSlot(id) {
     if (!canEdit() || !PART_SLOTS.some(slot => slot.id === id)) return;
-    slotId = id; candidateId = getProgram().parts.equipped[id]; experimental=!!partById(candidateId).ability; render();
+    slotId = id; candidateId = getProgram().parts.equipped[id]; render();
   }
   $('assembly-stage').addEventListener('click', event => {
     const slot = event.target.closest('[data-build-slot]');
@@ -148,15 +156,6 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     if (!canEdit() || !fitPart(getProgram(), candidateId)) return;
     onFit(partById(candidateId));
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) $('assembly-stage').animate([{boxShadow:'inset 0 0 0 2px #a5dcc4'},{boxShadow:'inset 0 0 0 0px transparent'}],{duration:450});
-  });
-  $('experimental-browse')?.addEventListener('click',()=>{
-    if(!canEdit())return;
-    experimental=!experimental;
-    if(experimental&&!catalogFor(getProgram()).some(p=>p.slot===slotId&&p.ability))slotId='engine';
-    const p=getProgram(),catalog=catalogFor(p);
-    const ready=catalog.filter(item=>!!item.ability===experimental&&(p.stock?.includes(item.id)||p.parts.owned.includes(item.id)));
-    const choice=experimental?(ready.find(item=>item.slot===slotId&&item.price<=p.credits)||ready.find(item=>item.price<=p.credits)||ready.find(item=>item.slot===slotId)||ready[0]):catalog.find(item=>item.slot===slotId&&!item.ability);
-    if(choice){slotId=choice.slot;candidateId=choice.id;}render();
   });
   $('reserve-part')?.addEventListener('click',()=>{if(canEdit()){onReserve(getReserved()===candidateId?null:candidateId);render();}});
   return { render, selectSlot };

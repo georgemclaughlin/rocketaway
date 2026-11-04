@@ -1,4 +1,4 @@
-import { worldFor } from './worlds.js?v=roguelite-live-1';
+import { worldFor } from './worlds.js?v=mobile-builder-1';
 export function journeyRecordsMarkup(profile) {
   const records=profile.flightRecords;
   const stats=[

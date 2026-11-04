@@ -1,5 +1,5 @@
 // Two campaigns share the existing save key without replacing either one's progress.
-import { newExpeditions, restoreSession } from './prototype-run.js?v=roguelite-live-1';
+import { newExpeditions, restoreSession } from './prototype-run.js?v=mobile-builder-1';
 
 export function openCampaignSave(raw, original = false) {
   if (raw?.campaignSaveVersion !== undefined && raw.campaignSaveVersion !== 1) {

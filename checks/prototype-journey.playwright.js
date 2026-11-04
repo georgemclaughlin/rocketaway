@@ -26,8 +26,6 @@ async page=>{
   });
   for(const part of plan.parts){
    await page.locator(`button[data-build-slot="${part.slot}"]`).click();
-   const experimental=await page.locator('#experimental-browse').getAttribute('aria-pressed')==='true';
-   if(experimental!==part.experimental)await page.locator('#experimental-browse').click();
    await page.locator(`[data-part="${part.id}"]`).click();assert(await page.locator('#part-fit').isEnabled(),`cannot fit earned ${part.id}`);await page.locator('#part-fit').click();
   }
   await page.locator('#contracts-open').click();

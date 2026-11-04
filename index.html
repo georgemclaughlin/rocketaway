@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=roguelite-live-1">
-  <script type="module" src="./game.js?v=roguelite-live-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=mobile-builder-1">
+  <script type="module" src="./game.js?v=mobile-builder-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -20,6 +20,7 @@
       <div class="journey-heading"><strong id="journey-destination"></strong><span class="journey-tools"><span id="journey-count"></span></span></div>
       <ol id="journey-steps" class="journey-steps" aria-label="Your expedition milestones"></ol>
       <div class="journey-footer"><strong id="journey-current"></strong><span id="journey-lives"></span></div>
+      <button id="contracts-open" class="contract-goal" hidden><span><small>OPTIONAL GOAL</small><strong id="contract-selection">Choose a contract</strong></span><span aria-hidden="true">›</span></button>
     </div>
     <div class="mission-heading"><span id="mission-status">MISSION 01 · REACH SPACE</span><span id="progress-caption"><b id="best">0.0</b> / <span id="goal-limit">100</span> <span id="goal-unit">km</span></span></div>
     <div class="mission-track" role="progressbar" aria-label="Best altitude toward space" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="mission-progress"><div id="mission-fill"></div></div>
@@ -49,10 +50,9 @@
         <div id="assembly-slots"></div><div class="rocket-readiness"><span>Estimated at 110% · <b id="fitted-height"></b></span><small id="fitted-readiness"></small></div>
       </div>
       <section class="part-picker" aria-labelledby="candidate-name">
-        <div id="prototype-builder-tools" class="prototype-tools" hidden><button id="experimental-browse" class="small-button" aria-pressed="false">Experimental parts</button><button id="contracts-open" class="small-button">Contracts</button></div>
         <div class="picker-heading"><span id="category-label">ENGINE</span><span id="candidate-position">1 / 4</span></div>
         <div class="part-shelf" id="part-shelf" role="group" aria-label="Available parts"></div>
-        <div class="part-browser"><h3 id="candidate-name" aria-live="polite">Spark engine</h3><button id="reserve-part" class="small-button" hidden aria-pressed="false">Reserve offer</button><button id="part-info" class="small-button" aria-label="Part details">Info</button></div>
+        <div class="part-browser"><h3 id="candidate-name" aria-live="polite">Spark engine</h3><button id="part-info" class="small-button" aria-label="Part details">Info</button></div>
         <p id="candidate-description"></p><p id="candidate-trait" hidden></p><span id="candidate-state" hidden></span>
         <div class="part-comparison"><span><span id="comparison-label">Estimated height</span><small>Estimate at 110% power</small></span><div><strong id="candidate-height">—</strong><small id="candidate-difference">Current rocket</small></div></div>
         <div class="picker-action"><p id="candidate-tradeoff"></p><button id="part-fit" class="small-button">Fitted</button></div>
@@ -110,7 +110,7 @@
     <p class="science-sources"><a id="science-source" target="_blank" rel="noopener noreferrer">NASA facts ↗</a><a id="science-gravity-source" target="_blank" rel="noopener noreferrer">NASA gravity data ↗</a></p>
     <p class="science-note">Real space facts. Flight physics, altitude goals and travel times are simplified for play.</p>
   </dialog>
-  <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><button id="part-info-close" class="primary">Back to parts</button></dialog>
+  <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><div id="part-reservation" hidden><p>Keep this offer in the shop after your next flight. Reserving is free and does not buy or fit the part. You can keep one offer.</p><button id="reserve-part" class="small-button" aria-pressed="false">Reserve offer</button></div><button id="part-info-close" class="primary">Back to parts</button></dialog>
   <dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">
     <div class="eyebrow">A FRESH START</div>
     <h2 id="reset-title">Reset the entire game?</h2>

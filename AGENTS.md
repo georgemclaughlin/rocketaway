@@ -22,6 +22,7 @@ Read this file before changing the project. `README.md` documents the player exp
 - Each new world/attempt starts a fresh rocket and budget. Explain that transition clearly. Keep the current world, next goal, overall journey position, and remaining misses understandable.
 - Prototype exception: Earth and Moon share one rocket, credits, and three-miss budget. A new milestone or an unfinished selected contract makes a flight successful. Clearing Earth permanently unlocks a fresh funded Moon checkpoint start. The prototype ends after the Moon; do not imply the full planned campaign is implemented.
 - Credits buy parts for the current rocket. Research points buy permanent, kit-specific upgrades. Preserve the visible research button and its distinct states for an affordable current-kit upgrade, other-kit upgrades, and no affordable upgrade.
+- The roguelite uses one horizontally scrolling parts shelf per selected rocket section, showing owned/stocked standard and experimental equipment together. Keep the selected preview visible after resizing. Contracts belong in the journey goal area; reservation belongs in the part Info dialog. Do not restore the changing Standard/Experimental toggle or make browsing jump sections.
 - Selecting a part previews it; only Buy & fit / Fit part changes the equipped rocket. Keep fitted and preview values visually distinct. Explain base tradeoffs separately from seeded part bonuses.
 - Height estimates use 110% launch power; timing ranges from 90% to 120%. Miss advice must distinguish a reachable timing opportunity from a build limitation. Suggest a useful experiment without silently choosing or purchasing a part.
 - Fast Forward is **one on/off toggle**, not a multiplier cycle. It measures the remaining flight once and aims for about six real-time seconds to the result, never slowing a shorter flight. It stays selected between launches during a visit; pause stops advancement. Do not recalculate the rate every frame, which would keep moving the finish away.
@@ -81,6 +82,7 @@ Useful browser checks:
 
 - `prototype.playwright.js` and `prototype-journey.playwright.js`: run only on port 4174 in an isolated session. Cover experimental previews, reservation, contracts, ability flight parity, saved travel, unsupported-save protection, and earned UI progression. Keep these separate from default-game fixtures.
 
+- `mobile-builder.playwright.js`: unified browsing, section stability, preview versus fitting, reservation explanation, optional goals, six viewport touch targets, and price/overlap visibility.
 - `campaign-switch.playwright.js`: public default, existing-save preservation, six-size campaign menu, switching, and launch/reload; isolated session only.
 - Original-campaign browser checks must open `?campaign=original` and read the saved `originalCampaign` member.
 - `polish.playwright.js`: all part previews, first-start clarity, real miss diagnosis, starting builds, wider world selection.
@@ -96,7 +98,7 @@ Useful browser checks:
 - The approved bundled illustration is `assets/astronaut-cartoon.png?v=2`. An earlier portrait was intentionally removed from Git history and its old asset filename remains ignored. Do not recover it, re-add it, or include source/reference photographs. Do not change the cartoon likeness without a request.
 - Respect `.gitignore`; do not force-add ignored material. Use the repository's existing public-safe Git author configuration rather than introducing a personal email.
 - Before pushing, review every staged file for privacy and scope. Keep asset paths relative and retain existing site/repository settings.
-- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. The app currently uses `v=roguelite-live-1`; the cartoon's independent `v=2` is intentional.
+- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. The app currently uses `v=mobile-builder-1`; the cartoon's independent `v=2` is intentional.
 - Push the validated commit to `main`, then confirm Pages built that commit with `gh api repos/georgemclaughlin/rocketaway/pages/builds/latest --jq '{status,commit}'`. For game changes, run an isolated live-site smoke check and give the user the public game link. A documentation-only change does not require replaying the game.
 
 ## Remaining design opportunity

@@ -12,9 +12,9 @@ async page => {
   });
   await page.reload();
   await page.locator('#run-start').click();
-  assert(await page.locator('#prototype-builder-tools').isVisible(),'new default has roguelite tools');
-  await page.locator('#experimental-browse').click();
-  await page.locator('#reserve-part').click();
+  assert(await page.locator('#contracts-open').isVisible(),'new default has roguelite tools');
+  await page.locator('button[data-build-slot="aero"]').click();await page.locator('[data-experimental="true"]').first().click();
+  await page.locator('#part-info').click();await page.locator('#reserve-part').click();await page.locator('#part-info-close').click();
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
   assert(JSON.stringify(saved.originalCampaign)===JSON.stringify(legacy),'original save preserved exactly');
   const reserved=saved.active.reservedOffer;
@@ -28,11 +28,11 @@ async page => {
   await page.screenshot({path:'/tmp/rocketaway-campaign-menu.png'});
   await page.locator('#switch-campaign').click();await page.waitForURL('**campaign=original');
   await page.locator('#run-resume').waitFor({state:'visible'});
-  assert(!await page.locator('#prototype-builder-tools').isVisible(),'original campaign stays original');
+  assert(!await page.locator('#contracts-open').isVisible(),'original campaign stays original');
   await page.locator('#game-menu').click();await page.locator('#switch-campaign').click();
   await page.waitForURL(url=>!url.searchParams.has('campaign'));
-  await page.locator('#experimental-browse').click();
-  assert((await page.locator('#reserve-part').innerText()).includes('Reserved'),'roguelite reservation survived switching');
+  await page.locator('button[data-build-slot="aero"]').click();await page.locator(`[data-part="${reserved}"]`).click();await page.locator('#part-info').click();
+  assert((await page.locator('#reserve-part').innerText()).includes('Reserved'),'roguelite reservation survived switching');await page.locator('#part-info-close').click();
   const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
   assert(after.active.reservedOffer===reserved,'same roguelite rocket');
   assert(after.originalCampaign.active.launchQuality===1.17,'original ignition quality retained');

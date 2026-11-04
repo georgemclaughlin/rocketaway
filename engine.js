@@ -1,4 +1,4 @@
-import { newInventory, restoreInventory } from './parts.js?v=roguelite-live-1';
+import { newInventory, restoreInventory } from './parts.js?v=mobile-builder-1';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [

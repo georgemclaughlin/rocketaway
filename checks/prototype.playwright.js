@@ -11,23 +11,24 @@ async page=>{
  assert((await page.locator('#expedition-step').innerText()).includes('PLAYTEST'),'prototype identity');
  assert(await page.locator('[data-world]').count()===2,'only implemented worlds offered');
  await fits('#expedition,#run-start,.kit-card','start');
- await page.locator('#run-start').click();await page.locator('#experimental-browse').click();
- assert(await page.locator('#part-fit').isEnabled(),'opening experimental browser selects an affordable offer');
+ await page.locator('#run-start').click();await page.locator('button[data-build-slot="aero"]').click();
+ await page.locator('[data-experimental="true"]').first().click();
+ assert(await page.locator('#part-fit').isEnabled(),'opening special offer is affordable');
  const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
- await page.locator('#reserve-part').click();
+ await page.locator('#part-info').click();await page.locator('#reserve-part').click();await page.locator('#part-info-close').click();
  const reserved=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
  assert(reserved.active.reservedOffer&&reserved.active.program.credits===before.active.program.credits,'reservation is free');
- await page.reload();await page.locator('#experimental-browse').click();assert((await page.locator('#reserve-part').innerText()).includes('Reserved'),'reservation survives reload');
- await fits('#workshop,.part-picker,#candidate-description,#part-fit,#shop-launch,.assembly-stage,#prototype-builder-tools','opening offer');
+ await page.reload();await page.locator('button[data-build-slot="aero"]').click();await page.locator(`[data-part="${reserved.active.reservedOffer}"]`).click();await page.locator('#part-info').click();assert((await page.locator('#reserve-part').innerText()).includes('Reserved'),'reservation survives reload');await fits('#part-dialog,#reserve-part,#part-info-close','reservation details');await page.locator('#part-info-close').click();
+ await fits('#workshop,.part-picker,#candidate-description,#part-fit,#shop-launch,.assembly-stage,#contracts-open','opening offer');
  await page.locator('#contracts-open').click();await fits('#contracts-dialog,.contract-card,#contracts-close,#contract-none','contracts');
  await page.locator('[data-contract="earth-light"]').click();assert(!(await page.locator('#contracts-dialog').isVisible()),'selection returns to build');
  assert((await page.locator('#contracts-open').innerText()).includes('Small but mighty'),'selected goal is visible');
  // Inspect every experimental ability with a saved, isolated build fixture.
  await page.evaluate(async()=>{const r=await import('./prototype-run.js'),p=await import('./parts.js'),x=await import('./experimental.js');const s=r.newExpeditions();s.profile.totalGates=6;s.profile.maxDifficulty=1;r.startPrototype(s,{seed:42});s.active.program.credits=10000;s.active.program.stock=[...p.PARTS,...x.EXPERIMENTAL_PARTS].map(p=>p.id);localStorage.setItem('rocket-away-expeditions-v1',JSON.stringify(s));});await page.reload();
  for(const slot of ['aero','tank','engine']){
-  await page.locator(`button[data-build-slot="${slot}"]`).click();await page.locator('#experimental-browse').click();
+  await page.locator(`button[data-build-slot="${slot}"]`).click();
   const ids=await page.locator('[data-part]').evaluateAll(es=>es.map(e=>e.dataset.part));
-  for(const id of ids){await page.locator(`[data-part="${id}"]`).click();await fits('#workshop,.part-picker,#part-fit,#shop-launch,#candidate-description,#prototype-builder-tools',id);}
+  for(const id of ids){await page.locator(`[data-part="${id}"]`).click();await fits('#workshop,.part-picker,#part-fit,#shop-launch,#candidate-description,#contracts-open',id);}
  }
  // An interrupted ability flight reproduces its outcome, and no reward repeats.
  const expected=await page.evaluate(async()=>{const r=await import('./prototype-run.js'),p=await import('./parts.js'),b=await import('./builder.js');const s=JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'));for(const id of ['reserve-tank','separation-engine','orbitals'])p.fitPart(s.active.program,id);r.beginFlight(s,1.1);localStorage.setItem('rocket-away-expeditions-v1',JSON.stringify(s));return b.estimateHeight(s.active.program);});await page.reload();

@@ -16,7 +16,7 @@ Play on the public site or open **http://127.0.0.1:4174/** locally (`npm start` 
 
 Build one rocket through **Earth → Moon**, keeping its parts, credits, research effects, and remaining misses during travel. A fresh Moon checkpoint build becomes available after clearing Earth and receives 1,100 additional credits. The prototype ends after the Moon; it does not yet implement the proposed three-world expeditions or longer campaign.
 
-- **Experimental parts** opens special equipment in the existing four slots. Previewing is free; Buy & fit / Fit part equips it. The opening browser prioritizes an affordable offer. **Reserve offer** keeps one unowned experimental item through shop refreshes without buying it. Standard upgrades remain available.
+- **One parts list per rocket section.** Tap the nose, tank, engine, or boosters to browse owned and stocked equipment together. Swipe the row for more; experimental equipment has a **SPECIAL** badge. Selecting a card previews it, and only **Buy & fit / Fit part** equips it. **Info → Reserve offer** keeps one unowned experimental item through shop refreshes for free; it does not buy or fit it.
 - **Reserve tank:** 6 seconds of base fuel plus an equal reserve unlocked by booster separation. Both supplies count toward launch mass. Engine efficiency and research affect both supplies.
 - **Separation engine:** double thrust for 5 simulated seconds after booster separation.
 - **Feather shell:** 25% more thrust at or below 1.30 tonnes of launch mass.
@@ -26,7 +26,7 @@ Build one rocket through **Earth → Moon**, keeping its parts, credits, researc
 
 Abilities have fixed specifications and replace random traits on their experimental part. Their active/inactive conditions are visible in the preview. **Info** shows full specifications and tradeoffs, including on compact screens. Stage separation, reserve release, and thrust surges appear during flight and in the report.
 
-**Optional contracts** offers two finite objectives per world. A new altitude milestone **or** completion of the selected contract avoids a miss; if neither succeeds, the flight uses one miss. Each contract pays once. Equipment eligibility is determined at ignition, and completed contracts cannot be used again for miss protection. Contract-aware previews distinguish a reachable contract from the next altitude goal. Three misses end the whole Earth–Moon attempt; research and unlocked Moon access survive.
+**Optional goal → Choose a contract**, beside the flight goals above the rocket, offers two finite objectives per world. The selected contract stays visible there. A new altitude milestone **or** completion of the selected contract avoids a miss; if neither succeeds, the flight uses one miss. Each contract pays once. Equipment eligibility is determined at ignition, and completed contracts cannot be used again for miss protection. Contract-aware previews distinguish a reachable contract from the next altitude goal. Three misses end the whole Earth–Moon attempt; research and unlocked Moon access survive.
 
 Prototype conditions version 4 uses Earth milestones of **2.5, 10, 25, 70, 160, and 240 km**, and Moon milestones of **350, 700, 1,100, 1,700, 2,400, and 3,200 km**. The original campaign still starts version 3 runs; old runs retain their original conditions. Unsupported saves are preserved with an export option instead of being overwritten.
 
