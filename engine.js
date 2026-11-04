@@ -1,4 +1,4 @@
-import { newInventory, restoreInventory } from './parts.js?v=flight-polish';
+import { newInventory, restoreInventory } from './parts.js?v=roguelite-prototype-1';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [
@@ -76,6 +76,7 @@ export function createFlight(levels, quality = 1, options = {}) {
     stats = { ...options.assembly, thrust: options.assembly.thrust * plan.thrust, burn: options.assembly.burn * plan.burn, drag: options.assembly.drag * plan.drag };
   }
   return { ...stats, quality: clamp(quality, .9, 1.2), time: 0, altitude: 0, velocity: 0, peak: 0, fuel: 1, boosted: false, phase: 'powered', done: false, settled: false,
+    ...(stats.rulesVersion===1?{separationAt:stats.burn*.6,mainBurn:stats.burn,reserveOpened:false,surgeUntil:0,events:[]} : {}),
     plan: options.plan || 'standard', payMultiplier: (options.plan ? flightPlan(options.plan).pay : 1) * (options.assembly?.pay || 1), contractIndex: options.contractIndex ?? null,
     encounterId: Number.isInteger(options.encounterId) ? options.encounterId % 3 : null, encounterAt: stats.burn * .55, encountered: false, pendingEncounter: null,
     salvage: 0, choice: null, power: options.assembly?.power ?? Object.values(levels).reduce((sum, level) => sum + level, 0), coastTime: 0 };
@@ -105,6 +106,31 @@ export function stepFlight(flight, elapsed) {
   while (remaining > 0 && !flight.done) {
     const dt = Math.min(remaining, 1 / 120); remaining -= dt;
     flight.time += dt;
+    if(flight.rulesVersion===1) {
+      if(!flight.boosted&&flight.time>=flight.separationAt) {
+        flight.boosted=true;
+        if(flight.hasBoosters) {
+          flight.velocity+=flight.kick;flight.dryMass-=flight.stageMass;
+          flight.events.push('Boosters separated');
+          if(flight.reserveSeconds) {flight.reserveOpened=true;flight.burn+=flight.reserveSeconds;flight.events.push('Reserve fuel released');}
+          if(flight.surge) {flight.surgeUntil=flight.time+5;flight.events.push('Separation surge · 2× thrust');}
+        }
+      }
+      const powered=flight.time<flight.burn;
+      if(!powered)flight.coastTime+=dt;
+      const reserve=flight.reserveRatio||0;
+      const totalBurn=flight.mainBurn+(flight.reserveSeconds||0);
+      // Inaccessible reserve stays aboard; accessible fuel drains at a constant rate.
+      const consumed=flight.reserveOpened?Math.min(1,flight.time/totalBurn):(1-reserve)*Math.min(1,flight.time/flight.mainBurn);
+      flight.fuel=Math.max(0,1-consumed);
+      const massFactor=flight.mass/(flight.dryMass+flight.fuelMass*flight.fuel);
+      const surge=flight.time<flight.surgeUntil?2:1;
+      const acceleration=(powered?flight.thrust*massFactor*flight.quality*surge:0)-flight.gravity-flight.drag*flight.velocity*Math.abs(flight.velocity);
+      flight.velocity+=acceleration*dt;flight.altitude=Math.max(0,flight.altitude+flight.velocity*dt*500);
+      flight.peak=Math.max(flight.peak,flight.altitude);flight.phase=powered?'powered':'coasting';
+      if(!powered&&flight.velocity<=0){flight.done=true;flight.phase='complete';}
+      continue;
+    }
     const powered = flight.time < flight.burn;
     if (!powered) flight.coastTime += dt;
     if (!flight.boosted && flight.time >= flight.burn * .6) { flight.velocity += flight.kick; flight.boosted = true; if (flight.dryMass) flight.dryMass -= flight.stageMass; }

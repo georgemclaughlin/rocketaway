@@ -1,11 +1,12 @@
-import { flightConditions } from './worlds.js?v=flight-polish';
-import { PARTS, PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart } from './parts.js?v=flight-polish';
-import { createFlight, stepFlight } from './engine.js?v=flight-polish';
-import { partInsight } from './part-insights.js?v=flight-polish';
+import { flightConditions } from './worlds.js?v=roguelite-prototype-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=roguelite-prototype-1';
+import { createFlight, stepFlight } from './engine.js?v=roguelite-prototype-1';
+import { partInsight } from './part-insights.js?v=roguelite-prototype-1';
+import { abilityDescription } from './experimental.js?v=roguelite-prototype-1';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
-  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1);
+  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1)+'|'+(program.rulesVersion||0);
   if (estimates.has(key)) return estimates.get(key);
   const flight = createFlight(program.levels, quality, { plan: 'explorer', assembly: assemblySpecs(program) });
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);
@@ -49,20 +50,21 @@ function partArt(part) {
   return `<svg viewBox="0 0 80 64" aria-hidden="true"><g fill="#e9e3ce" stroke="#788f9e" stroke-width="1">${shape}</g></svg>`;
 }
 
-export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => null }) {
+export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => null, getTargetLabel=()=>'', getReserved=()=>null, onReserve=()=>{} }) {
   const $ = id => document.getElementById(id);
-  let slotId = 'engine', candidateId = null, shelfSlot = null;
+  let slotId = 'engine', candidateId = null, shelfSlot = null, experimental=false;
   $('assembly-slots').innerHTML = PART_SLOTS.map(slot => `<button class="assembly-slot slot-${slot.id}" data-build-slot="${slot.id}" aria-pressed="false"><span>${slot.name}</span><strong></strong></button>`).join('');
   function render() {
     const program = getProgram(), parts = fittedParts(program),conditions=flightConditions(program.launchWorld,program.conditionsVersion??1);
     if (partById(candidateId)?.slot !== slotId) candidateId = program.parts.equipped[slotId];
+    if(program.rulesVersion!==1)experimental=false;
+    const options = catalogFor(program).filter(part => part.slot === slotId&&!!part.ability===experimental);
+    if(!options.some(p=>p.id===candidateId))candidateId=options[0]?.id||program.parts.equipped[slotId];
     const candidate = partForProgram(program, candidateId), preview = previewPart(program, candidateId);
-    const equipped = program.parts.equipped[slotId] === candidateId;
-    const owned = program.parts.owned.includes(candidateId);
-    const options = PARTS.filter(part => part.slot === slotId);
-    if (shelfSlot !== slotId) {
+    const equipped = program.parts.equipped[slotId] === candidateId, owned = program.parts.owned.includes(candidateId);
+    if (shelfSlot !== slotId+'/'+experimental+'/'+program.rulesVersion) {
       $('part-shelf').innerHTML = options.map(part => `<button class="shelf-part" data-part="${part.id}" aria-label="Preview ${part.name}">${partArt(part)}<span class="shelf-name">${part.name.replace(/ engine| tank| fairing| capsule| boosters| cluster/g, '')}</span><small></small></button>`).join('');
-      shelfSlot = slotId;
+      shelfSlot = slotId+'/'+experimental+'/'+program.rulesVersion;
     }
     for (const button of $('part-shelf').querySelectorAll('[data-part]')) {
       const part = partById(button.dataset.part), fitted = program.parts.equipped[slotId] === part.id;
@@ -89,12 +91,12 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('candidate-trait').textContent = candidate.trait ? `${candidate.trait.name} · ${candidate.trait.detail}` : '';
     $('candidate-description').textContent = partInsight(program, candidateId);
     $('candidate-height').textContent = `${(preview.height/1000).toFixed(1)} km`;
-    const target = getTarget();
-    $('comparison-label').textContent = equipped ? 'Equipped estimate' : target ? (preview.height>=target ? `After fitting: clears ${Number((target/1000).toFixed(1))} km` : `After fitting: ${((target-preview.height)/1000).toFixed(1)} km short`) : 'With this part';
+    const target = getTarget(preview.program),fittedTarget=getTarget(program);
+    $('comparison-label').textContent = equipped ? 'Equipped estimate' : getTargetLabel(preview.program)==='Contract' ? (preview.height>=target?'After fitting: contract ready':`Contract: ${((target-preview.height)/1000).toFixed(1)} km short`) : target ? (preview.height>=target ? `After fitting: clears ${Number((target/1000).toFixed(1))} km` : `After fitting: ${((target-preview.height)/1000).toFixed(1)} km short`) : 'With this part';
     $('fitted-height').textContent = `~${(preview.previousHeight/1000).toFixed(1)} km`;
-    const margin = target ? (preview.previousHeight-target)/1000 : null;
-    $('fitted-readiness').textContent = target ? (margin >= 0 ? 'Within reach' : estimateHeight(program,1.2) >= target ? 'Gold can reach it' : `${Math.abs(margin).toFixed(1)} km short`) : 'Estimated at 110% launch power';
-    $('fitted-readiness').dataset.ready = margin === null || margin >= 0 ? 'true' : estimateHeight(program,1.2)>=target?'timing':'false';
+    const margin = fittedTarget ? (preview.previousHeight-fittedTarget)/1000 : null;
+    $('fitted-readiness').textContent = fittedTarget ? (margin >= 0 ? (getTargetLabel(program)==='Contract'?'Contract within reach':'Within reach') : estimateHeight(program,1.2) >= fittedTarget ? 'Gold can reach it' : `${Math.abs(margin).toFixed(1)} km short`) : 'Estimated at 110% launch power';
+    $('fitted-readiness').dataset.ready = margin === null || margin >= 0 ? 'true' : estimateHeight(program,1.2)>=fittedTarget?'timing':'false';
     $('fitted-readiness').title = 'Estimates use 110% power. Gold timing can give up to 120%.';
     document.querySelector('.part-comparison').hidden = equipped;
     const difference = (preview.height-preview.previousHeight)/1000;
@@ -111,10 +113,25 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('part-info-description').textContent = candidate.detail + (candidate.trait ? ` This run: ${candidate.trait.name.toLowerCase()} — ${candidate.trait.detail}.` : '');
     $('part-info-stats').textContent = `${$('candidate-state').textContent}. With this part: ${burn.toFixed(1)}s fuel, ${weight.toFixed(2)} tonnes. Height estimates use 110% launch power; actual timing affects the result. ${flightConditions(program.launchWorld,program.conditionsVersion??1).tip}`;
     $('part-fit').disabled = !canEdit() || !stocked || equipped || (!owned && program.credits < candidate.price);
+    if($('experimental-browse')) {
+      const prototype=program.rulesVersion===1;
+      $('prototype-builder-tools').hidden=!prototype;
+      $('experimental-browse').setAttribute('aria-pressed',experimental);
+      $('experimental-browse').textContent=experimental?'Standard parts':'Experimental parts';
+      $('experimental-browse').disabled=!canEdit();
+      $('reserve-part').hidden=!candidate.ability||owned||!stocked;
+      $('reserve-part').textContent=getReserved()===candidateId?'Reserved ✓':'Reserve offer';
+      $('reserve-part').setAttribute('aria-pressed',getReserved()===candidateId);
+      $('reserve-part').disabled=!canEdit();
+      if(candidate.ability) {
+        $('candidate-description').textContent=abilityDescription(candidate,preview.stats);
+        $('candidate-trait').hidden=false;$('candidate-trait').textContent=candidate.detail;
+      }
+    }
   }
   function selectSlot(id) {
     if (!canEdit() || !PART_SLOTS.some(slot => slot.id === id)) return;
-    slotId = id; candidateId = getProgram().parts.equipped[id]; render();
+    slotId = id; candidateId = getProgram().parts.equipped[id]; experimental=!!partById(candidateId).ability; render();
   }
   $('assembly-stage').addEventListener('click', event => {
     const slot = event.target.closest('[data-build-slot]');
@@ -132,5 +149,15 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     onFit(partById(candidateId));
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) $('assembly-stage').animate([{boxShadow:'inset 0 0 0 2px #a5dcc4'},{boxShadow:'inset 0 0 0 0px transparent'}],{duration:450});
   });
+  $('experimental-browse')?.addEventListener('click',()=>{
+    if(!canEdit())return;
+    experimental=!experimental;
+    if(experimental&&!catalogFor(getProgram()).some(p=>p.slot===slotId&&p.ability))slotId='engine';
+    const p=getProgram(),catalog=catalogFor(p);
+    const ready=catalog.filter(item=>!!item.ability===experimental&&(p.stock?.includes(item.id)||p.parts.owned.includes(item.id)));
+    const choice=experimental?(ready.find(item=>item.slot===slotId&&item.price<=p.credits)||ready.find(item=>item.price<=p.credits)||ready.find(item=>item.slot===slotId)||ready[0]):catalog.find(item=>item.slot===slotId&&!item.ability);
+    if(choice){slotId=choice.slot;candidateId=choice.id;}render();
+  });
+  $('reserve-part')?.addEventListener('click',()=>{if(canEdit()){onReserve(getReserved()===candidateId?null:candidateId);render();}});
   return { render, selectSlot };
 }

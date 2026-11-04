@@ -898,3 +898,56 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
 
 /* A completed flight gets the whole viewport; the journey stays behind it. */
 .overlay:has(#report:not([hidden])) { position: fixed; inset: 0; border-radius: 0; padding: max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); }
+
+/* Local roguelite playtest. These controls remain hidden in the regular game. */
+.prototype-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.prototype-tools button { min-height: 44px; font-size: 11px; padding: 5px; }
+.prototype-tools [aria-pressed="true"] { border-color: #b5e4c9; color: #b5e4c9; }
+.app[data-prototype="true"] .world-route { grid-template-columns: repeat(2,minmax(48px,100px)); }
+.app[data-prototype="true"] #candidate-trait { line-height: 1.3; margin: 0; }
+.app[data-prototype="true"] #reserve-part { font-size: 10px; padding: 4px; min-height: 44px; }
+.app[data-prototype="true"] .part-browser { flex-wrap: wrap; gap: 4px; }
+.contract-card { width: 100%; display: grid; gap: 6px; text-align: left; margin: 10px 0; padding: 12px; border: 1px solid #73869d; border-radius: 8px; background: #253344; color: #e1e9ee; }
+.contract-card[aria-pressed="true"] { border-color: var(--gold); background: #3b3d35; }
+.contract-card span { font-size: 13px; }
+.contract-card small { color: #b5e4c9; }
+#contracts-help { font-size: 13px; line-height: 1.4; }
+#contract-none { min-height: 44px; }
+.ability-flight { position: absolute; top: 95px; left: 16px; right: 16px; text-align: center; color: #d4f3de; font: bold 11px monospace; padding: 8px; background: #203544d9; border-radius: 6px; pointer-events: none; }
+#save-recovery { max-width: 520px; margin: 10vh auto; padding: 24px; }
+#save-export { min-height: 48px; padding: 10px; }
+@media (max-width:700px) and (min-height:521px) {
+ .app[data-prototype="true"] .part-picker { gap: 4px; }
+ .app[data-prototype="true"] .part-browser h3 { font-size: 15px; }
+}
+@media (max-height:650px) and (min-height:521px) {
+ .app[data-prototype="true"] .part-picker { gap: 2px; padding: 5px; }
+ .app[data-prototype="true"] #candidate-trait { font-size: 10px; }
+ .app[data-prototype="true"] .shelf-part svg { height: 22px; }
+ .app[data-prototype="true"] #candidate-trait { display: none; }
+}
+@media (max-height:650px) {
+ .app[data-prototype="true"] .part-picker { grid-template-columns: minmax(0,1fr) auto; }
+ .app[data-prototype="true"] .part-picker > * { grid-column: 1 / -1; }
+ .app[data-prototype="true"] .part-comparison { grid-column: 1; grid-row: 8; border: 0; padding: 0; }
+ .app[data-prototype="true"] .part-comparison > span { display: none; }
+ .app[data-prototype="true"] .part-comparison > div { text-align: left; }
+ .app[data-prototype="true"] .picker-action { grid-column: 2; grid-row: 8; }
+ .app[data-prototype="true"] .picker-action p { display: none; }
+ .app[data-prototype="true"] #part-fit { min-width: 120px; width: auto; }
+ .app[data-prototype="true"] #reserve-part { max-width: 72px; }
+}
+@media (max-height:520px) {
+ .app[data-prototype="true"] .workshop { position: relative; }
+ .app[data-prototype="true"] .prototype-tools { position: absolute; left: 14px; top: 14px; width: calc(50% - 26px); z-index: 2; }
+ .app[data-prototype="true"] #assembly-slots { top: 54px; }
+ .app[data-prototype="true"] .assembly-art { top: 44px; }
+ .app[data-prototype="true"] #candidate-trait { font-size: 10px; }
+ .app[data-prototype="true"] .shelf-part svg { height: 22px; }
+ .app[data-prototype="true"] #candidate-trait { display: none; }
+ .app[data-prototype="true"] .part-picker { align-content: start; }
+ #contracts-dialog { width: min(640px,calc(100% - 24px)); padding: 12px; }
+ #contract-offers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+ .contract-card { margin: 4px 0; }
+ .ability-flight { top: 55px; left: 160px; right: 160px; }
+}

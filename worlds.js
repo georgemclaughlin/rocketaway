@@ -48,6 +48,7 @@ export function flightConditions(world,version=CONDITIONS_VERSION) {
   if(!Number.isInteger(world)||world<0||world>=CONDITIONS.length)return {...EARTH,label:'',brief:'',tip:'',grant:0};
   if(version===0)return {...EARTH,label:'Original flight conditions',brief:'This saved expedition keeps its original flight conditions.',tip:'This saved expedition keeps its original flight conditions.',grant:0};
   if(version===1)return world===1?{...MOON,grant:0}:world===0?EARTH:{...EARTH,label:'Original flight conditions',brief:'This saved expedition keeps its original flight conditions.',tip:'This saved expedition keeps its original flight conditions.',grant:0};
+  if(version===4&&world<2)return {...CONDITIONS[world],checkpoints:world===0?[2500,10000,25000,70000,160000,240000]:[350000,700000,1100000,1700000,2400000,3200000]};
   return (version===2?CONDITIONS_V2:CONDITIONS)[world];
 }
 export function worldMarkup(world, extraClass='') {

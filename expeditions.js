@@ -1,9 +1,9 @@
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=flight-polish';
-import { newProgram, restoreProgram } from './engine.js?v=flight-polish';
-import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js?v=flight-polish';
-import { MODULES, ROUTES } from './modifiers.js?v=flight-polish';
-import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js?v=flight-polish';
-import { newFlightRecords, restoreFlightRecords, recordLaunch, recordFlightPeak } from './flight-records.js?v=flight-polish';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=roguelite-prototype-1';
+import { newProgram, restoreProgram } from './engine.js?v=roguelite-prototype-1';
+import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js?v=roguelite-prototype-1';
+import { MODULES, ROUTES } from './modifiers.js?v=roguelite-prototype-1';
+import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js?v=roguelite-prototype-1';
+import { newFlightRecords, restoreFlightRecords, recordLaunch, recordFlightPeak } from './flight-records.js?v=roguelite-prototype-1';
 export const EXPEDITION_KEY = 'rocket-away-expeditions-v1';
 export const ASCENT_STEP = .05;
 export const MOON_CHECKPOINTS = [6000,20000,60000,150000,300000,600000];

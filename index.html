@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=flight-polish">
-  <script type="module" src="./game.js?v=flight-polish"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=roguelite-prototype-1">
+  <script type="module" src="./game.js?v=roguelite-prototype-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -32,6 +32,7 @@
         <canvas id="game" aria-label="Your assembled rocket. Tap its nose, tank, engine, or side boosters to choose parts. Flights are automatic."></canvas>
         <div class="flight-top"><div><span class="label">ALTITUDE</span><strong><span id="altitude">0.00</span><small> km</small></strong><span id="launch-rating" class="launch-rating" hidden></span></div><div class="flight-number"><button class="label science-readout" id="flight-number" aria-label="Open world guide">FLIGHT 01</button><span id="flight-status">ON THE PAD</span></div></div>
         <div class="scene-tag" id="scene-tag">TAP ROCKET PARTS TO BUILD</div>
+        <div id="ability-flight" class="ability-flight" hidden aria-live="polite"></div>
         <div class="flight-telemetry" id="telemetry" hidden><div><span class="label">FUEL</span><div class="fuel-track"><div id="fuel"></div></div></div><div><span class="label">VERTICAL SPEED</span><strong id="velocity">0 m/s</strong></div></div>
       </div>
       <div class="launch-console">
@@ -48,9 +49,10 @@
         <div id="assembly-slots"></div><div class="rocket-readiness"><span>Estimated at 110% · <b id="fitted-height"></b></span><small id="fitted-readiness"></small></div>
       </div>
       <section class="part-picker" aria-labelledby="candidate-name">
+        <div id="prototype-builder-tools" class="prototype-tools" hidden><button id="experimental-browse" class="small-button" aria-pressed="false">Experimental parts</button><button id="contracts-open" class="small-button">Contracts</button></div>
         <div class="picker-heading"><span id="category-label">ENGINE</span><span id="candidate-position">1 / 4</span></div>
         <div class="part-shelf" id="part-shelf" role="group" aria-label="Available parts"></div>
-        <div class="part-browser"><h3 id="candidate-name" aria-live="polite">Spark engine</h3><button id="part-info" class="small-button" aria-label="Part details">Info</button></div>
+        <div class="part-browser"><h3 id="candidate-name" aria-live="polite">Spark engine</h3><button id="reserve-part" class="small-button" hidden aria-pressed="false">Reserve offer</button><button id="part-info" class="small-button" aria-label="Part details">Info</button></div>
         <p id="candidate-description"></p><p id="candidate-trait" hidden></p><span id="candidate-state" hidden></span>
         <div class="part-comparison"><span><span id="comparison-label">Estimated height</span><small>Estimate at 110% power</small></span><div><strong id="candidate-height">—</strong><small id="candidate-difference">Current rocket</small></div></div>
         <div class="picker-action"><p id="candidate-tradeoff"></p><button id="part-fit" class="small-button">Fitted</button></div>
@@ -89,6 +91,11 @@
     <button id="run-abandon" class="small-button">End expedition</button>
     <button id="reset-all" class="reset-button" aria-label="Reset entire game">Reset entire game</button>
     <p id="menu-flight-note" hidden>Finish this flight before switching modes or resetting.</p>
+  </dialog>
+  <dialog id="contracts-dialog" class="reset-dialog reference-dialog" aria-labelledby="contracts-title">
+    <div class="menu-heading"><h2 id="contracts-title">Optional contracts</h2><button id="contracts-close" class="small-button">Back</button></div>
+    <p id="contracts-help">Clear a new milestone OR your selected contract to avoid a miss. If neither succeeds, use one miss. Each contract pays once.</p>
+    <div id="contract-offers"></div><button id="contract-none" class="small-button">Altitude only</button>
   </dialog>
   <dialog id="records-dialog" class="reset-dialog reference-dialog" aria-labelledby="records-title">
     <div class="menu-heading"><h2 id="records-title">Journey records</h2><button id="records-close" class="small-button" autofocus>Back</button></div>
@@ -129,5 +136,6 @@
   </dialog>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
 </main>
+<section id="save-recovery" hidden><h1>Your save is protected</h1><p id="save-error"></p><p>No progress has been overwritten.</p><button id="save-export">Export saved progress</button></section>
 </body>
 </html>

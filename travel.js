@@ -1,6 +1,6 @@
-import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=flight-polish';
-import { fittedParts } from './parts.js?v=flight-polish';
-import { rocketArt } from './builder.js?v=flight-polish';
+import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=roguelite-prototype-1';
+import { fittedParts } from './parts.js?v=roguelite-prototype-1';
+import { rocketArt } from './builder.js?v=roguelite-prototype-1';
 
 export function createTravel(onArrive) {
   const dialog=document.getElementById('travel-dialog');

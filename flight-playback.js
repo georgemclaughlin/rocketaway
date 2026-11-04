@@ -1,4 +1,4 @@
-import { stepFlight } from './engine.js?v=flight-polish';
+import { stepFlight } from './engine.js?v=roguelite-prototype-1';
 
 export const FAST_FORWARD_SECONDS = 6;
 const PHYSICS_STEP = 1 / 120;
@@ -7,7 +7,7 @@ const remainders = new WeakMap();
 // Measure the remaining trajectory once when fast forward starts. Recalculating
 // every frame would continually push the finish away instead of reaching it.
 export function fastForwardRate(flight) {
-  const preview = { ...flight };
+  const preview = structuredClone(flight);
   remainders.set(preview, remainders.get(flight) || 0);
   for (let steps = 0; steps < 12000 && !preview.done && !preview.pendingEncounter; steps++) {
     advanceFlight(preview, 1);

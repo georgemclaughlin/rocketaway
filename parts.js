@@ -1,6 +1,7 @@
-import { modifyAssembly } from './modifiers.js?v=flight-polish';
-import { researchModifiers } from './research.js?v=flight-polish';
-import { flightConditions } from './worlds.js?v=flight-polish';
+import { modifyAssembly } from './modifiers.js?v=roguelite-prototype-1';
+import { researchModifiers } from './research.js?v=roguelite-prototype-1';
+import { flightConditions } from './worlds.js?v=roguelite-prototype-1';
+import { EXPERIMENTAL_PARTS, experimentalAssembly } from './experimental.js?v=roguelite-prototype-1';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },
@@ -49,7 +50,8 @@ export function partForProgram(program, id) {
   if (trait.id === 'light' && part.fuelMass) result.mass = (part.mass-part.fuelMass)*trait.factor+part.fuelMass;
   return result;
 }
-export function partById(id) { return PARTS.find(part => part.id === id); }
+export function partById(id) { return PARTS.find(part => part.id === id) || EXPERIMENTAL_PARTS.find(part=>part.id===id); }
+export function catalogFor(program) { return program.rulesVersion===1?[...PARTS,...EXPERIMENTAL_PARTS]:PARTS; }
 export function newInventory() {
   const starters=PARTS.filter(part=>part.price===0);
   return {owned:starters.map(part=>part.id),equipped:Object.fromEntries(starters.map(part=>[part.slot,part.id]))};
@@ -76,7 +78,7 @@ export function restoreInventory(raw, legacyLevels={}) {
 }
 export function fitPart(program,id) {
   const part=partById(id);
-  if(!part) return false;
+  if(!part || (part.ability&&program.rulesVersion!==1)) return false;
   if(Array.isArray(program.stock)&&!program.stock.includes(id)&&!program.parts.owned.includes(id))return false;
   if(!program.parts.owned.includes(id)) {
     if(program.credits<part.price) return false;
@@ -91,9 +93,9 @@ export function fittedParts(program) {
 export function assemblySpecs(program) {
   const parts=fittedParts(program), research=researchModifiers(program), baseMass=.5+Object.values(parts).reduce((sum,part)=>sum+part.mass,0);
   const mass=(baseMass-parts.tank.fuelMass)*research.dry+parts.tank.fuelMass,conditions=flightConditions(program.launchWorld,program.conditionsVersion??1);
-  return modifyAssembly({thrust:parts.engine.thrust/mass,burn:parts.tank.burn*parts.engine.efficiency*research.burn,drag:parts.aero.drag*conditions.drag,gravity:conditions.gravity,kick:parts.boosters.kick/mass*research.kick*(program.conditionsVersion>=2?4:1),
+  return experimentalAssembly(modifyAssembly({thrust:parts.engine.thrust/mass,burn:parts.tank.burn*parts.engine.efficiency*research.burn,drag:parts.aero.drag*conditions.drag,gravity:conditions.gravity,kick:parts.boosters.kick/mass*research.kick*(program.conditionsVersion>=2?4:1),
     mass,dryMass:mass-parts.tank.fuelMass,fuelMass:parts.tank.fuelMass,stageMass:parts.boosters.mass*.8*research.dry,pay:parts.aero.pay*research.pay,
-    power:Object.values(parts).reduce((sum,part)=>sum+part.tier,0)},parts,program);
+    power:Object.values(parts).reduce((sum,part)=>sum+part.tier,0)},parts,program),parts,program);
 }
 export function partStats(part) {
   const weight=`${part.mass.toFixed(2)} t`;

@@ -4,6 +4,36 @@ A small rocket-building game: buy components, assemble a rocket, and launch it t
 
 [Play Rocket Away](https://georgemclaughlin.github.io/rocketaway/)
 
+The [roguelite design and implementation plan](ROGUELITE_PLAN.md) describes the proposed longer campaign. An isolated Earth–Moon prototype is available locally; the regular game retains its existing campaign.
+
+## Local roguelite prototype
+
+```sh
+npm run prototype
+```
+
+Open **http://127.0.0.1:4174/**. Port 4174 enables the prototype and gives it a separate browser origin from the regular port 4173 game and GitHub Pages. Keep using that origin to resume prototype progress. The same two storage key names are retained; progress is never copied from the regular game automatically. Do not serve the regular player session on the prototype port.
+
+Build one rocket through **Earth → Moon**, keeping its parts, credits, research effects, and remaining misses during travel. A fresh Moon checkpoint build becomes available after clearing Earth and receives 1,100 additional credits. The prototype ends after the Moon; it does not yet implement the proposed three-world expeditions or longer campaign.
+
+- **Experimental parts** opens special equipment in the existing four slots. Previewing is free; Buy & fit / Fit part equips it. The opening browser prioritizes an affordable offer. **Reserve offer** keeps one unowned experimental item through shop refreshes without buying it. Standard upgrades remain available.
+- **Reserve tank:** 6 seconds of base fuel plus an equal reserve unlocked by booster separation. Both supplies count toward launch mass. Engine efficiency and research affect both supplies.
+- **Separation engine:** double thrust for 5 simulated seconds after booster separation.
+- **Feather shell:** 25% more thrust at or below 1.30 tonnes of launch mass.
+- **Endurance engine:** 75% longer burn with no boosters fitted.
+- **Survey capsule:** 90 extra credits for every new altitude milestone crossed while fitted.
+- **Instrument engine:** 70% longer burn with a Science or Survey capsule fitted.
+
+Abilities have fixed specifications and replace random traits on their experimental part. Their active/inactive conditions are visible in the preview. **Info** shows full specifications and tradeoffs, including on compact screens. Stage separation, reserve release, and thrust surges appear during flight and in the report.
+
+**Optional contracts** offers two finite objectives per world. A new altitude milestone **or** completion of the selected contract avoids a miss; if neither succeeds, the flight uses one miss. Each contract pays once. Equipment eligibility is determined at ignition, and completed contracts cannot be used again for miss protection. Contract-aware previews distinguish a reachable contract from the next altitude goal. Three misses end the whole Earth–Moon attempt; research and unlocked Moon access survive.
+
+Prototype conditions version 4 uses Earth milestones of **2.5, 10, 25, 70, 160, and 240 km**, and Moon milestones of **350, 700, 1,100, 1,700, 2,400, and 3,200 km**. The normal game still starts version 3 runs; old runs retain their original conditions. Unsupported saves are preserved with an export option instead of being overwritten.
+
+Run `node checks/prototype-audit.js` for sampled earned runs using exhaustive affordable build comparisons, contracts, and perfect timing when it can bridge a shortfall. The initial five-seed audit completed **60/60 cases** across three kits, research ranks 0 and 5, and Earth/Moon starts. Full Earth–Moon cases took **4–8 launches** (median 6); Moon-only starts took 1–5 (median 2.5). These are automated policies, not player telemetry or proof of enjoyable pacing. The longer-session target remains unproven and needs human playtesting before expanding the campaign.
+
+`tests/prototype.test.js` covers abilities, preview/playback agreement, offers, contracts, travel, saves, and earned progression. Run `checks/prototype.playwright.js` and `checks/prototype-journey.playwright.js` in an isolated browser on port 4174 for six viewport sizes, reward integrity, recovery, and a fresh earned UI journey. These browser checks replace only their isolated session's saves. The regular game instructions follow below.
+
 ## Play locally
 
 ```sh
