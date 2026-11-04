@@ -23,14 +23,14 @@ export function bestAffordable(program,contract=null) {
   }
   return best;
 }
-export function earnedPrototype({seed=42,kit='scrapper',rank=0,world=0,policy='altitude',quality=1.1}={}) {
-  const session=newExpeditions();session.profile.totalGates=6;session.profile.maxDifficulty=1;session.profile.research.levels[kit]=rank;
+export function earnedPrototype({seed=42,kit='scrapper',rank=0,world=0,policy='altitude',quality=1.1,endWorld=1}={}) {
+  const session=newExpeditions();session.profile.totalGates=6;session.profile.maxDifficulty=Math.max(1,world);session.profile.research.levels[kit]=rank;
   startPrototype(session,{seed,kit,difficulty:world});const launches=[];
-  for(let i=0;i<30;i++) {
-    const run=session.active,p=run.program;
+  for(let i=0;i<90;i++) {
     while(buyResearch(session,kit));
-    if(run.status==='lost'||(run.status==='won'&&run.difficulty===1))break;
-    if(run.status==='won')arrivePrototype(session);
+    if(session.active.status==='lost'||(session.active.status==='won'&&session.active.difficulty===endWorld))break;
+    if(session.active.status==='won'&&!arrivePrototype(session))startPrototype(session,{seed:seed+session.active.difficulty+1,kit,difficulty:session.active.difficulty+1});
+    const run=session.active,p=run.program;
     const buys=[];let chosenContract=null;
     if(estimateHeight(p)<milestoneHeight(run)) {
       let best=bestAffordable(p);

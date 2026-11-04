@@ -1,7 +1,7 @@
-import { modifyAssembly } from './modifiers.js?v=mobile-builder-1';
-import { researchModifiers } from './research.js?v=mobile-builder-1';
-import { flightConditions } from './worlds.js?v=mobile-builder-1';
-import { EXPERIMENTAL_PARTS, experimentalAssembly } from './experimental.js?v=mobile-builder-1';
+import { modifyAssembly } from './modifiers.js?v=next-world-1';
+import { researchModifiers } from './research.js?v=next-world-1';
+import { flightConditions } from './worlds.js?v=next-world-1';
+import { EXPERIMENTAL_PARTS, experimentalAssembly } from './experimental.js?v=next-world-1';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },

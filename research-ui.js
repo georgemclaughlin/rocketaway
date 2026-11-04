@@ -1,4 +1,4 @@
-import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=mobile-builder-1';
+import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=next-world-1';
 
 export function researchButtonState(profile,selectedKit='scrapper') {
  const data=profile.research.data;

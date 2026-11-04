@@ -1,9 +1,10 @@
-// Local Earth–Moon prototype. Legacy sessions continue through their original rules.
-import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, KITS, milestoneHeight } from './expeditions.js?v=mobile-builder-1';
-import { PARTS, partById, assemblySpecs } from './parts.js?v=mobile-builder-1';
-import { EXPERIMENTAL_PARTS } from './experimental.js?v=mobile-builder-1';
-import { awardResearch } from './research.js?v=mobile-builder-1';
-import { recordFlightPeak } from './flight-records.js?v=mobile-builder-1';
+// Roguelite journey. Existing flights retain their physics and equipment.
+import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=next-world-1';
+import { PARTS, partById, assemblySpecs } from './parts.js?v=next-world-1';
+import { EXPERIMENTAL_PARTS } from './experimental.js?v=next-world-1';
+import { awardResearch } from './research.js?v=next-world-1';
+import { recordFlightPeak } from './flight-records.js?v=next-world-1';
+import { WORLDS, flightConditions } from './worlds.js?v=next-world-1';
 
 export const isPrototype = run => run?.rulesVersion===1;
 const bounded=(v,max=1e9)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
@@ -14,6 +15,13 @@ function shuffled(items,seed) {
   return result;
 }
 export function prototypeContracts(world) {
+  if(world>1) {
+    const name=WORLDS[world].name,goals=flightConditions(world,4).checkpoints;
+    return [
+      {id:`world-${world}-light`,name:'Quiet ascent',detail:`Reach ${goals[1]/1000} km with no side boosters`,target:goals[1],kind:'bare',reward:240},
+      {id:`world-${world}-science`,name:`${name} instruments`,detail:`Reach ${goals[3]/1000} km carrying a science capsule`,target:goals[3],kind:'science',reward:320},
+    ];
+  }
   return world===0?[
     {id:'earth-light',name:'Small but mighty',detail:'Reach 12 km at ≤1.30t launch mass',target:12000,kind:'light',reward:180},
     {id:'earth-science',name:'Atmosphere survey',detail:'Reach 40 km carrying a science capsule',target:40000,kind:'science',reward:240},
@@ -43,7 +51,7 @@ export function reserveOffer(session,id) {
 }
 function restock(run) {
   const p=run.program,seed=run.seed+run.offerIndex*7919+run.difficulty*104729;
-  const stock=PARTS.filter(part=>part.price>0&&!p.parts.owned.includes(part.id)&&part.tier<=Math.min(6,2+run.stage*2+(run.difficulty?2:0))).map(part=>part.id);
+  const stock=PARTS.filter(part=>part.price>0&&!p.parts.owned.includes(part.id)&&part.tier<=Math.max(run.difficulty>1?flightConditions(run.difficulty,4).stockTier:0,Math.min(6,2+run.stage*2+(run.difficulty?2:0)))).map(part=>part.id);
   const pool=EXPERIMENTAL_PARTS.filter(part=>!p.parts.owned.includes(part.id));
   if(p.parts.owned.includes(run.reservedOffer))run.reservedOffer=null;
   const offered=run.reservedOffer?[run.reservedOffer]:[];
@@ -52,9 +60,15 @@ function restock(run) {
   p.stock=[...stock,...offered.filter(Boolean)];
 }
 export function startPrototype(session,options={}) {
-  if(!startExpedition(session,{...options,difficulty:bounded(options.difficulty,1)}))return false;
+  // Choosing a new launchpad explicitly replaces the saved rocket; merely opening setup does not.
+  if(Number.isInteger(session.pendingWorld)&&session.active&&session.pendingWorld>session.active.difficulty&&['build','debrief'].includes(session.active.status)) {
+    if(!KITS.some(kit=>kit.id===(options.kit||'scrapper')&&kit.unlock<=session.profile.totalGates))return false;
+    abandonExpedition(session);
+  }
+  if(!startExpedition(session,{...options,difficulty:bounded(options.difficulty,8)}))return false;
+  session.pendingWorld=null;
   const run=session.active,difficulty=run.difficulty;
-  session.prototypeVersion=1;
+  session.prototypeVersion=2;
   session.profile.prototypeWorlds??=[];
   Object.assign(run,{rulesVersion:1,startWorld:difficulty,conditionsVersion:4,offerIndex:0,reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
   Object.assign(run.program,{rulesVersion:1,conditionsVersion:4});
@@ -98,7 +112,8 @@ export function settle(session,flight) {
   run.status=run.stage===6?'won':run.strikes>=3?'lost':'debrief';
   if(run.status==='won') {
     if(firstWorld)session.profile.prototypeWorlds.push(run.difficulty);
-    session.profile.wins++;session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(1,run.difficulty+1));
+    session.profile.wins++;session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,run.difficulty+1));
+    if(run.difficulty===8){session.profile.campaignComplete=true;session.profile.endingAcknowledged=false;}
   }
   return result;
 }
@@ -110,7 +125,7 @@ export function arrivePrototype(session) {
   restock(run);return true;
 }
 export function restoreSession(raw) {
-  if(raw?.prototypeVersion!==undefined&&raw.prototypeVersion!==1)throw Error('This save needs a newer prototype build.');
+  if(raw?.prototypeVersion!==undefined&&![1,2].includes(raw.prototypeVersion))throw Error('This save needs a newer prototype build.');
   if(raw?.active?.rulesVersion!==undefined&&raw.active.rulesVersion!==1)throw Error('This expedition needs a newer rules version.');
   if(raw?.version!==undefined&&![1,2].includes(raw.version))throw Error('This save needs a newer game build.');
   if(raw?.active?.conditionsVersion>4)throw Error('This save needs newer flight conditions.');
@@ -122,15 +137,19 @@ export function restoreSession(raw) {
   // then restore only validated prototype fields. Do not downgrade a v4 run.
   const legacy=copy(raw);
   if(legacy.active)legacy.active.conditionsVersion=3;
-  const session=restoreExpeditions(legacy);session.prototypeVersion=1;
-  session.profile.prototypeWorlds=[0,1].filter(w=>raw.profile?.prototypeWorlds?.includes(w));
-  session.profile.maxDifficulty=Math.min(1,session.profile.maxDifficulty);
+  const session=restoreExpeditions(legacy);session.prototypeVersion=2;
+  session.profile.prototypeWorlds=WORLDS.map((_,i)=>i).filter(w=>raw.profile?.prototypeWorlds?.includes(w));
+  // A player may already have started an Earth replay after the old Moon ending.
+  for(const world of session.profile.prototypeWorlds)session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,world+1));
+  if(session.profile.prototypeWorlds.includes(8))session.profile.campaignComplete=true;
+  session.pendingWorld=Number.isInteger(raw.pendingWorld)&&raw.pendingWorld>=0&&raw.pendingWorld<=session.profile.maxDifficulty?raw.pendingWorld:null;
   const run=session.active,input=raw.active;
   if(!run)return session;
-  if(input.difficulty!==0&&input.difficulty!==1)throw Error('Unsupported prototype destination.');
-  Object.assign(run,{rulesVersion:1,conditionsVersion:4,startWorld:input.startWorld===1?1:0,offerIndex:bounded(input.offerIndex),reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
+  if(!Number.isInteger(input.difficulty)||input.difficulty<0||input.difficulty>8)throw Error('Unsupported roguelite destination.');
+  if(run.status==='won')session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,run.difficulty+1));
+  Object.assign(run,{rulesVersion:1,conditionsVersion:4,startWorld:bounded(input.startWorld,8),offerIndex:bounded(input.offerIndex),reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
   Object.assign(run.program,{rulesVersion:1,conditionsVersion:4});
-  const allContracts=[...prototypeContracts(0),...prototypeContracts(1)];
+  const allContracts=WORLDS.flatMap((_,world)=>prototypeContracts(world));
   run.completedContracts=allContracts.filter(c=>input.completedContracts?.includes(c.id)).map(c=>c.id);
   run.contractId=prototypeContracts(run.difficulty).some(c=>c.id===input.contractId&&!run.completedContracts.includes(c.id))?input.contractId:null;
   const validIds=[...PARTS,...EXPERIMENTAL_PARTS].map(p=>p.id);

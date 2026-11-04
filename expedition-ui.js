@@ -1,13 +1,14 @@
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=mobile-builder-1';
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=mobile-builder-1';
-import { altitudeLabel } from './journey.js?v=mobile-builder-1';
-import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=mobile-builder-1';
-import { newProgram } from './engine.js?v=mobile-builder-1';
-import { fittedParts } from './parts.js?v=mobile-builder-1';
-import { rocketArt } from './builder.js?v=mobile-builder-1';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=mobile-builder-1';
-import { researchButtonState } from './research-ui.js?v=mobile-builder-1';
-import { kitDetails } from './kit-details.js?v=mobile-builder-1';
+import { hasNextWorldOffer } from './campaign-save.js?v=next-world-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=next-world-1';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=next-world-1';
+import { altitudeLabel } from './journey.js?v=next-world-1';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=next-world-1';
+import { newProgram } from './engine.js?v=next-world-1';
+import { fittedParts } from './parts.js?v=next-world-1';
+import { rocketArt } from './builder.js?v=next-world-1';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=next-world-1';
+import { researchButtonState } from './research-ui.js?v=next-world-1';
+import { kitDetails } from './kit-details.js?v=next-world-1';
 
 function kitArt(item,profile) {
   return rocketArt(kitDetails(item,profile).parts);
@@ -17,9 +18,16 @@ function kitArt(item,profile) {
 export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, startRun=startExpedition, prototype=false, onTravel=()=>{} }) {
   const $=id=>document.getElementById(id);
   let kit='scrapper', difficulty=0, setupKey=null;
+  function keepWorldVisible() {
+    const route=$('expedition-goal').querySelector('.world-route'),selected=route?.querySelector('[aria-pressed="true"]');
+    if(!selected||!route.clientWidth)return;
+    route.scrollLeft+=selected.getBoundingClientRect().left-route.getBoundingClientRect().left-(route.clientWidth-selected.clientWidth)/2;
+  }
+  new ResizeObserver(()=>requestAnimationFrame(keepWorldVisible)).observe($('expedition-goal'));
   function render() {
     const session=getSession(),run=session.active,profile=session.profile;
-    const ended=run && ['won','lost'].includes(run.status), hub=!run || ended;
+    const offeringNext=hasNextWorldOffer(session);
+    const ended=run && ['won','lost'].includes(run.status), hub=!run || ended || offeringNext;
     $('expedition').dataset.phase=hub?'hub':'resume';
     $('expedition').dataset.ended=!!ended;
     $('expedition-step').textContent=hub?`EXPEDITION ${profile.runs+1} · NEW JOURNEY`:'EXPEDITION IN PROGRESS';
@@ -32,7 +40,7 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, s
     $('expedition-stats').hidden=!!ended;
     $('expedition-stats').textContent=`${profile.wins} wins · ${profile.totalGates} milestones cleared`;
     $('expedition-choices').className='expedition-choices';
-    if(prototype&&run?.rulesVersion===1&&run.status==='won'&&run.difficulty===0) {
+    if(prototype&&run?.rulesVersion===1&&run.status==='won'&&run.difficulty===0&&profile.maxDifficulty<=1) {
       $('expedition-step').textContent='EARTH CLEARED · ROCKET SAVED';
       $('expedition-title').textContent='Your next stop is the Moon';
       $('expedition-summary').textContent='Carry your parts and credits into vacuum. Your remaining misses carry too.';
@@ -55,11 +63,11 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, s
         $('expedition-footer').innerHTML=`<p id="ending-record-note">${records.partial?'Older flights may be missing from these records.':'Your journey is complete. Keep your upgrades and revisit any world when you’re ready.'}</p><button id="ending-explore" class="primary">Explore cleared worlds ↗</button>`;
         return;
       }
-      const key=run?`${profile.runs}/${run.seed}/${run.status}`:'fresh';
+      const key=run?`${profile.runs}/${run.seed}/${run.status}/${offeringNext?session.pendingWorld:''}`:`fresh/${profile.maxDifficulty}`;
       if(key!==setupKey) {
         setupKey=key;
         kit=run?.kit||'scrapper';
-        difficulty=prototype&&run?.status==='won'?0:run?.status==='won'?Math.min(profile.maxDifficulty,run.difficulty+1):run?.difficulty||0;
+        difficulty=profile.maxDifficulty;
       }
       const world=worldFor({difficulty}),next=destinationFor({difficulty});
       $('world-briefing').textContent=`${flightConditions(difficulty).brief} ⓘ`;
@@ -68,13 +76,7 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, s
       $('expedition-title').innerHTML=`${worldMarkup(world)}<span>Launch from ${world.name==='Moon'?'the Moon':world.name}</span>`;
       $('expedition-summary').textContent=profile.campaignComplete?`Replay ${world.name} with a new build. Your Tau Ceti journey stays complete.`:`Reach ${altitudeLabel(milestoneHeight({difficulty,conditionsVersion:CONDITIONS_VERSION},5))} → ${next.name}. Six milestones, three misses.`;
       $('expedition-goal').innerHTML=`<nav class="world-route" aria-label="Road to Tau Ceti. Select an unlocked world to replay.">${worldRoute(profile,difficulty)}</nav>`;
-      const route=$('expedition-goal').querySelector('.world-route');
-      if(prototype)route.querySelectorAll('[data-world]').forEach(button=>{if(Number(button.dataset.world)>1)button.remove();});
-      requestAnimationFrame(()=>{
-        if(!route.isConnected)return;
-        const selected=route.querySelector('[aria-pressed="true"]');
-        if(selected)route.scrollLeft+=selected.getBoundingClientRect().left-route.getBoundingClientRect().left-(route.clientWidth-selected.clientWidth)/2;
-      });
+      requestAnimationFrame(keepWorldVisible);
       const kits=KITS.filter(item=>profile.totalGates>=item.unlock);
       $('expedition').dataset.kits=kits.length;
       $('expedition-setup-title').textContent=kits.length===1?'Your first rocket':'Choose a starting build';
@@ -89,9 +91,14 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, s
       const researchButton=researchButtonState(profile,kit);
       $('expedition-footer').innerHTML=`<p class="kit-unlock">${flightConditions(difficulty).grant?`Starting credits include ${flightConditions(difficulty).grant} world funding.`:ended?'Fresh rocket. Your research stays yours.':'Choose parts, then test your build. Tau Ceti awaits.'}</p><div class="start-actions"><button id="research-hub" class="research-action ${researchButton.available?'research-ready':''}" data-research-state="${researchButton.state}" aria-label="${researchButton.ariaLabel}">${researchButton.label}</button><button id="run-start" class="primary">Build rocket ↗</button></div>`;
       if(prototype) {
-        $('expedition-step').textContent=run?.status==='won'?'PROTOTYPE EXPEDITION COMPLETE':'EARTH → MOON · ROGUELITE PLAYTEST';
-        $('expedition-summary').textContent=difficulty===0?'One rocket across two worlds. Find experimental combinations. Three misses end the expedition.':'Moon checkpoint: a fresh funded rocket. Three misses. Research stays with you.';
-        $('expedition-footer').querySelector('.kit-unlock').textContent=difficulty===1?'Includes 1,100 checkpoint credits.':run?.status==='won'?'Try another combination. Your research and Moon access are kept.':'Experimental parts and optional contracts await in the hangar.';
+        $('expedition-step').textContent=profile.campaignComplete?'JOURNEY COMPLETE · OPTIONAL REPLAY':`ROAD TO TAU CETI · WORLD ${difficulty+1} / 9`;
+        $('expedition-summary').textContent=difficulty===0?'Build through Earth and Moon with one rocket. Then continue the journey to Tau Ceti.':`Next: ${next.name}. A fresh rocket and credits; your research stays with you.`;
+        $('expedition-footer').querySelector('.kit-unlock').textContent=difficulty===1?'Includes 1,100 checkpoint credits.':'Three misses. Research and worlds are kept.';
+        if(offeringNext) {
+          $('expedition-summary').textContent=`${world.name} unlocked in your earlier save. Start fresh here or resume your ${worldFor(run).name} rocket.`;
+          $('expedition-footer').querySelector('.kit-unlock').innerHTML='<button id="run-keep" class="small-button">Back to saved rocket</button>';
+          $('run-start').textContent='Build new rocket ↗';
+        }
       }
     } else {
       $('expedition-title').textContent=`Return to ${worldFor(run).name}`;
@@ -113,14 +120,15 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, s
     const id=event.target.closest('button')?.id,session=getSession();
     if(id==='ending-explore') {
       session.profile.endingAcknowledged=true;
-      setupKey=session.active?`${session.profile.runs}/${session.active.seed}/${session.active.status}`:'fresh';
+      setupKey=session.active?`${session.profile.runs}/${session.active.seed}/${session.active.status}/`:`fresh/${session.profile.maxDifficulty}`;
       difficulty=0;kit=session.active?.kit||'scrapper';
       onExplore();render();$('expedition-title').focus({preventScroll:true});
     }
     if(id==='run-start' && startRun(session,{seed:crypto.getRandomValues(new Uint32Array(1))[0],kit,difficulty}))onBuild();
     if(id==='run-travel')onTravel();
+    if(id==='run-keep'){session.pendingWorld=null;onBuild();}
     if(id==='run-build')onBuild();
     if(id==='run-resume')onResume();
   });
-  return {render,getSelectedWorld:()=>{const run=getSession().active;return run&&!['won','lost'].includes(run.status)?run.difficulty:difficulty;},getSelectedKit:()=>{const run=getSession().active;return run&&!['won','lost'].includes(run.status)?run.kit:kit;},reset:()=>{kit='scrapper';difficulty=0;setupKey=null;}};
+  return {render,getSelectedWorld:()=>{const run=getSession().active;return run&&!['won','lost'].includes(run.status)&&!hasNextWorldOffer(getSession())?run.difficulty:difficulty;},getSelectedKit:()=>{const run=getSession().active;return run&&!['won','lost'].includes(run.status)&&!hasNextWorldOffer(getSession())?run.kit:kit;},reset:()=>{kit='scrapper';difficulty=0;setupKey=null;}};
 }

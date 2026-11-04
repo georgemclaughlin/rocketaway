@@ -1,22 +1,22 @@
-import { createScienceUI } from './science-ui.js?v=mobile-builder-1';
-import { environmentLabel } from './science-data.js?v=mobile-builder-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=mobile-builder-1';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=mobile-builder-1';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=mobile-builder-1';
-import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=mobile-builder-1';
-import { MODULES } from './modifiers.js?v=mobile-builder-1';
-import { createExpeditionUI } from './expedition-ui.js?v=mobile-builder-1';
-import { createBuilder, rocketArt } from './builder.js?v=mobile-builder-1';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=mobile-builder-1';
-import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=mobile-builder-1';
-import { createTravel } from './travel.js?v=mobile-builder-1';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=mobile-builder-1';
-import { launchRating } from './launch-feedback.js?v=mobile-builder-1';
-import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=mobile-builder-1';
-import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=mobile-builder-1';
-import { kitDetails } from './kit-details.js?v=mobile-builder-1';
-import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, prototypeContracts, contractReady } from './prototype-run.js?v=mobile-builder-1';
-import { openCampaignSave, packCampaignSave } from './campaign-save.js?v=mobile-builder-1';
+import { createScienceUI } from './science-ui.js?v=next-world-1';
+import { environmentLabel } from './science-data.js?v=next-world-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=next-world-1';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=next-world-1';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=next-world-1';
+import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=next-world-1';
+import { MODULES } from './modifiers.js?v=next-world-1';
+import { createExpeditionUI } from './expedition-ui.js?v=next-world-1';
+import { createBuilder, rocketArt } from './builder.js?v=next-world-1';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=next-world-1';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=next-world-1';
+import { createTravel } from './travel.js?v=next-world-1';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=next-world-1';
+import { launchRating } from './launch-feedback.js?v=next-world-1';
+import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=next-world-1';
+import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=next-world-1';
+import { kitDetails } from './kit-details.js?v=next-world-1';
+import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, prototypeContracts, contractReady } from './prototype-run.js?v=next-world-1';
+import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=next-world-1';
 const prototype = new URLSearchParams(location.search).get('campaign') !== 'original';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
@@ -41,7 +41,7 @@ document.querySelector('.app').dataset.prototype=prototype;
 const inExpedition = () => expeditionSession.mode === 'expedition' && !!expeditionSession.active;
 const canBuild = () => mode === 'workshop' && (expeditionSession.mode === 'classic' || expeditionSession.active?.status === 'build');
 if (expeditionSession.mode === 'expedition') currentScreen = 'expedition';
-if (inExpedition()) { continueExpedition(expeditionSession); program = expeditionSession.active.program; currentScreen = expeditionSession.active.status === 'build' ? 'workshop' : 'expedition'; }
+if (inExpedition()) { continueExpedition(expeditionSession); program = expeditionSession.active.program; currentScreen = expeditionSession.active.status === 'build' && !hasNextWorldOffer(expeditionSession) ? 'workshop' : 'expedition'; }
 const expeditionUI = createExpeditionUI({ getSession: () => expeditionSession, prototype, ...(prototype?{startRun:startPrototype}:{}), onTravel:()=>travelToNextWorld(expeditionSession.active),
   onExplore: () => persist(),
   onBuild: () => { continueExpedition(expeditionSession); expeditionSession.mode = 'expedition'; program = expeditionSession.active.program; persist(); renderWorkshop(); builder.selectSlot('engine'); showScreen('workshop'); $('workshop-title').focus({ preventScroll: true }); },
@@ -110,10 +110,9 @@ function renderPrototypeResult(result) {
     $('result-description').textContent=`${altitudeLabel(Math.max(0,target-result.altitude))} short · ${3-run.strikes} misses left across this expedition.`;
   }
   if(run.status==='won') {
-    $('result-title').textContent=run.difficulty===0?'Earth, cleared!':'Expedition complete!';
-    $('result-description').textContent=run.difficulty===0?'Take this rocket to the Moon. Parts, credits and remaining misses carry over.':'Earth–Moon playtest complete. Keep your research and try another combination.';
-    if(run.startWorld===1&&run.difficulty===1)$('result-description').textContent='Moon checkpoint cleared. Try the full Earth–Moon expedition with another build.';
-    $('return').textContent=run.difficulty===0?'Travel to Moon ↗':'Explore another build ↗';
+    $('result-title').textContent=`${worldFor(run).name}, cleared!`;
+    $('result-description').textContent=run.difficulty===0?'Take this rocket to the Moon. Parts, credits and remaining misses carry over.':run.difficulty===8?'The last launchpad is behind you. One final crossing to Tau Ceti.':`Next launchpad: ${destinationFor(run).name}. Start a fresh rocket there; research and unlocked worlds stay yours.`;
+    $('return').textContent=`Travel to ${destinationFor(run).name} ↗`;
   }
   if(result.contractPay||result.surveyPay) {
     const line=document.createElement('span');line.textContent=[result.contractPay?`Contract +${result.contractPay}`:'',result.surveyPay?`Survey +${result.surveyPay}`:''].filter(Boolean).join(' · ');$('bonus-note').append(line);
@@ -128,7 +127,7 @@ function syncScreens() {
   const expeditionMode = expeditionSession.mode === 'expedition';
   app.dataset.view = currentScreen;
   app.dataset.mode = expeditionMode ? 'expedition' : 'classic';
-  app.dataset.hub = expeditionMode && (!run || ['won','lost'].includes(run.status)) && currentScreen === 'expedition';
+  app.dataset.hub = expeditionMode && (!run || ['won','lost'].includes(run.status) || hasNextWorldOffer(expeditionSession)) && currentScreen === 'expedition';
   app.dataset.flight = mode !== 'workshop';
   app.style.setProperty('--world-accent', worldFor(run).color);
   $('launchpad').inert = modal || currentScreen !== 'launchpad';
@@ -139,8 +138,8 @@ function syncScreens() {
   if (mode === 'workshop') $('launch').disabled = !canBuild();
   $('run-classic').disabled = mode !== 'workshop' || !expeditionMode;
   $('switch-campaign').disabled = mode !== 'workshop';
-  $('switch-campaign').textContent = prototype ? 'Original campaign · saved separately' : 'Play Earth–Moon roguelite';
-  $('run-expeditions').textContent = prototype ? 'Earth–Moon roguelite' : 'Road to Tau Ceti';
+  $('switch-campaign').textContent = prototype ? 'Original campaign · saved separately' : 'Play roguelite journey';
+  $('run-expeditions').textContent = prototype ? 'Roguelite journey' : 'Road to Tau Ceti';
   $('run-expeditions').disabled = mode !== 'workshop' || expeditionMode;
   $('run-classic').setAttribute('aria-pressed', !expeditionMode);
   $('run-expeditions').setAttribute('aria-pressed', expeditionMode);
@@ -160,7 +159,7 @@ function syncScreens() {
   $('run-abandon').disabled = mode !== 'workshop';
   $('menu-flight-note').hidden = mode === 'workshop';
   $('menu-context').textContent = expeditionMode ? run && !['won','lost'].includes(run.status) ? `${worldFor(run).name} → ${destinationFor(run).name} · ${run.stage}/6 milestones` : 'Road to Tau Ceti · nine worlds, one journey' : 'Free Flight · permanent rocket and upgrades';
-  if (prototype && expeditionMode) $('menu-context').textContent = isPrototype(run) && !['won','lost'].includes(run.status) ? `${worldFor(run).name} · ${run.stage}/6 milestones · Earth–Moon playtest` : 'Earth–Moon playtest · one rocket, two worlds';
+  if (prototype && expeditionMode) $('menu-context').textContent = isPrototype(run) && !['won','lost'].includes(run.status) ? `${worldFor(run).name} · ${run.stage}/6 milestones · World ${run.difficulty+1}/9` : 'Road to Tau Ceti · roguelite journey';
   $('run-details').hidden = !inExpedition() || !run.program.relics.length;
   $('module-count').textContent = run?.program.relics.length || '';
   $('menu-modules').innerHTML = (run?.program.relics || []).map(id => { const m = MODULES.find(m => m.id === id); return `<p><strong>${m.name}</strong><br>${m.detail}</p>`; }).join('');
@@ -202,7 +201,7 @@ for(const id of ['science-menu','world-briefing','flight-number'])$(id).addEvent
 $('records-menu').addEventListener('click',()=>{
   const profile=expeditionSession.profile;
   $('records-summary').textContent=profile.campaignComplete?'Tau Ceti reached. Your journey is complete.':`Road to Tau Ceti · ${profile.maxDifficulty} of 9 worlds cleared`;
-  if (prototype) $('records-summary').textContent=`Earth–Moon playtest · ${profile.prototypeWorlds?.length||0} of 2 worlds cleared`;
+  if (prototype) $('records-summary').textContent=`Road to Tau Ceti · ${profile.prototypeWorlds?.length||0} of 9 worlds cleared`;
   $('records-content').innerHTML=journeyRecordsMarkup(profile);
   $('records-note').textContent=profile.flightRecords.partial?'Older flights may be missing from these records.':'Your expedition records stay with you across retries and replays.';
   openReference('records-dialog');
@@ -269,8 +268,7 @@ function renderJourney() {
   if (key === lastJourneyKey) return;
   lastJourneyKey = key;
   $('journey-destination').textContent = `${worldFor(run).name} → ${destinationFor(run).name}`;
-  $('journey-count').textContent = isPrototype(run)?`${run.difficulty+1}/2 · one rocket`:`World ${run.difficulty+1}/9`;
-  if(isPrototype(run)&&run.difficulty===1)$('journey-destination').textContent='Moon · expedition finale';
+  $('journey-count').textContent = `World ${run.difficulty+1}/9`;
   $('journey-steps').innerHTML = journeyMarkup(journey);
   $('journey-current').textContent = run.status === 'lost' ? 'Expedition ended' : journey.next ? `${airborne ? 'Climbing to' : 'Next'}: ${journey.next.name} · ${altitudeLabel(journey.next.altitude)}` : 'Departure target reached!';
   $('journey-lives').textContent = `${3-run.strikes} misses left`;
@@ -484,7 +482,7 @@ function workshop() {
   $('launch-description').textContent = 'Try a new part or swap your build, then give it another go.';
   if (inExpedition()) {
     continueExpedition(expeditionSession);
-    const ready = expeditionSession.active.status === 'build';
+    const ready = expeditionSession.active.status === 'build' && !hasNextWorldOffer(expeditionSession);
     persist(); showScreen(ready ? 'workshop' : 'expedition'); renderWorkshop();
     (ready ? $('workshop-title') : $('expedition-title')).focus({ preventScroll: true }); return;
   }
@@ -493,7 +491,7 @@ function workshop() {
 }
 $('return').addEventListener('click', () => {
   if(mode==='paused')pause();
-  else if(mode==='report' && inExpedition() && expeditionSession.active.status==='won'&&!(isPrototype(expeditionSession.active)&&expeditionSession.active.difficulty===1))travelToNextWorld(expeditionSession.active);
+  else if(mode==='report' && inExpedition() && expeditionSession.active.status==='won')travelToNextWorld(expeditionSession.active);
   else workshop();
 });
 $('reset-all').addEventListener('click', () => {

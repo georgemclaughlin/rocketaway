@@ -1,10 +1,12 @@
 # Rocket Away roguelite design and implementation plan
 
-Status: Earth–Moon roguelite enabled as the public default at the owner’s request. The original campaign is preserved separately and accessible from the menu. Phases 1–3 have a playable first implementation and automated coverage. Phase 4 remains open for human feedback and pacing revisions; the three-world expeditions and full campaign below remain proposed.
+Status: The public roguelite now continues past Moon through the existing nine-world route to Tau Ceti, with next-world selection fixed at the owner’s request. The original campaign is preserved separately and accessible from the menu. Phases 1–3 have a playable first implementation and automated coverage. Phase 4 remains open for human feedback and pacing revisions; the grouped three-world expeditions and expanded research below remain proposed.
 
-## Current prototype findings
+## Current implementation findings
 
-The prototype includes six experimental parts, two optional contracts per world, one reservable shop offer, carried equipment and credits, shared misses, Moon checkpoint funding, and protected save/resume. Exact initial specifications and local play instructions are in [README](README.md#earthmoon-roguelite), with source constants in [experimental.js](experimental.js) and [prototype-run.js](prototype-run.js).
+Moon completion now unlocks Mars, and later worlds use fresh funded rockets with their existing targets plus experimental parts and two equipment contracts. Setup defaults to the furthest unlocked world; replay is explicit. Older Moon-complete saves upgrade without repeating rewards. Original-campaign world/kit unlocks are recognised once while the original save and any interrupted rocket remain preserved. The later-world audit completed 210/210 sampled starts across five seeds, three kits, and research ranks 0/5; six earned full journeys also pass. Grouped carryover beyond Earth–Moon is not yet implemented.
+
+The prototype includes six experimental parts, two optional contracts per world, one reservable shop offer, carried equipment and credits, shared misses, Moon checkpoint funding, and protected save/resume. Exact initial specifications and local play instructions are in [README](README.md#roguelite-journey), with source constants in [experimental.js](experimental.js) and [prototype-run.js](prototype-run.js).
 
 The sampled earned-build audit completes 60/60 cases across five seeds, three kits, ranks 0/5, and Earth/Moon starts. Its policy uses contracts and perfect timing where useful. Full Earth–Moon cases take 4–8 launches, median 6. This does not establish the planned session duration: carrying an already developed rocket can make the Moon brief. Next evaluate actual player choices and consider additional distinct equipment opportunities or objectives before increasing targets. No human enjoyment result is claimed.
 
@@ -292,4 +294,4 @@ Resolve these questions through the prototype:
 5. Does the target duration emerge from decisions, or do goals and rewards still create padding?
 6. Does the full-route record provide enough incentive when a shorter checkpoint start is available?
 
-The next design task is Phase 4: play the Earth–Moon prototype, evaluate whether its combinations and recovery are enjoyable, and revise its pacing before adding Mars or the later expedition groups.
+The next design task is Phase 4: play the current journey, evaluate whether its combinations and recovery are enjoyable, and revise its pacing before adding the proposed later expedition groups and research extensions.

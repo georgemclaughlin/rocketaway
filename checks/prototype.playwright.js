@@ -8,8 +8,8 @@ async page=>{
   for(const[width,height]of sizes){await page.setViewportSize({width,height});const bad=await page.locator(selector).evaluateAll(es=>es.filter(e=>{if(!e.getClientRects().length)return false;const r=e.getBoundingClientRect();return r.left<0||r.top<0||r.right>innerWidth+1||r.bottom>innerHeight+1||e.scrollWidth>e.clientWidth+2||e.scrollHeight>e.clientHeight+2;}).map(e=>e.id||e.className));assert(!bad.length,JSON.stringify({label,width,height,bad}));}
  };
  await page.evaluate(()=>{localStorage.removeItem('rocket-away-program-v1');localStorage.removeItem('rocket-away-expeditions-v1');});await page.reload();
- assert((await page.locator('#expedition-step').innerText()).includes('PLAYTEST'),'prototype identity');
- assert(await page.locator('[data-world]').count()===2,'only implemented worlds offered');
+ assert((await page.locator('#expedition-step').innerText()).includes('ROAD TO TAU CETI'),'roguelite journey identity');
+ assert(await page.locator('[data-world]').count()===9,'full world route offered');
  await fits('#expedition,#run-start,.kit-card','start');
  await page.locator('#run-start').click();await page.locator('button[data-build-slot="aero"]').click();
  await page.locator('[data-experimental="true"]').first().click();
