@@ -8,7 +8,7 @@ Read this file before changing the project. `README.md` documents the player exp
 - Repository: https://github.com/georgemclaughlin/rocketaway
 - Live game: https://georgemclaughlin.github.io/rocketaway/
 - GitHub Pages serves the repository root on `main`; retain `.nojekyll` and relative asset/module URLs so repository-subpath hosting works.
-- `ROGUELITE_PLAN.md` is the accepted implementation direction. The Earth–Moon prototype is implemented locally on port 4174 (`npm run prototype`); broader campaign expansion awaits human playtesting. The regular/default game remains on its existing rules. Treat the prototype exceptions below as scoped to that port and versioned prototype sessions.
+- `ROGUELITE_PLAN.md` is the accepted implementation direction. The Earth–Moon roguelite is the public default, authorized by the owner. The original campaign remains accessible from the menu (`?campaign=original`), with separate progress. Broader campaign expansion awaits human playtesting. Treat the prototype exceptions below as scoped to versioned roguelite sessions.
 - `npm start` serves port 4173 on all interfaces for same-network phone testing. Check for an existing server before starting another. Keep shared preview servers running.
 - Routine fixes and requested game improvements have existing authorization to be committed and published to this repository. Follow any newer user instruction that changes that scope. Reviews alone do not require implementation or deployment.
 - Preserve unrelated working-tree changes. Do not reset a player's save while testing. Prefer the established Playwright CLI workflow.
@@ -46,7 +46,7 @@ Read this file before changing the project. `README.md` documents the player exp
 | Timing ratings, miss explanations, progress headlines | `launch-feedback.js`, `flight-feedback.js` |
 | Persistent statistics and records display | `flight-records.js`, `journey-records-ui.js` |
 | Educational facts and optional world guide | `science-data.js`, `science-ui.js` |
-| Isolated roguelite prototype, abilities, contracts, stock, carryover, save guard | `experimental.js`, `prototype-run.js`; integration in the existing builder, engine, and UI |
+| Roguelite abilities, contracts, stock, carryover, save guard | `experimental.js`, `prototype-run.js`, `campaign-save.js`; integration in the existing builder, engine, and UI |
 
 Keep new domain logic independent of DOM/storage where practical. Avoid circular imports. The builder estimates flights through the same physics used by gameplay.
 
@@ -54,8 +54,8 @@ Keep new domain logic independent of DOM/storage where practical. Avoid circular
 
 - Storage keys: `rocket-away-program-v1` and `rocket-away-expeditions-v1`. Saves are per browser and origin; local and hosted games have separate progress. Reset only this game's keys in production code.
 - Do not rename storage keys or discard old saves to simplify a change. Preserve migration, interrupted-flight quality, one-time rewards, research, and records. An expedition resumed after reload restarts ignition with its saved build and timing.
-- Current flight/balance conditions are version **3**. Existing v0/v1/v2 expeditions retain their original physics, targets, stock rules, and earnings. Pass a run's `conditionsVersion` through condition/goal lookups. New runs use the current version.
-- Prototype sessions use `prototypeVersion: 1`, run/program `rulesVersion: 1`, and conditions version **4** without changing the default `CONDITIONS_VERSION`. Preserve all v0–v3 behavior. Future unsupported saves must remain untouched; the export recovery UI must not persist a replacement session. Prototype and regular saves use the same keys on separate origins.
+- Original-campaign flight/balance conditions are version **3**. Existing v0/v1/v2 expeditions retain their original physics, targets, stock rules, and earnings. Pass a run's `conditionsVersion` through condition/goal lookups. New original-campaign runs use version 3; roguelite runs use version 4.
+- Prototype sessions use `prototypeVersion: 1`, run/program `rulesVersion: 1`, and conditions version **4** without changing the default `CONDITIONS_VERSION`. Preserve all v0–v3 behavior. Future unsupported saves must remain untouched; the export recovery UI must not persist a replacement session. Both campaigns use the existing expedition key. `campaign-save.js` writes a version 1 campaign envelope with the roguelite at the root and preserved original data under `originalCampaign`. Validate both campaigns before writing; switching must preserve interrupted flights, research, and records. Reset entire game resets both campaigns.
 - `node checks/prototype-audit.js` samples five seeds, three kits, ranks 0/5, and Earth/Moon starts. Its contract policy can refit for earnings and use perfect timing when sufficient. Initial results were 60/60 completions, with full Earth–Moon runs taking 4–8 launches; the proposed longer-session target is not yet achieved or human-validated.
 - Balance changes must test optimal affordable purchases and fully researched starts as well as normal play. Do not add arbitrary milestone caps, mandatory launch counts, or goals that rise when the player buys research.
 - `node checks/balance-audit.js` exhausts affordable opening builds across five seeds, three kits, and nine worlds at maximum research and perfect timing. The v2/v3 comparison was 65/135 versus 10/135 possible first-launch world clears. Five remaining cases were Earth replays. These are simulated possibilities, not player telemetry.
@@ -81,6 +81,8 @@ Useful browser checks:
 
 - `prototype.playwright.js` and `prototype-journey.playwright.js`: run only on port 4174 in an isolated session. Cover experimental previews, reservation, contracts, ability flight parity, saved travel, unsupported-save protection, and earned UI progression. Keep these separate from default-game fixtures.
 
+- `campaign-switch.playwright.js`: public default, existing-save preservation, six-size campaign menu, switching, and launch/reload; isolated session only.
+- Original-campaign browser checks must open `?campaign=original` and read the saved `originalCampaign` member.
 - `polish.playwright.js`: all part previews, first-start clarity, real miss diagnosis, starting builds, wider world selection.
 - `world-challenges.playwright.js`: nine-world briefings/budgets, legacy saves, coast skipping, fast-forward preference.
 - `science.playwright.js`: atmosphere HUD, guide pause/resume, previews, unlock reports, ending/records layouts.
@@ -94,7 +96,7 @@ Useful browser checks:
 - The approved bundled illustration is `assets/astronaut-cartoon.png?v=2`. An earlier portrait was intentionally removed from Git history and its old asset filename remains ignored. Do not recover it, re-add it, or include source/reference photographs. Do not change the cartoon likeness without a request.
 - Respect `.gitignore`; do not force-add ignored material. Use the repository's existing public-safe Git author configuration rather than introducing a personal email.
 - Before pushing, review every staged file for privacy and scope. Keep asset paths relative and retain existing site/repository settings.
-- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. The app currently uses `v=roguelite-prototype-1`; the cartoon's independent `v=2` is intentional.
+- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. The app currently uses `v=roguelite-live-1`; the cartoon's independent `v=2` is intentional.
 - Push the validated commit to `main`, then confirm Pages built that commit with `gh api repos/georgemclaughlin/rocketaway/pages/builds/latest --jq '{status,commit}'`. For game changes, run an isolated live-site smoke check and give the user the public game link. A documentation-only change does not require replaying the game.
 
 ## Remaining design opportunity

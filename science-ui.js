@@ -1,5 +1,5 @@
-import { EARTH_LAYERS, SCIENCE_WORLDS, GRAVITY_SOURCE, earthLayerAt } from './science-data.js?v=roguelite-prototype-1';
-import { WORLDS, TAU_CETI, worldMarkup, flightConditions } from './worlds.js?v=roguelite-prototype-1';
+import { EARTH_LAYERS, SCIENCE_WORLDS, GRAVITY_SOURCE, earthLayerAt } from './science-data.js?v=roguelite-live-1';
+import { WORLDS, TAU_CETI, worldMarkup, flightConditions } from './worlds.js?v=roguelite-live-1';
 export function createScienceUI() {
   const $=id=>document.getElementById(id);
   let world=0,layer=0,legacyWorld=null;

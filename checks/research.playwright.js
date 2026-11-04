@@ -20,14 +20,14 @@ const checkLab = async page => {
  assert(await page.locator('#research-dialog').evaluate(e=>e.scrollHeight<=e.clientHeight+2),'next upgrade and purchase feedback fit smallest phone');
  assert((await page.locator('#research-balance').innerText()).includes('52'),'costs paid');
  await page.locator('#research-close').click();assert(await page.locator('#fitted-height').innerText()!==before,'estimate updates');
- let save=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));assert(save.active.program.parts.equipped.engine==='spark','no replacement of fitted parts');
+ let save=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));assert(save.active.program.parts.equipped.engine==='spark','no replacement of fitted parts');
  await page.reload();assert((await page.locator('#research-open').innerText()).includes('52'),'data saved');await page.locator('#research-open').click();assert((await page.locator('#research-rank').innerText()).includes('2'),'rank saved');await page.keyboard.press('Escape');
- await page.evaluate(async()=>{const e=await import('./expeditions.js');const s=e.restoreExpeditions(JSON.parse(localStorage.getItem(e.EXPEDITION_KEY)));e.abandonExpedition(s);localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();
+ await page.evaluate(async()=>{const e=await import('./expeditions.js');const s=e.restoreExpeditions((saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem(e.EXPEDITION_KEY))));e.abandonExpedition(s);localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();
  await page.locator('#research-hub').click();await page.locator('#research-close').click();await page.locator('#run-start').click();
- save=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));assert(save.active.program.parts.equipped.engine==='ember'&&save.active.program.credits===180,'upgraded next start');
+ save=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));assert(save.active.program.parts.equipped.engine==='ember'&&save.active.program.credits===180,'upgraded next start');
  await page.locator('#shop-launch').click();assert(await page.locator('#research-open').isDisabled(),'research blocked during ignition');await page.locator('#cancel-launch').click();
  await page.locator('#game-menu').click();await page.locator('#reset-all').click();await page.locator('#reset-confirm').click();
- save=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));assert(save.profile.research.data===0&&save.profile.research.levels.scrapper===0,'full reset clears research');
+ save=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));assert(save.profile.research.data===0&&save.profile.research.levels.scrapper===0,'full reset clears research');
  assert(!errors.length,JSON.stringify(errors));return{passed:'Lab layout at six sizes for all builds, purchase, estimates, reload, upgraded starter, phase guard, full reset',errors};
 };
 const checkEdges = async page => {
@@ -43,7 +43,7 @@ const checkEdges = async page => {
   await page.setViewportSize({width,height});
   const bad=await page.evaluate(()=>[...document.querySelectorAll('.journey-heading,.journey-tools,#research-open,#shop-launch')].filter(e=>{const r=e.getBoundingClientRect();return r.right>innerWidth+1||r.bottom>innerHeight+1||e.scrollWidth>e.clientWidth+2||e.scrollHeight>e.clientHeight+2}).map(e=>e.id||e.className));assert(!bad.length,JSON.stringify({width,height,bad}));
  }
- await page.evaluate(async()=>{const e=await import('./expeditions.js');const s=e.restoreExpeditions(JSON.parse(localStorage.getItem(e.EXPEDITION_KEY)));e.abandonExpedition(s);localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();
+ await page.evaluate(async()=>{const e=await import('./expeditions.js');const s=e.restoreExpeditions((saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem(e.EXPEDITION_KEY))));e.abandonExpedition(s);localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();
  for(const [width,height]of[[320,568],[390,844],[667,375]]){
   await page.setViewportSize({width,height});
   const bad=await page.evaluate(()=>[...document.querySelectorAll('.kit-card,.setup-heading,#research-hub,#run-start')].filter(e=>{const r=e.getBoundingClientRect();return r.bottom>innerHeight+1||r.right>innerWidth+1||e.scrollHeight>e.clientHeight+2||e.scrollWidth>e.clientWidth+2}).map(e=>e.id||e.className));assert(!bad.length,JSON.stringify({width,height,bad}));

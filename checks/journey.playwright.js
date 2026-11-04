@@ -12,10 +12,10 @@ const checkLayout = async page => {
   const bad=await page.evaluate(()=>[...document.querySelectorAll('.expedition-card,#expedition,#expedition-footer,#run-start,.world-route,#expedition-title')].filter(el=>{const r=el.getBoundingClientRect();return r.bottom>innerHeight+1||r.right>innerWidth+1||el.scrollHeight>el.clientHeight+2}).map(el=>el.id||el.className));assert(!bad.length,JSON.stringify({name,width,height,bad}));
   if(name==='won')assert((await page.locator('#expedition-title').innerText()).includes('Moon'),'next goal');
  }
- await page.evaluate(s=>localStorage.setItem('rocket-away-expeditions-v1',JSON.stringify(s)),fixtures.won);await page.reload();await page.locator('[data-world="0"]').click();await page.locator('[data-kit=scientist]').click();assert(await page.locator('[data-world="0"]').getAttribute('aria-pressed')==='true','goal preserved');await page.locator('#run-start').click();assert(await page.locator('#shop-launch').isVisible(),'starts in hangar');const selected=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));assert(selected.active.kit==='scientist'&&selected.active.difficulty===0&&selected.active.program.credits===100&&selected.profile.wins===1,'chosen build, credits, goal and unlocks');
+ await page.evaluate(s=>localStorage.setItem('rocket-away-expeditions-v1',JSON.stringify(s)),fixtures.won);await page.reload();await page.locator('[data-world="0"]').click();await page.locator('[data-kit=scientist]').click();assert(await page.locator('[data-world="0"]').getAttribute('aria-pressed')==='true','goal preserved');await page.locator('#run-start').click();assert(await page.locator('#shop-launch').isVisible(),'starts in hangar');const selected=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));assert(selected.active.kit==='scientist'&&selected.active.difficulty===0&&selected.active.program.credits===100&&selected.profile.wins===1,'chosen build, credits, goal and unlocks');
  await page.locator('#game-menu').click();await page.locator('#reset-all').click();await page.locator('#reset-confirm').click();
  assert(await page.locator('[data-kit]').count()===1,'reset restores first starting rocket');
- await page.locator('#run-start').click();const state=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));assert(state.active.kit==='scrapper'&&state.active.difficulty===0,'reset clears setup selection');
+ await page.locator('#run-start').click();const state=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));assert(state.active.kit==='scrapper'&&state.active.difficulty===0,'reset clears setup selection');
  return {passed:'fresh, won, lost setups at six sizes; replay Earth; preserve chosen kit; reset worlds'};
 };
 const checkFlights = async page => {
@@ -39,7 +39,7 @@ const checkFlights = async page => {
   await page.waitForFunction(()=>document.querySelector('#launch').textContent.includes('See result'),{timeout:30000});
   await page.locator('#launch').click();
   assert((await page.locator('#return').innerText()).includes(difficulty===0?'Moon':'Tau Ceti'),'travel CTA');
-  const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
+  const before=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));
   assert(before.active.status==='won','real flight wins');
   await page.locator('#return').click();
   assert(await page.locator('#travel-dialog').isVisible(),'travel opens');
@@ -47,7 +47,7 @@ const checkFlights = async page => {
 
   if(method==='skip')await page.locator('#travel-skip').click();
   await page.locator(difficulty===8?'#ending-explore':'#run-start').waitFor({state:'visible',timeout:6000});
-  const after=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
+  const after=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));
   assert(after.profile.wins===before.profile.wins,'travel does not pay twice');
   assert(after.profile.maxDifficulty===(difficulty===0?1:8),'unlock correct');
   assert(after.profile.campaignComplete===(difficulty===8),'campaign finish correct');

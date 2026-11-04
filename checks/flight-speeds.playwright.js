@@ -30,7 +30,7 @@ async page=>{
   await page.locator('#report').waitFor({state:'visible',timeout:10000});
   const elapsed=(Date.now()-start)/1000;timings.push({world,seconds:elapsed});
   assert(elapsed>=5&&elapsed<8,`world ${world} should take about six seconds: ${elapsed}`);
-  const result=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')).active);
+  const result=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))).active);
   assert(result.program.flights===1,'one settlement');
   assert(Math.abs(result.lastResult.altitude-expected)<expected*.003,'fast-forward outcome matches predicted peak within frame integration tolerance');
  }

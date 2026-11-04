@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=roguelite-prototype-1">
-  <script type="module" src="./game.js?v=roguelite-prototype-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=roguelite-live-1">
+  <script type="module" src="./game.js?v=roguelite-live-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -83,6 +83,7 @@
     <p id="menu-context"></p>
     <div class="menu-modes" role="group" aria-label="Game mode"><button id="run-expeditions" class="small-button">Road to Tau Ceti</button><button id="run-classic" class="small-button">Free Flight</button></div>
     <p class="menu-note">Each mode keeps its own rocket and credits.</p>
+    <button id="switch-campaign" class="small-button">Original campaign · saved separately</button>
     <details id="run-details"><summary>Bonuses from your saved run <span id="module-count"></span></summary><div id="menu-modules"></div></details>
     <button id="sound" class="small-button" aria-label="Turn sound on" aria-pressed="false">Sound <span id="sound-state">OFF</span></button>
     <button id="research-menu" class="small-button">Permanent research</button>

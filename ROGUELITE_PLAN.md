@@ -1,14 +1,14 @@
 # Rocket Away roguelite design and implementation plan
 
-Status: Earth–Moon prototype implemented locally on port 4174. Phases 1–3 have a playable first implementation and automated coverage. Phase 4 remains open for human feedback and pacing revisions; the three-world expeditions and full campaign below remain proposed.
+Status: Earth–Moon roguelite enabled as the public default at the owner’s request. The original campaign is preserved separately and accessible from the menu. Phases 1–3 have a playable first implementation and automated coverage. Phase 4 remains open for human feedback and pacing revisions; the three-world expeditions and full campaign below remain proposed.
 
 ## Current prototype findings
 
-The prototype includes six experimental parts, two optional contracts per world, one reservable shop offer, carried equipment and credits, shared misses, Moon checkpoint funding, and protected save/resume. Exact initial specifications and local play instructions are in [README](README.md#local-roguelite-prototype), with source constants in [experimental.js](experimental.js) and [prototype-run.js](prototype-run.js).
+The prototype includes six experimental parts, two optional contracts per world, one reservable shop offer, carried equipment and credits, shared misses, Moon checkpoint funding, and protected save/resume. Exact initial specifications and local play instructions are in [README](README.md#earthmoon-roguelite), with source constants in [experimental.js](experimental.js) and [prototype-run.js](prototype-run.js).
 
 The sampled earned-build audit completes 60/60 cases across five seeds, three kits, ranks 0/5, and Earth/Moon starts. Its policy uses contracts and perfect timing where useful. Full Earth–Moon cases take 4–8 launches, median 6. This does not establish the planned session duration: carrying an already developed rocket can make the Moon brief. Next evaluate actual player choices and consider additional distinct equipment opportunities or objectives before increasing targets. No human enjoyment result is claimed.
 
-The initial prototype uses one separation event, fixed experimental abilities, and existing research. Catalog research extensions, collection/medal UI, longer expedition groups, and production migration backups are deferred until the prototype design passes Phase 4. It is isolated from regular saves and does not replace the public default campaign.
+The initial prototype uses one separation event, fixed experimental abilities, and existing research. Catalog research extensions, collection/medal UI, and longer expedition groups are deferred until the prototype design passes Phase 4. Public rollout preserves the original save inside the campaign envelope. It now opens by default publicly; the original campaign is kept separately in the existing save envelope, with menu switching between campaigns.
 
 ## Direction
 
@@ -273,7 +273,7 @@ Keep automated sessions, agent walkthroughs, and actual human feedback labeled s
 | 5 — Extend the campaign | Mars completes the first expedition, then the remaining two expeditions, catalog unlocks, world-specific contracts, and Tau Ceti integration | Earned full campaigns and checkpoint recovery work across kits and research levels |
 | 6 — Finish and publish | Rocket collection/records as justified, presentation polish, updated documentation, cache versions, and release validation | Reviewed public-safe diff, passing relevant checks, Pages commit confirmation, isolated live smoke check |
 
-Implement these as reviewable increments. Phase 4 is a genuine decision point; the later phases should be revised if longer expeditions or a family fail the playtest. Keep the first prototype off the public default path while its balance and save format are changing. Use a separate isolated browser origin or session for prototype saves; do not expose unsupported prototype saves to the old live build.
+Implement these as reviewable increments. Phase 4 is a genuine decision point; the later phases should be revised if longer expeditions or a family fail the playtest. The owner subsequently requested public access to the first prototype as the default. Both campaigns now coexist in a versioned save envelope; keep their progress separate and preserve unsupported saves. Continue using isolated browser sessions for tests.
 
 Before public rollout, test release recovery as well as forward migration. Retain an untouched copy of the last supported save inside this game's existing save envelope during migration, and provide a recovery/export path for unsupported data. A rollback build must recognize and preserve the new envelope; redeploying the current old code unchanged could discard a new-format run. Prefer a compatible corrective release. Update entry-point and transitive module cache versions together, then confirm that GitHub Pages built the validated commit and run an isolated live smoke check.
 

@@ -18,7 +18,7 @@ async page=>{
  // All old save generations retain their launch target and announce that their rules stay unchanged.
  for(const version of[0,1,2])for(const difficulty of[0,1,2,5]){
   await page.evaluate(async({version,difficulty})=>{const e=await import('./expeditions.js'),s=e.newExpeditions();s.profile.maxDifficulty=difficulty;e.startExpedition(s,{seed:7,difficulty});s.active.conditionsVersion=version;delete s.active.program.conditionsVersion;localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));},{version,difficulty});await page.reload();
-  const target=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')).active);
+  const target=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))).active);
   assert(target.conditionsVersion===version,'old run version retained');
   await page.locator('#game-menu').click();await page.locator('#science-menu').click();assert((await page.locator('#science-gameplay').innerText()).includes('saved expedition keeps'),'guide explains legacy conditions');await check('#science-dialog,#science-close','legacy guide');await page.locator('#science-close').click();
  }
@@ -27,7 +27,7 @@ async page=>{
  await page.locator('#speed').click();assert(await page.locator('#speed').getAttribute('aria-pressed')==='true','fast forward enabled');
  await page.waitForFunction(()=>!document.querySelector('#launch').disabled,null,{timeout:10000});
  await page.locator('#pause').click();await check('#launch,#speed,#pause,.launch-actions','coasting controls');await page.locator('#return').click();await page.locator('#launch').click();
- const settled=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));
+ const settled=await page.evaluate(()=>(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'))));
  assert(Math.abs(settled.active.lastResult.altitude-expected)<=Math.max(10,expected*.001),'skip matches the flight estimate within frame integration tolerance');assert(settled.active.strikes===1,'skip records the miss honestly');assert(settled.active.program.flights===1,'settles once');
  await check('#result,#result-description,#return','large target miss');
  await page.locator('#return').click();await page.locator('#shop-launch').click();await page.locator('#launch').click();assert(await page.locator('#speed').getAttribute('aria-pressed')==='true','fast forward kept for next flight');

@@ -1,6 +1,6 @@
-import { newProgram } from './engine.js?v=roguelite-prototype-1';
-import { partById, fittedParts } from './parts.js?v=roguelite-prototype-1';
-import { researchLoadout } from './research.js?v=roguelite-prototype-1';
+import { newProgram } from './engine.js?v=roguelite-live-1';
+import { partById, fittedParts } from './parts.js?v=roguelite-live-1';
+import { researchLoadout } from './research.js?v=roguelite-live-1';
 
 export function kitDetails(kit,profile) {
  const loadout=researchLoadout(profile,kit),program=newProgram();

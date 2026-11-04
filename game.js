@@ -1,23 +1,23 @@
-import { createScienceUI } from './science-ui.js?v=roguelite-prototype-1';
-import { environmentLabel } from './science-data.js?v=roguelite-prototype-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=roguelite-prototype-1';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=roguelite-prototype-1';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=roguelite-prototype-1';
-import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=roguelite-prototype-1';
-import { MODULES } from './modifiers.js?v=roguelite-prototype-1';
-import { createExpeditionUI } from './expedition-ui.js?v=roguelite-prototype-1';
-import { createBuilder, rocketArt } from './builder.js?v=roguelite-prototype-1';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=roguelite-prototype-1';
-import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=roguelite-prototype-1';
-import { createTravel } from './travel.js?v=roguelite-prototype-1';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=roguelite-prototype-1';
-import { launchRating } from './launch-feedback.js?v=roguelite-prototype-1';
-import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=roguelite-prototype-1';
-import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=roguelite-prototype-1';
-import { kitDetails } from './kit-details.js?v=roguelite-prototype-1';
-import { startPrototype, restoreSession, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, prototypeContracts, contractReady } from './prototype-run.js?v=roguelite-prototype-1';
-// Separate origin for the local prototype; normal and hosted games stay on v3.
-const prototype = location.port === '4174';
+import { createScienceUI } from './science-ui.js?v=roguelite-live-1';
+import { environmentLabel } from './science-data.js?v=roguelite-live-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=roguelite-live-1';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=roguelite-live-1';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=roguelite-live-1';
+import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=roguelite-live-1';
+import { MODULES } from './modifiers.js?v=roguelite-live-1';
+import { createExpeditionUI } from './expedition-ui.js?v=roguelite-live-1';
+import { createBuilder, rocketArt } from './builder.js?v=roguelite-live-1';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=roguelite-live-1';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=roguelite-live-1';
+import { createTravel } from './travel.js?v=roguelite-live-1';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=roguelite-live-1';
+import { launchRating } from './launch-feedback.js?v=roguelite-live-1';
+import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=roguelite-live-1';
+import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=roguelite-live-1';
+import { kitDetails } from './kit-details.js?v=roguelite-live-1';
+import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, prototypeContracts, contractReady } from './prototype-run.js?v=roguelite-live-1';
+import { openCampaignSave, packCampaignSave } from './campaign-save.js?v=roguelite-live-1';
+const prototype = new URLSearchParams(location.search).get('campaign') !== 'original';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
 const astronautArt = new Image();
@@ -34,9 +34,9 @@ rawFreeSave=readSave(SAVE_KEY);
 try { program = restoreProgram(JSON.parse(rawFreeSave)); } catch { saveFailure='Your saved game could not be read. Export it before recovering.'; }
 // The rocket itself now determines performance; old inventory and records carry over.
 program.plan = 'explorer';
-let freeProgram = program, expeditionSession = newExpeditions();
+let freeProgram = program, expeditionSession = newExpeditions(), otherCampaign = newExpeditions();
 rawExpeditionSave=readSave(EXPEDITION_KEY);
-try { const raw=JSON.parse(rawExpeditionSave); if(!prototype&&raw?.prototypeVersion)throw Error('Open this prototype save on port 4174.'); expeditionSession = restoreSession(raw); } catch(error) { saveFailure=error.message; }
+try { const saved=openCampaignSave(JSON.parse(rawExpeditionSave),!prototype); expeditionSession=saved.session; otherCampaign=saved.other; } catch(error) { saveFailure=error.message; }
 document.querySelector('.app').dataset.prototype=prototype;
 const inExpedition = () => expeditionSession.mode === 'expedition' && !!expeditionSession.active;
 const canBuild = () => mode === 'workshop' && (expeditionSession.mode === 'classic' || expeditionSession.active?.status === 'build');
@@ -61,7 +61,7 @@ $('expedition-footer').addEventListener('click',event=>{if(event.target.closest(
 $('research-menu').addEventListener('click',()=>{$('menu-dialog').close();researchUI.open();});
 function persist() {
   if(saveFailure)return;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(freeProgram)); localStorage.setItem(EXPEDITION_KEY, JSON.stringify(expeditionSession)); storageAvailable = true; }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(freeProgram)); localStorage.setItem(EXPEDITION_KEY, JSON.stringify(packCampaignSave(expeditionSession,otherCampaign,!prototype))); storageAvailable = true; }
   catch { storageAvailable = false; }
   $('save-status').textContent = storageAvailable ? 'PROGRESS SAVED ON THIS DEVICE' : 'PROGRESS LASTS FOR THIS VISIT';
 }
@@ -134,6 +134,9 @@ function syncScreens() {
   $('shop-launch').disabled = !canBuild();
   if (mode === 'workshop') $('launch').disabled = !canBuild();
   $('run-classic').disabled = mode !== 'workshop' || !expeditionMode;
+  $('switch-campaign').disabled = mode !== 'workshop';
+  $('switch-campaign').textContent = prototype ? 'Original campaign · saved separately' : 'Play Earth–Moon roguelite';
+  $('run-expeditions').textContent = prototype ? 'Earth–Moon roguelite' : 'Road to Tau Ceti';
   $('run-expeditions').disabled = mode !== 'workshop' || expeditionMode;
   $('run-classic').setAttribute('aria-pressed', !expeditionMode);
   $('run-expeditions').setAttribute('aria-pressed', expeditionMode);
@@ -207,6 +210,14 @@ function unlockNotice(result) {
     return `<div class="unlock-card"><span class="unlock-rocket" aria-hidden="true">${rocketArt(details.parts)}</span><div><strong>${kit.name} unlocked!</strong><span>${details.benefit}</span><small>Choose it on your next expedition.</small></div></div>`;
   }).join('');
 }
+$('switch-campaign').addEventListener('click', () => {
+  if (mode !== 'workshop') return;
+  persist();
+  const url = new URL(location.href);
+  if (prototype) url.searchParams.set('campaign','original');
+  else url.searchParams.delete('campaign');
+  location.href = url.href;
+});
 $('run-classic').addEventListener('click', () => {
   if (mode !== 'workshop') return;
   $('menu-dialog').close(); expeditionSession.mode = 'classic'; program = freeProgram;
@@ -490,6 +501,7 @@ $('reset-confirm').addEventListener('click', () => {
   if (!$('reset-dialog').open || mode !== 'workshop') return;
   $('reset-dialog').close();
   expeditionSession = newExpeditions();
+  otherCampaign = newExpeditions();
   expeditionUI.reset();
   program = newProgram(); freeProgram = program;
   builder.selectSlot('engine');

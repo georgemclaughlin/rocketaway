@@ -22,7 +22,7 @@ async page=>{
  }
  await page.locator('#return').click();await page.locator('#shop-launch').click();assert(await page.locator('#launch-rating').isHidden(),'previous launch badge cleared during new timing');
  await page.locator('#launch').click();
- const actual=await page.evaluate(async()=>{const {launchRating}=await import('./launch-feedback.js'),s=JSON.parse(localStorage.getItem('rocket-away-expeditions-v1'));return launchRating(s.active.launchQuality);});
+ const actual=await page.evaluate(async()=>{const {launchRating}=await import('./launch-feedback.js'),s=(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')));return launchRating(s.active.launchQuality);});
  assert(await page.locator('#launch-rating').innerText()===`${actual.label} · ${actual.power}%`,'live timing click uses actual outcome');
  assert(!errors.length,JSON.stringify(errors));return {passed:'Four ratings, resumed and live launches, six layouts clear of rocket, pause/speed persistence, results, next-launch reset',errors};
 }

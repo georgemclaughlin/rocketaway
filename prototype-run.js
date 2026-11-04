@@ -1,9 +1,9 @@
 // Local Earth–Moon prototype. Legacy sessions continue through their original rules.
-import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, KITS, milestoneHeight } from './expeditions.js?v=roguelite-prototype-1';
-import { PARTS, partById, assemblySpecs } from './parts.js?v=roguelite-prototype-1';
-import { EXPERIMENTAL_PARTS } from './experimental.js?v=roguelite-prototype-1';
-import { awardResearch } from './research.js?v=roguelite-prototype-1';
-import { recordFlightPeak } from './flight-records.js?v=roguelite-prototype-1';
+import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, KITS, milestoneHeight } from './expeditions.js?v=roguelite-live-1';
+import { PARTS, partById, assemblySpecs } from './parts.js?v=roguelite-live-1';
+import { EXPERIMENTAL_PARTS } from './experimental.js?v=roguelite-live-1';
+import { awardResearch } from './research.js?v=roguelite-live-1';
+import { recordFlightPeak } from './flight-records.js?v=roguelite-live-1';
 
 export const isPrototype = run => run?.rulesVersion===1;
 const bounded=(v,max=1e9)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;

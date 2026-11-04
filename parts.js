@@ -1,7 +1,7 @@
-import { modifyAssembly } from './modifiers.js?v=roguelite-prototype-1';
-import { researchModifiers } from './research.js?v=roguelite-prototype-1';
-import { flightConditions } from './worlds.js?v=roguelite-prototype-1';
-import { EXPERIMENTAL_PARTS, experimentalAssembly } from './experimental.js?v=roguelite-prototype-1';
+import { modifyAssembly } from './modifiers.js?v=roguelite-live-1';
+import { researchModifiers } from './research.js?v=roguelite-live-1';
+import { flightConditions } from './worlds.js?v=roguelite-live-1';
+import { EXPERIMENTAL_PARTS, experimentalAssembly } from './experimental.js?v=roguelite-live-1';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },

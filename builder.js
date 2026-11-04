@@ -1,8 +1,8 @@
-import { flightConditions } from './worlds.js?v=roguelite-prototype-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=roguelite-prototype-1';
-import { createFlight, stepFlight } from './engine.js?v=roguelite-prototype-1';
-import { partInsight } from './part-insights.js?v=roguelite-prototype-1';
-import { abilityDescription } from './experimental.js?v=roguelite-prototype-1';
+import { flightConditions } from './worlds.js?v=roguelite-live-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=roguelite-live-1';
+import { createFlight, stepFlight } from './engine.js?v=roguelite-live-1';
+import { partInsight } from './part-insights.js?v=roguelite-live-1';
+import { abilityDescription } from './experimental.js?v=roguelite-live-1';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {

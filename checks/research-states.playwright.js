@@ -23,7 +23,7 @@ async page=>{
  assert(await page.locator('#research-hub').getAttribute('data-research-state')==='none','updates after spending');
  colors.none=await page.locator('#research-hub').evaluate(e=>getComputedStyle(e).backgroundColor);
  await page.locator('#run-start').click();assert(await page.locator('#research-open').getAttribute('data-research-state')==='none','hangar has same state');
- await page.evaluate(()=>{const key='rocket-away-expeditions-v1',s=JSON.parse(localStorage.getItem(key));s.profile.research.data=3;localStorage.setItem(key,JSON.stringify(s));});await page.reload();
+ await page.evaluate(()=>{const key='rocket-away-expeditions-v1',s=(saved=>saved.originalCampaign||saved)(JSON.parse(localStorage.getItem(key)));s.profile.research.data=3;localStorage.setItem(key,JSON.stringify(s));});await page.reload();
  assert(await page.locator('#research-open').getAttribute('data-research-state')==='other','hangar knows Scientist costs more');colors.other=await page.locator('#research-open').evaluate(e=>getComputedStyle(e).backgroundColor);
  await page.locator('#research-open').click();assert(await page.locator('[data-research-tab="stager"]').getAttribute('aria-pressed')==='true','hangar opens affordable other build');await page.locator('#research-close').click();
  assert(new Set(Object.values(colors)).size===3,'visually distinct states');assert(!errors.length,JSON.stringify(errors));return {passed:'Three states, selected kit changes, world/menu sync, correct lab tab, purchase refresh, hub and hangar, six sizes',colors,errors};

@@ -1,13 +1,13 @@
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=roguelite-prototype-1';
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=roguelite-prototype-1';
-import { altitudeLabel } from './journey.js?v=roguelite-prototype-1';
-import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=roguelite-prototype-1';
-import { newProgram } from './engine.js?v=roguelite-prototype-1';
-import { fittedParts } from './parts.js?v=roguelite-prototype-1';
-import { rocketArt } from './builder.js?v=roguelite-prototype-1';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=roguelite-prototype-1';
-import { researchButtonState } from './research-ui.js?v=roguelite-prototype-1';
-import { kitDetails } from './kit-details.js?v=roguelite-prototype-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=roguelite-live-1';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=roguelite-live-1';
+import { altitudeLabel } from './journey.js?v=roguelite-live-1';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=roguelite-live-1';
+import { newProgram } from './engine.js?v=roguelite-live-1';
+import { fittedParts } from './parts.js?v=roguelite-live-1';
+import { rocketArt } from './builder.js?v=roguelite-live-1';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=roguelite-live-1';
+import { researchButtonState } from './research-ui.js?v=roguelite-live-1';
+import { kitDetails } from './kit-details.js?v=roguelite-live-1';
 
 function kitArt(item,profile) {
   return rocketArt(kitDetails(item,profile).parts);
