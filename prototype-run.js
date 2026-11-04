@@ -1,15 +1,15 @@
 // Roguelite journey. Existing flights retain their physics and equipment.
-import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=mission-journal-1';
-import { PARTS, assemblySpecs } from './parts.js?v=mission-journal-1';
-import { EXPERIMENTAL_PARTS } from './experimental.js?v=mission-journal-1';
-import { awardResearch } from './research.js?v=mission-journal-1';
-import { recordFlightPeak } from './flight-records.js?v=mission-journal-1';
-import { contractsFor, missionPool, contractReady } from './missions.js?v=mission-journal-1';
-import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=mission-journal-1';
-export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=mission-journal-1';
-import { WORLDS, flightConditions } from './worlds.js?v=mission-journal-1';
+import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=equipment-synergy-1';
+import { PARTS, assemblySpecs, catalogFor } from './parts.js?v=equipment-synergy-1';
+import { experimentalCatalog, companionOffers, EQUIPMENT_VERSION, ABILITY_EVENTS } from './experimental.js?v=equipment-synergy-1';
+import { awardResearch } from './research.js?v=equipment-synergy-1';
+import { recordFlightPeak } from './flight-records.js?v=equipment-synergy-1';
+import { contractsFor, missionPool, contractReady } from './missions.js?v=equipment-synergy-1';
+import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=equipment-synergy-1';
+export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=equipment-synergy-1';
+import { WORLDS, flightConditions } from './worlds.js?v=equipment-synergy-1';
 
-export const PROTOTYPE_VERSION=3;
+export const PROTOTYPE_VERSION=4;
 export const isPrototype = run => run?.rulesVersion===1;
 const bounded=(v,max=1e9)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
 const copy=v=>structuredClone(v);
@@ -30,20 +30,24 @@ export function chooseContract(session,id) {
 export function reserveOffer(session,id) {
   const run=session.active;
   if(!isPrototype(run)||run.status!=='build')return false;
-  if(id!==null&&(!EXPERIMENTAL_PARTS.some(p=>p.id===id)||!run.program.stock.includes(id)||run.program.parts.owned.includes(id)))return false;
+  if(id!==null&&(!experimentalCatalog(run.program).some(p=>p.id===id)||!run.program.stock.includes(id)||run.program.parts.owned.includes(id)))return false;
   run.reservedOffer=id;return true;
 }
 function restock(run) {
   const p=run.program,seed=run.seed+run.offerIndex*7919+run.difficulty*104729;
   const stock=PARTS.filter(part=>part.price>0&&!p.parts.owned.includes(part.id)&&part.tier<=Math.max(run.difficulty>1?flightConditions(run.difficulty,4).stockTier:0,Math.min(6,2+run.stage*2+(run.difficulty?2:0)))).map(part=>part.id);
-  const pool=EXPERIMENTAL_PARTS.filter(part=>!p.parts.owned.includes(part.id));
+  const pool=experimentalCatalog(p).filter(part=>!p.parts.owned.includes(part.id));
   if(p.parts.owned.includes(run.reservedOffer))run.reservedOffer=null;
   const offered=run.reservedOffer?[run.reservedOffer]:[];
   if(run.offerIndex===0&&run.difficulty===0)offered.push(shuffled(pool.filter(part=>part.price<=130),seed)[0]?.id);
+  const companion=shuffled(companionOffers(p),seed).find(id=>!offered.includes(id));
+  if(companion&&offered.length<2)offered.push(companion);
   for(const part of shuffled(pool,seed))if(offered.length<2&&!offered.includes(part.id))offered.push(part.id);
   p.stock=[...stock,...offered.filter(Boolean)];
 }
 export function startPrototype(session,options={}) {
+  const equipmentVersion=options.equipmentVersion??EQUIPMENT_VERSION;
+  if(![1,EQUIPMENT_VERSION].includes(equipmentVersion))return false;
   // Choosing a new launchpad explicitly replaces the saved rocket; merely opening setup does not.
   if(Number.isInteger(session.pendingWorld)&&session.active&&session.pendingWorld>session.active.difficulty&&['build','debrief'].includes(session.active.status)) {
     if(!KITS.some(kit=>kit.id===(options.kit||'scrapper')&&kit.unlock<=session.profile.totalGates))return false;
@@ -55,8 +59,8 @@ export function startPrototype(session,options={}) {
   session.prototypeVersion=PROTOTYPE_VERSION;
   session.profile.prototypeWorlds??=[];
   session.profile.missionJournal??=restoreJournal();
-  Object.assign(run,{rulesVersion:1,missionVersion:2,worldStartFlights:0,startWorld:difficulty,conditionsVersion:4,offerIndex:0,reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
-  Object.assign(run.program,{rulesVersion:1,conditionsVersion:4});
+  Object.assign(run,{rulesVersion:1,equipmentVersion,missionVersion:2,worldStartFlights:0,startWorld:difficulty,conditionsVersion:4,offerIndex:0,reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
+  Object.assign(run.program,{rulesVersion:1,equipmentVersion:run.equipmentVersion,conditionsVersion:4});
   // A checkpoint is a new funded build, never a duplicate arrival stipend.
   if(difficulty===1)run.program.credits+=1100;
   restock(run);return true;
@@ -66,7 +70,7 @@ export function beginFlight(session,quality) {
   const run=session.active;
   if(isPrototype(run)) {
     const contract=selectedContract(run);
-    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true};
+    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0};
   }
   return true;
 }
@@ -85,14 +89,16 @@ export function settle(session,flight) {
   if(completed){run.completedContracts.push(contract.id);run.contractId=null;recordMission(session.profile,contract.id);}
   const contractPay=completed?contract.reward:0,surveyPay=run.launchSnapshot?.survey?cleared.length*90:0;
   const flightPay=60+Math.floor(Math.min(altitude*160000/milestoneHeight(run,5),500000)/220*flight.payMultiplier);
-  const total=flightPay+bonus+contractPay+surveyPay,success=cleared.length>0||!!completed;
+  const success=cleared.length>0||!!completed;
+  const recoveryPay=success&&flight.recovered?(run.launchSnapshot?.recovery||0):0;
+  const total=flightPay+bonus+contractPay+surveyPay+recoveryPay;
   const firstWorld=run.stage===6&&!session.profile.prototypeWorlds.includes(run.difficulty);
   const data=awardResearch(session,cleared.length,firstWorld);
   p.credits+=total;p.best=Math.max(p.best,altitude);p.flights++;
   recordFlightPeak(session.profile,altitude,run.difficulty);
   if(!success)run.strikes++;
   run.offerIndex++;restock(run);
-  const result={altitude,target,success,total,flightPay,bonus,contractPay,surveyPay,contract:completed?contract.name:null,data,stage:oldStage+1,power:Math.round(flight.quality*100),cleared,nextTarget:run.stage<6?milestoneHeight(run):null,record:altitude>oldBest,improvement:Math.max(0,altitude-oldBest),events:[...(flight.events||[])],newParts:p.stock.filter(id=>!oldStock.includes(id)),unlockedKits:KITS.filter(k=>k.unlock>oldGates&&k.unlock<=session.profile.totalGates).map(k=>k.id)};
+  const result={altitude,target,success,total,flightPay,bonus,contractPay,surveyPay,recoveryPay,contract:completed?contract.name:null,data,stage:oldStage+1,power:Math.round(flight.quality*100),cleared,nextTarget:run.stage<6?milestoneHeight(run):null,record:altitude>oldBest,improvement:Math.max(0,altitude-oldBest),events:[...(flight.events||[])],newParts:p.stock.filter(id=>!oldStock.includes(id)),unlockedKits:KITS.filter(k=>k.unlock>oldGates&&k.unlock<=session.profile.totalGates).map(k=>k.id)};
   run.lastResult=result;run.launchQuality=null;run.launchSnapshot=null;
   run.status=run.stage===6?'won':run.strikes>=3?'lost':'debrief';
   if(run.status==='won') {
@@ -112,9 +118,10 @@ export function arrivePrototype(session) {
   restock(run);return true;
 }
 export function restoreSession(raw) {
-  if(raw?.prototypeVersion!==undefined&&![1,2,PROTOTYPE_VERSION].includes(raw.prototypeVersion))throw Error('This save needs a newer prototype build.');
+  if(raw?.prototypeVersion!==undefined&&![1,2,3,PROTOTYPE_VERSION].includes(raw.prototypeVersion))throw Error('This save needs a newer prototype build.');
   if(raw?.active?.rulesVersion!==undefined&&raw.active.rulesVersion!==1)throw Error('This expedition needs a newer rules version.');
   if(raw?.version!==undefined&&![1,2].includes(raw.version))throw Error('This save needs a newer game build.');
+  if(raw?.active?.equipmentVersion!==undefined&&![1,EQUIPMENT_VERSION].includes(raw.active.equipmentVersion))throw Error('This expedition needs newer equipment rules.');
   if(raw?.active?.missionVersion!==undefined&&![1,2].includes(raw.active.missionVersion))throw Error('This expedition needs a newer mission version.');
   if(raw?.profile?.missionJournal?.version!==undefined&&raw.profile.missionJournal.version!==1)throw Error('This journal needs a newer game build.');
   if(raw?.active?.conditionsVersion>4)throw Error('This save needs newer flight conditions.');
@@ -137,23 +144,24 @@ export function restoreSession(raw) {
   if(!run)return session;
   if(!Number.isInteger(input.difficulty)||input.difficulty<0||input.difficulty>8)throw Error('Unsupported roguelite destination.');
   if(run.status==='won')session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,run.difficulty+1));
-  Object.assign(run,{rulesVersion:1,missionVersion:input.missionVersion===2?2:1,worldStartFlights:Number.isInteger(input.worldStartFlights)&&input.worldStartFlights>=0&&input.worldStartFlights<=run.program.flights?input.worldStartFlights:null,conditionsVersion:4,startWorld:bounded(input.startWorld,8),offerIndex:bounded(input.offerIndex),reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
-  Object.assign(run.program,{rulesVersion:1,conditionsVersion:4});
+  Object.assign(run,{rulesVersion:1,equipmentVersion:input.equipmentVersion===2?2:1,missionVersion:input.missionVersion===2?2:1,worldStartFlights:Number.isInteger(input.worldStartFlights)&&input.worldStartFlights>=0&&input.worldStartFlights<=run.program.flights?input.worldStartFlights:null,conditionsVersion:4,startWorld:bounded(input.startWorld,8),offerIndex:bounded(input.offerIndex),reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
+  Object.assign(run.program,{rulesVersion:1,equipmentVersion:run.equipmentVersion,conditionsVersion:4});
   const allContracts=WORLDS.flatMap((_,world)=>missionPool(world));
   run.completedContracts=allContracts.filter(c=>input.completedContracts?.includes(c.id)).map(c=>c.id);
   for(const id of run.completedContracts)recordMission(session.profile,id);
   run.contractId=contractsFor(run).some(c=>c.id===input.contractId&&!run.completedContracts.includes(c.id))?input.contractId:null;
-  const validIds=[...PARTS,...EXPERIMENTAL_PARTS].map(p=>p.id);
+  const validIds=catalogFor(run.program).map(p=>p.id);
+  if(run.program.parts.owned.some(id=>!validIds.includes(id)))throw Error('This equipment requires its original equipment rules.');
   run.program.stock=[...new Set((input.program?.stock||[]).filter(id=>validIds.includes(id)))];
-  if(EXPERIMENTAL_PARTS.some(p=>p.id===input.reservedOffer)&&!run.program.parts.owned.includes(input.reservedOffer))run.reservedOffer=input.reservedOffer;
+  if(experimentalCatalog(run.program).some(p=>p.id===input.reservedOffer)&&!run.program.parts.owned.includes(input.reservedOffer))run.reservedOffer=input.reservedOffer;
   if(run.status==='flying') {
     const contract=selectedContract(run);
     // The build is immutable while flying. Reconstruct eligibility from validated equipment.
-    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true};
+    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0};
   }
   if(run.lastResult) {
     const r=input.lastResult;
-    Object.assign(run.lastResult,{success:r.success===true,contractPay:bounded(r.contractPay),surveyPay:bounded(r.surveyPay),contract:allContracts.find(c=>c.name===r.contract)?.name||null,events:(Array.isArray(r.events)?r.events:[]).filter(e=>['Boosters separated','Reserve fuel released','Separation surge · 2× thrust'].includes(e)).slice(0,3)});
+    Object.assign(run.lastResult,{success:r.success===true,contractPay:bounded(r.contractPay),surveyPay:bounded(r.surveyPay),recoveryPay:bounded(r.recoveryPay),contract:allContracts.find(c=>c.name===r.contract)?.name||null,events:(Array.isArray(r.events)?r.events:[]).filter(e=>ABILITY_EVENTS.includes(e)).slice(0,5)});
     run.lastResult.nextTarget=run.stage<6?milestoneHeight(run):null;
     run.lastResult.newParts=(r.newParts||[]).filter(id=>validIds.includes(id));
   }

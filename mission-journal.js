@@ -1,6 +1,6 @@
 // Bounded, permanent collection records. No storage or DOM dependencies.
-import { missionPool } from './missions.js?v=mission-journal-1';
-import { PART_SLOTS, partById, assemblySpecs, restorePartTraits } from './parts.js?v=mission-journal-1';
+import { missionPool } from './missions.js?v=equipment-synergy-1';
+import { PART_SLOTS, partById, assemblySpecs, restorePartTraits } from './parts.js?v=equipment-synergy-1';
 
 export const JOURNAL_KITS=['scrapper','stager','scientist'];
 const int=(value,max=1e9)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;

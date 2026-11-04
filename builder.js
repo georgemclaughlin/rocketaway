@@ -1,12 +1,12 @@
-import { flightConditions } from './worlds.js?v=mission-journal-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=mission-journal-1';
-import { createFlight, stepFlight } from './engine.js?v=mission-journal-1';
-import { partInsight } from './part-insights.js?v=mission-journal-1';
-import { abilityDescription } from './experimental.js?v=mission-journal-1';
+import { flightConditions } from './worlds.js?v=equipment-synergy-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=equipment-synergy-1';
+import { createFlight, stepFlight } from './engine.js?v=equipment-synergy-1';
+import { partInsight } from './part-insights.js?v=equipment-synergy-1';
+import { abilityDescription } from './experimental.js?v=equipment-synergy-1';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
-  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1)+'|'+(program.rulesVersion||0);
+  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1)+'|'+(program.rulesVersion||0)+'|'+(program.equipmentVersion||1);
   if (estimates.has(key)) return estimates.get(key);
   const flight = createFlight(program.levels, quality, { plan: 'explorer', assembly: assemblySpecs(program) });
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);
@@ -17,7 +17,7 @@ export function estimateHeight(program, quality = 1.1) {
 }
 export function previewPart(program, id) {
   const part = partById(id);
-  if (!part) return null;
+  if (!part || !catalogFor(program).some(candidate=>candidate.id===id)) return null;
   const preview = { ...program, parts: { ...program.parts, equipped: { ...program.parts.equipped, [part.slot]: id } } };
   return { program: preview, height: estimateHeight(preview), previousHeight: estimateHeight(program), stats: assemblySpecs(preview), previousStats: assemblySpecs(program) };
 }

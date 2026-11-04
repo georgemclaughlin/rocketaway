@@ -8,15 +8,15 @@ import { createFlight } from '../engine.js';
 import { advanceFlight } from '../flight-playback.js';
 import { buyResearch } from '../research.js';
 
-export function bestAffordable(program,contract=null) {
+export function bestAffordable(program,contract=null,quality=1.1) {
   const available=catalogFor(program).filter(p=>program.parts.owned.includes(p.id)||program.stock.includes(p.id));
   const slots=['aero','tank','engine','boosters'].map(slot=>available.filter(p=>p.slot===slot));
-  let best=contract?null:{height:estimateHeight(program),cost:0,ids:Object.values(program.parts.equipped)};
+  let best=contract?null:{height:estimateHeight(program,quality),cost:0,ids:Object.values(program.parts.equipped)};
   for(const a of slots[0])for(const t of slots[1])for(const e of slots[2])for(const b of slots[3]) {
     const parts=[a,t,e,b],cost=parts.reduce((sum,p)=>sum+(program.parts.owned.includes(p.id)?0:p.price),0);
     if(cost>program.credits)continue;
     const candidate={...program,parts:{...program.parts,equipped:Object.fromEntries(parts.map(p=>[p.slot,p.id]))}};
-    const height=estimateHeight(candidate);
+    const height=estimateHeight(candidate,quality);
     if(contract) {
       if(height>=contract.target&&contractReady(candidate,contract)&&(!best||cost<best.cost))best={height,cost,ids:parts.map(p=>p.id)};
     } else if(height>best.height+1)best={height,cost,ids:parts.map(p=>p.id)};

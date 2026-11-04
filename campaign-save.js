@@ -1,5 +1,5 @@
 // Two campaigns share the existing save key without replacing either one's progress.
-import { newExpeditions, restoreSession, PROTOTYPE_VERSION } from './prototype-run.js?v=mission-journal-1';
+import { newExpeditions, restoreSession, PROTOTYPE_VERSION } from './prototype-run.js?v=equipment-synergy-1';
 
 export function openCampaignSave(raw, original = false) {
   if (raw?.campaignSaveVersion !== undefined && raw.campaignSaveVersion !== 1) {

@@ -1,9 +1,9 @@
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=mission-journal-1';
-import { newProgram, restoreProgram } from './engine.js?v=mission-journal-1';
-import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js?v=mission-journal-1';
-import { MODULES, ROUTES } from './modifiers.js?v=mission-journal-1';
-import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js?v=mission-journal-1';
-import { newFlightRecords, restoreFlightRecords, recordLaunch, recordFlightPeak } from './flight-records.js?v=mission-journal-1';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=equipment-synergy-1';
+import { newProgram, restoreProgram } from './engine.js?v=equipment-synergy-1';
+import { PARTS, PART_SLOTS, PART_TRAITS, restorePartTraits } from './parts.js?v=equipment-synergy-1';
+import { MODULES, ROUTES } from './modifiers.js?v=equipment-synergy-1';
+import { newResearch, restoreResearch, researchLoadout, syncResearch, awardResearch } from './research.js?v=equipment-synergy-1';
+import { newFlightRecords, restoreFlightRecords, recordLaunch, recordFlightPeak } from './flight-records.js?v=equipment-synergy-1';
 export const EXPEDITION_KEY = 'rocket-away-expeditions-v1';
 export const ASCENT_STEP = .05;
 export const MOON_CHECKPOINTS = [6000,20000,60000,150000,300000,600000];

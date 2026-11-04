@@ -1,4 +1,4 @@
-import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=mission-journal-1';
+import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch } from './research.js?v=equipment-synergy-1';
 
 export function researchButtonState(profile,selectedKit='scrapper') {
  const data=profile.research.data;

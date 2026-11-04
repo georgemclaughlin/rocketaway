@@ -1,14 +1,14 @@
-import { hasNextWorldOffer } from './campaign-save.js?v=mission-journal-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=mission-journal-1';
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=mission-journal-1';
-import { altitudeLabel } from './journey.js?v=mission-journal-1';
-import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=mission-journal-1';
-import { newProgram } from './engine.js?v=mission-journal-1';
-import { fittedParts } from './parts.js?v=mission-journal-1';
-import { rocketArt } from './builder.js?v=mission-journal-1';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=mission-journal-1';
-import { researchButtonState } from './research-ui.js?v=mission-journal-1';
-import { kitDetails } from './kit-details.js?v=mission-journal-1';
+import { hasNextWorldOffer } from './campaign-save.js?v=equipment-synergy-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=equipment-synergy-1';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=equipment-synergy-1';
+import { altitudeLabel } from './journey.js?v=equipment-synergy-1';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=equipment-synergy-1';
+import { newProgram } from './engine.js?v=equipment-synergy-1';
+import { fittedParts } from './parts.js?v=equipment-synergy-1';
+import { rocketArt } from './builder.js?v=equipment-synergy-1';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=equipment-synergy-1';
+import { researchButtonState } from './research-ui.js?v=equipment-synergy-1';
+import { kitDetails } from './kit-details.js?v=equipment-synergy-1';
 
 function kitArt(item,profile) {
   return rocketArt(kitDetails(item,profile).parts);

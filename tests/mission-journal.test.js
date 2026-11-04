@@ -70,7 +70,7 @@ test('interrupted new missions preserve eligibility, timing, rewards and journal
 test('legacy flights keep their old contracts, rewards and rocket and do not invent launch records',()=>{
   const raw=start(1);raw.prototypeVersion=2;delete raw.active.missionVersion;delete raw.active.worldStartFlights;delete raw.profile.missionJournal;
   raw.active.contractId='moon-science';fit(raw,'lab');beginFlight(raw,1.17);
-  const s=restoreSession(raw);assert.equal(s.prototypeVersion,3);assert.deepEqual(contractsFor(s.active),prototypeContracts(1));
+  const s=restoreSession(raw);assert.equal(s.prototypeVersion,4);assert.deepEqual(contractsFor(s.active),prototypeContracts(1));
   assert.equal(s.active.launchQuality,1.17);assert.equal(s.active.contractId,'moon-science');
   assert.deepEqual(s.active.program.parts,raw.active.program.parts);
   const r=settle(s,{done:true,peak:milestoneHeight(s.active,5)+1,quality:1.17,payMultiplier:1});

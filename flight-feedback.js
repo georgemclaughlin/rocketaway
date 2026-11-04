@@ -1,7 +1,7 @@
-import { catalogFor } from './parts.js?v=mission-journal-1';
-import { estimateHeight, previewPart } from './builder.js?v=mission-journal-1';
-import { buildExperiment } from './part-insights.js?v=mission-journal-1';
-import { altitudeLabel } from './journey.js?v=mission-journal-1';
+import { catalogFor } from './parts.js?v=equipment-synergy-1';
+import { estimateHeight, previewPart } from './builder.js?v=equipment-synergy-1';
+import { buildExperiment } from './part-insights.js?v=equipment-synergy-1';
+import { altitudeLabel } from './journey.js?v=equipment-synergy-1';
 
 export function missedFlightAdvice(run,result) {
  const perfect=estimateHeight(run.program,1.2),shortfall=Math.max(0,result.target-result.altitude),misses=Math.max(0,3-run.strikes);

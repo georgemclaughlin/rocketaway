@@ -1,7 +1,7 @@
-import { modifyAssembly } from './modifiers.js?v=mission-journal-1';
-import { researchModifiers } from './research.js?v=mission-journal-1';
-import { flightConditions } from './worlds.js?v=mission-journal-1';
-import { EXPERIMENTAL_PARTS, experimentalAssembly } from './experimental.js?v=mission-journal-1';
+import { modifyAssembly } from './modifiers.js?v=equipment-synergy-1';
+import { researchModifiers } from './research.js?v=equipment-synergy-1';
+import { flightConditions } from './worlds.js?v=equipment-synergy-1';
+import { EXPERIMENTAL_PARTS, experimentalAssembly, experimentalCatalog } from './experimental.js?v=equipment-synergy-1';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },
@@ -51,7 +51,7 @@ export function partForProgram(program, id) {
   return result;
 }
 export function partById(id) { return PARTS.find(part => part.id === id) || EXPERIMENTAL_PARTS.find(part=>part.id===id); }
-export function catalogFor(program) { return program.rulesVersion===1?[...PARTS,...EXPERIMENTAL_PARTS]:PARTS; }
+export function catalogFor(program) { return program.rulesVersion===1?[...PARTS,...experimentalCatalog(program)]:PARTS; }
 export function newInventory() {
   const starters=PARTS.filter(part=>part.price===0);
   return {owned:starters.map(part=>part.id),equipped:Object.fromEntries(starters.map(part=>[part.slot,part.id]))};
@@ -78,7 +78,7 @@ export function restoreInventory(raw, legacyLevels={}) {
 }
 export function fitPart(program,id) {
   const part=partById(id);
-  if(!part || (part.ability&&program.rulesVersion!==1)) return false;
+  if(!part || !catalogFor(program).some(candidate=>candidate.id===id)) return false;
   if(Array.isArray(program.stock)&&!program.stock.includes(id)&&!program.parts.owned.includes(id))return false;
   if(!program.parts.owned.includes(id)) {
     if(program.credits<part.price) return false;

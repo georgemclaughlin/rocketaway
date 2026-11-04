@@ -1,4 +1,5 @@
-import { newInventory, restoreInventory } from './parts.js?v=mission-journal-1';
+import { newInventory, restoreInventory } from './parts.js?v=equipment-synergy-1';
+import { momentumMultiplier } from './experimental.js?v=equipment-synergy-1';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [
@@ -77,6 +78,7 @@ export function createFlight(levels, quality = 1, options = {}) {
   }
   return { ...stats, quality: clamp(quality, .9, 1.2), time: 0, altitude: 0, velocity: 0, peak: 0, fuel: 1, boosted: false, phase: 'powered', done: false, settled: false,
     ...(stats.rulesVersion===1?{separationAt:stats.burn*.6,mainBurn:stats.burn,reserveOpened:false,surgeUntil:0,events:[]} : {}),
+    ...(stats.equipmentVersion===2?{dropAt:stats.burn*.5,dropReleased:false,momentumFull:false,recovered:false}:{}),
     plan: options.plan || 'standard', payMultiplier: (options.plan ? flightPlan(options.plan).pay : 1) * (options.assembly?.pay || 1), contractIndex: options.contractIndex ?? null,
     encounterId: Number.isInteger(options.encounterId) ? options.encounterId % 3 : null, encounterAt: stats.burn * .55, encountered: false, pendingEncounter: null,
     salvage: 0, choice: null, power: options.assembly?.power ?? Object.values(levels).reduce((sum, level) => sum + level, 0), coastTime: 0 };
@@ -112,11 +114,18 @@ export function stepFlight(flight, elapsed) {
         if(flight.hasBoosters) {
           flight.velocity+=flight.kick;flight.dryMass-=flight.stageMass;
           flight.events.push('Boosters separated');
+          if(flight.recovery){flight.recovered=true;flight.events.push('Recovery pods deployed');}
           if(flight.reserveSeconds) {flight.reserveOpened=true;flight.burn+=flight.reserveSeconds;flight.events.push('Reserve fuel released');}
           if(flight.surge) {flight.surgeUntil=flight.time+5;flight.events.push('Separation surge · 2× thrust');}
         }
       }
       const powered=flight.time<flight.burn;
+      if(flight.dropMass&&!flight.dropReleased&&flight.time>=flight.dropAt) {
+        flight.dropReleased=true;flight.dryMass-=flight.dropMass;flight.events.push('Empty tank released');
+      }
+      if(flight.momentum&&powered&&!flight.momentumFull&&flight.time>=10) {
+        flight.momentumFull=true;flight.events.push('Momentum engine · full thrust');
+      }
       if(!powered)flight.coastTime+=dt;
       const reserve=flight.reserveRatio||0;
       const totalBurn=flight.mainBurn+(flight.reserveSeconds||0);
@@ -125,7 +134,8 @@ export function stepFlight(flight, elapsed) {
       flight.fuel=Math.max(0,1-consumed);
       const massFactor=flight.mass/(flight.dryMass+flight.fuelMass*flight.fuel);
       const surge=flight.time<flight.surgeUntil?2:1;
-      const acceleration=(powered?flight.thrust*massFactor*flight.quality*surge:0)-flight.gravity-flight.drag*flight.velocity*Math.abs(flight.velocity);
+      const ramp=flight.momentum?momentumMultiplier(flight.time):1;
+      const acceleration=(powered?flight.thrust*massFactor*flight.quality*surge*ramp:0)-flight.gravity-flight.drag*flight.velocity*Math.abs(flight.velocity);
       flight.velocity+=acceleration*dt;flight.altitude=Math.max(0,flight.altitude+flight.velocity*dt*500);
       flight.peak=Math.max(flight.peak,flight.altitude);flight.phase=powered?'powered':'coasting';
       if(!powered&&flight.velocity<=0){flight.done=true;flight.phase='complete';}

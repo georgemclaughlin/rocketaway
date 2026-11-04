@@ -931,7 +931,7 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
 .contract-card small { color: #b5e4c9; }
 #contracts-help { font-size: 13px; line-height: 1.4; }
 #contract-none { min-height: 44px; }
-.ability-flight { position: absolute; top: 95px; left: 16px; right: 16px; text-align: center; color: #d4f3de; font: bold 11px monospace; padding: 8px; background: #203544d9; border-radius: 6px; pointer-events: none; }
+.ability-flight { position: absolute; bottom: 64px; left: 16px; max-width: 40%; text-align: left; color: #d4f3de; font: bold 10px/1.4 monospace; padding: 6px; background: #203544e8; border-radius: 6px; pointer-events: none; }
 #save-recovery { max-width: 520px; margin: 10vh auto; padding: 24px; }
 #save-export { min-height: 48px; padding: 10px; }
 @media (max-width:700px) and (min-height:521px) {
@@ -963,7 +963,7 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
  #contracts-dialog { width: min(640px,calc(100% - 24px)); padding: 12px; }
  #contract-offers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
  .contract-card { margin: 4px 0; }
- .ability-flight { top: 55px; left: 160px; right: 160px; }
+ .ability-flight { bottom: 50px; max-width: 200px; }
 }
 
 .part-picker[data-unified="true"] .picker-heading { display: flex; font-size: 11px; gap: 6px; }
