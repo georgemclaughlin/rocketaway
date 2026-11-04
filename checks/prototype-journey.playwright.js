@@ -11,7 +11,7 @@ async page=>{
   await page.locator('#research-close').click();
   // Read-only planning: all purchases and launches still go through visible controls.
   const plan=await page.evaluate(async()=>{
-   const {catalogFor}=await import('./parts.js'),{estimateHeight}=await import('./builder.js'),{milestoneHeight}=await import('./expeditions.js'),{prototypeContracts,contractReady}=await import('./prototype-run.js');
+   const {catalogFor}=await import('./parts.js'),{estimateHeight}=await import('./builder.js'),{milestoneHeight}=await import('./expeditions.js'),{contractsFor,contractReady}=await import('./prototype-run.js');
    const s=JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')),r=s.active,p=r.program;
    const cat=catalogFor(p).filter(x=>p.parts.owned.includes(x.id)||p.stock.includes(x.id)),slots=['aero','tank','engine','boosters'].map(slot=>cat.filter(x=>x.slot===slot));
    let best={height:estimateHeight(p),parts:[]};
@@ -21,7 +21,7 @@ async page=>{
     if(height>best.height+1)best={height,parts:parts.filter(x=>p.parts.equipped[x.slot]!==x.id)};
    }
    const equipped={...p.parts.equipped,...Object.fromEntries(best.parts.map(x=>[x.slot,x.id]))},candidate={...p,parts:{...p.parts,equipped}};
-   const contract=prototypeContracts(r.difficulty).find(c=>!r.completedContracts.includes(c.id)&&contractReady(candidate,c));
+   const contract=contractsFor(r).find(c=>!r.completedContracts.includes(c.id)&&contractReady(candidate,c));
    return {parts:best.parts.map(x=>({id:x.id,slot:x.slot,experimental:!!x.ability})),contract:contract?.id||null};
   });
   for(const part of plan.parts){

@@ -1,6 +1,6 @@
-import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=next-world-1';
-import { fittedParts } from './parts.js?v=next-world-1';
-import { rocketArt } from './builder.js?v=next-world-1';
+import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=mission-journal-1';
+import { fittedParts } from './parts.js?v=mission-journal-1';
+import { rocketArt } from './builder.js?v=mission-journal-1';
 
 export function createTravel(onArrive) {
   const dialog=document.getElementById('travel-dialog');

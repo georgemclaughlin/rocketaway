@@ -21,8 +21,8 @@ async page=>{
  await page.reload();await page.locator('button[data-build-slot="aero"]').click();await page.locator(`[data-part="${reserved.active.reservedOffer}"]`).click();await page.locator('#part-info').click();assert((await page.locator('#reserve-part').innerText()).includes('Reserved'),'reservation survives reload');await fits('#part-dialog,#reserve-part,#part-info-close','reservation details');await page.locator('#part-info-close').click();
  await fits('#workshop,.part-picker,#candidate-description,#part-fit,#shop-launch,.assembly-stage,#contracts-open','opening offer');
  await page.locator('#contracts-open').click();await fits('#contracts-dialog,.contract-card,#contracts-close,#contract-none','contracts');
- await page.locator('[data-contract="earth-light"]').click();assert(!(await page.locator('#contracts-dialog').isVisible()),'selection returns to build');
- assert((await page.locator('#contracts-open').innerText()).includes('Small but mighty'),'selected goal is visible');
+ const selectedName=await page.locator('.contract-card strong').first().innerText();await page.locator('.contract-card').first().click();assert(!(await page.locator('#contracts-dialog').isVisible()),'selection returns to build');
+ assert((await page.locator('#contracts-open').innerText()).includes(selectedName),'selected goal is visible');
  // Inspect every experimental ability with a saved, isolated build fixture.
  await page.evaluate(async()=>{const r=await import('./prototype-run.js'),p=await import('./parts.js'),x=await import('./experimental.js');const s=r.newExpeditions();s.profile.totalGates=6;s.profile.maxDifficulty=1;r.startPrototype(s,{seed:42});s.active.program.credits=10000;s.active.program.stock=[...p.PARTS,...x.EXPERIMENTAL_PARTS].map(p=>p.id);localStorage.setItem('rocket-away-expeditions-v1',JSON.stringify(s));});await page.reload();
  for(const slot of ['aero','tank','engine']){

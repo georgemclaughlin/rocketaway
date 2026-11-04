@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newExpeditions, startPrototype, beginFlight, settle, restoreSession, prototypeContracts } from '../prototype-run.js';
+import { newExpeditions, startPrototype, beginFlight, settle, restoreSession, prototypeContracts, contractsFor } from '../prototype-run.js';
 import { startExpedition, milestoneHeight } from '../expeditions.js';
 import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from '../campaign-save.js';
 import { estimateHeight } from '../builder.js';
@@ -85,7 +85,7 @@ test('later-world interrupted flights keep their world, equipment, contract, and
   for(const world of [2,5,8]) {
     const s=newExpeditions();s.profile.maxDifficulty=world;
     startPrototype(s,{seed:42,difficulty:world});
-    s.active.contractId=prototypeContracts(world)[0].id;
+    s.active.contractId=contractsFor(s.active)[0].id;
     beginFlight(s,1.17);
     const restored=restoreSession(s);
     assert.equal(restored.active.difficulty,world);

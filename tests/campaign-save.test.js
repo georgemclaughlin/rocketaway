@@ -11,7 +11,7 @@ test('opening roguelite preserves an existing interrupted campaign exactly', () 
   const before = structuredClone(legacy);
   const opened = openCampaignSave(legacy);
   assert.equal(opened.session.active, null);
-  assert.equal(opened.session.prototypeVersion, 2);
+  assert.equal(opened.session.prototypeVersion, 3);
   startPrototype(opened.session, { seed: 7 });
   const stored = packCampaignSave(opened.session, opened.other);
   assert.deepEqual(stored.originalCampaign, before);

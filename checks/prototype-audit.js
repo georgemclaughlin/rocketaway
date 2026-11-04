@@ -1,6 +1,6 @@
 // Sampled earned play policies plus exhaustive affordable loadouts at each decision.
 import { pathToFileURL } from 'node:url';
-import { newExpeditions,startPrototype,beginFlight,settle,arrivePrototype,chooseContract,prototypeContracts,contractReady } from '../prototype-run.js';
+import { newExpeditions,startPrototype,beginFlight,settle,arrivePrototype,chooseContract,contractsFor,contractReady } from '../prototype-run.js';
 import { continueExpedition,milestoneHeight } from '../expeditions.js';
 import { catalogFor,fitPart,assemblySpecs } from '../parts.js';
 import { estimateHeight } from '../builder.js';
@@ -35,7 +35,7 @@ export function earnedPrototype({seed=42,kit='scrapper',rank=0,world=0,policy='a
     if(estimateHeight(p)<milestoneHeight(run)) {
       let best=bestAffordable(p);
       if(policy==='contracts'&&best.height<milestoneHeight(run)) {
-        for(const contract of prototypeContracts(run.difficulty).filter(c=>!run.completedContracts.includes(c.id))) {
+        for(const contract of contractsFor(run).filter(c=>!run.completedContracts.includes(c.id))) {
           const alternative=bestAffordable(p,contract);
           if(alternative){best=alternative;chosenContract=contract;break;}
         }
@@ -43,7 +43,7 @@ export function earnedPrototype({seed=42,kit='scrapper',rank=0,world=0,policy='a
       for(const id of best.ids)if(id!==p.parts.equipped[catalogFor(p).find(x=>x.id===id).slot]){fitPart(p,id);buys.push(id);}
     }
     if(policy==='contracts') {
-      const contract=chosenContract||prototypeContracts(run.difficulty).find(c=>!run.completedContracts.includes(c.id)&&contractReady(p,c));
+      const contract=chosenContract||contractsFor(run).find(c=>!run.completedContracts.includes(c.id)&&contractReady(p,c));
       chooseContract(session,contract?.id||null);
     }
     const power=policy==='contracts'&&estimateHeight(p)<milestoneHeight(run)&&estimateHeight(p,1.2)>=milestoneHeight(run)?1.2:quality;

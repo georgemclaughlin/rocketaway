@@ -10,7 +10,7 @@ The prototype includes six experimental parts, two optional contracts per world,
 
 The sampled earned-build audit completes 60/60 cases across five seeds, three kits, ranks 0/5, and Earth/Moon starts. Its policy uses contracts and perfect timing where useful. Full Earth–Moon cases take 4–8 launches, median 6. This does not establish the planned session duration: carrying an already developed rocket can make the Moon brief. Next evaluate actual player choices and consider additional distinct equipment opportunities or objectives before increasing targets. No human enjoyment result is claimed.
 
-The initial prototype uses one separation event, fixed experimental abilities, and existing research. Catalog research extensions, collection/medal UI, and longer expedition groups are deferred until the prototype design passes Phase 4. Public rollout preserves the original save inside the campaign envelope. It now opens by default publicly; the original campaign is kept separately in the existing save envelope, with menu switching between campaigns.
+The initial prototype uses one separation event, fixed experimental abilities, and existing research. The owner-requested next increment implements mission variety, kit badges, and winning-rocket records as described at the end of this plan. Catalog research extensions and longer expedition groups remain deferred pending further playtesting. Public rollout preserves the original save inside the campaign envelope. It now opens by default publicly; the original campaign is kept separately in the existing save envelope, with menu switching between campaigns.
 
 ## Direction
 
@@ -294,4 +294,16 @@ Resolve these questions through the prototype:
 5. Does the target duration emerge from decisions, or do goals and rewards still create padding?
 6. Does the full-route record provide enough incentive when a shorter checkpoint start is available?
 
-The next design task is Phase 4: play the current journey, evaluate whether its combinations and recovery are enjoyable, and revise its pacing before adding the proposed later expedition groups and research extensions.
+## Implemented increment: missions and a flight journal
+
+The owner has asked to continue expanding the public journey. This increment gives optional replay a concrete purpose while keeping the current mobile hangar and travel boundaries.
+
+1. Give each world four equipment missions, offering two per attempt: one early objective and one later objective. Seed the pair when the attempt starts; reloads and shop refreshes cannot reroll it. Mix light/booster-free builds, staging, capsules, and pointed fairings. Keep the existing two-contract payout budget and milestone rules. Old attempts retain their original pair and interrupted-flight eligibility.
+2. Record completed mission stamps permanently, including on failed attempts. Track world clears with each of the three starting kits. These are optional collection goals, not required progression or new currencies.
+3. Save each world's fewest-launch winning rocket in the existing Journey records panel, including its parts, traits, research rank, and launch mass. Separate fresh starts from carried Moon arrivals so their records are comparable. Count launches within that world, not the whole Earth–Moon expedition. Never invent missing historical records.
+4. Show collection progress and a world selector inside that optional panel; keep the hangar free of additional controls. Explain how to pursue a new stamp or kit badge by explicitly replaying an unlocked world. Records never auto-fit or purchase parts.
+5. Verify deterministic boards, legacy and interrupted saves, settlement exactly once, journal persistence and validation, earned journeys and researched starts, and all six viewport sizes. Update documentation and coherent cache versions, then publish and smoke-test Pages.
+
+This is a replay and build-choice increment. New part abilities, longer carried chapters, and research branches remain separate design work. Automated checks establish correctness and sampled balance; enjoyment still needs player feedback.
+
+Implementation verification: all 110 Node tests pass, including earned full journeys and all 36 mission requirements. The sampled balance policies completed 60/60 Earth–Moon/checkpoint cases and 210/210 later-world cases. Isolated browser checks cover the six journal and hangar layouts, campaign switching, old saves and next-world selection, a resumed mission flight, and a fresh six-launch Earth–Moon journey through visible controls with automated gold timing. Save version 3 protects journal data from the previous build; versions 1/2 migrate with their existing mission pairs. These results do not establish human enjoyment.

@@ -1,5 +1,5 @@
 // Two campaigns share the existing save key without replacing either one's progress.
-import { newExpeditions, restoreSession } from './prototype-run.js?v=next-world-1';
+import { newExpeditions, restoreSession, PROTOTYPE_VERSION } from './prototype-run.js?v=mission-journal-1';
 
 export function openCampaignSave(raw, original = false) {
   if (raw?.campaignSaveVersion !== undefined && raw.campaignSaveVersion !== 1) {
@@ -17,7 +17,7 @@ export function openCampaignSave(raw, original = false) {
   const previous=restoreSession(legacy);
   const session = restoreSession(original ? legacy : roguelite);
   if (!original) {
-    session.prototypeVersion = 2;
+    session.prototypeVersion = PROTOTYPE_VERSION;
     session.progressImportVersion = 1;
     if (!roguelite?.progressImportVersion) {
       const next=Math.max(session.profile.maxDifficulty,previous.profile.maxDifficulty);
@@ -37,7 +37,7 @@ export function openCampaignSave(raw, original = false) {
 export function packCampaignSave(session, other, original = false) {
   const roguelite = original ? other : session;
   const legacy = original ? session : other;
-  return { ...roguelite, prototypeVersion: 2, campaignSaveVersion: 1, originalCampaign: legacy };
+  return { ...roguelite, prototypeVersion: PROTOTYPE_VERSION, campaignSaveVersion: 1, originalCampaign: legacy };
 }
 
 // An interrupted flight must resume with its saved rocket and timing first.

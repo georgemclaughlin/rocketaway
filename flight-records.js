@@ -1,4 +1,4 @@
-import { launchRating } from './launch-feedback.js?v=next-world-1';
+import { launchRating } from './launch-feedback.js?v=mission-journal-1';
 
 const count=(value,max=1e9)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
 export const newFlightRecords=()=>({launches:0,perfectLaunches:0,highestAltitude:0,highestWorld:0,partial:false});

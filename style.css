@@ -782,6 +782,26 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
 .reference-dialog .finale-stats { margin: 18px 0; }
 #records-summary { color: #e8d397; }
 #records-note { color: var(--muted); }
+#records-dialog .menu-heading { position: sticky; top: -20px; z-index: 2; background: #181f35; padding: 12px 0; }
+.mission-journal { border-top: 1px solid #536578; margin-top: 22px; padding-top: 8px; font-size: 13px; line-height: 1.5; }
+.mission-journal h3 { font-size: 20px; margin: 12px 0 4px; }
+.mission-journal h4 { font-size: 15px; margin: 18px 0 4px; }
+.mission-journal p { color: #b8c9d7; }
+.mission-journal .journal-total { color: var(--gold); margin-top: 0; }
+.mission-journal select { min-height: 48px; }
+.journal-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.journal-badges span { border: 1px solid #536578; border-radius: 20px; padding: 5px 9px; }
+.journal-badges [data-earned="true"] { color: #b5e4c9; border-color: #83b5a3; background: #263f3c; }
+.journal-missions { list-style: none; margin: 10px 0; padding: 0; display: grid; gap: 8px; }
+.journal-missions li { border-left: 3px solid #536578; padding: 6px 10px; background: #202d3e; }
+.journal-missions li[data-earned="true"] { border-color: #9fd4ba; }
+.journal-missions li[data-earned="true"] strong { color: #b5e4c9; }
+.journal-missions span,.journal-rocket summary span { display: block; color: #b8c9d7; font-size: 12px; }
+.journal-rocket { margin: 10px 0; border: 1px solid #63758b; border-radius: 8px; padding: 0 12px; }
+.journal-rocket summary { cursor: pointer; min-height: 48px; padding: 10px 0; color: var(--gold); }
+.journal-rocket ul { list-style: none; margin: 0; padding: 0; }
+.journal-rocket li { display: grid; padding: 8px 0; border-top: 1px solid #536578; }
+.journal-rocket li span,.journal-rocket small { color: #b8c9d7; font-size: 12px; }
 .science-select { display: flex; align-items: center; gap: 8px; }
 .science-select label { font-size: 12px; }
 .science-select .world-orb { width: 28px; height: 28px; }

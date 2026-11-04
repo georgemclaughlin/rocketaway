@@ -10,7 +10,7 @@ import {estimateHeight,previewPart} from '../builder.js';
 import {earnedPrototype} from '../checks/prototype-audit.js';
 const copy=v=>structuredClone(v);
 function start(world=0,kit='scrapper',seed=42) {
-  const s=newExpeditions();s.profile.maxDifficulty=1;s.profile.totalGates=6;startPrototype(s,{seed,difficulty:world,kit});return s;
+  const s=newExpeditions();s.profile.maxDifficulty=1;s.profile.totalGates=6;startPrototype(s,{seed,difficulty:world,kit});s.active.missionVersion=1;return s;
 }
 function equipped(s,ids) {
   const p=s.active.program;p.credits=10000;p.stock=[...PARTS,...EXPERIMENTAL_PARTS].map(p=>p.id);

@@ -1,22 +1,23 @@
-import { createScienceUI } from './science-ui.js?v=next-world-1';
-import { environmentLabel } from './science-data.js?v=next-world-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=next-world-1';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=next-world-1';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=next-world-1';
-import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=next-world-1';
-import { MODULES } from './modifiers.js?v=next-world-1';
-import { createExpeditionUI } from './expedition-ui.js?v=next-world-1';
-import { createBuilder, rocketArt } from './builder.js?v=next-world-1';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=next-world-1';
-import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=next-world-1';
-import { createTravel } from './travel.js?v=next-world-1';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=next-world-1';
-import { launchRating } from './launch-feedback.js?v=next-world-1';
-import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=next-world-1';
-import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=next-world-1';
-import { kitDetails } from './kit-details.js?v=next-world-1';
-import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, prototypeContracts, contractReady } from './prototype-run.js?v=next-world-1';
-import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=next-world-1';
+import { createScienceUI } from './science-ui.js?v=mission-journal-1';
+import { environmentLabel } from './science-data.js?v=mission-journal-1';
+import { missionJournalMarkup } from './mission-journal-ui.js?v=mission-journal-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=mission-journal-1';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=mission-journal-1';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=mission-journal-1';
+import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=mission-journal-1';
+import { MODULES } from './modifiers.js?v=mission-journal-1';
+import { createExpeditionUI } from './expedition-ui.js?v=mission-journal-1';
+import { createBuilder, rocketArt } from './builder.js?v=mission-journal-1';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=mission-journal-1';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=mission-journal-1';
+import { createTravel } from './travel.js?v=mission-journal-1';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=mission-journal-1';
+import { launchRating } from './launch-feedback.js?v=mission-journal-1';
+import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=mission-journal-1';
+import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=mission-journal-1';
+import { kitDetails } from './kit-details.js?v=mission-journal-1';
+import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, contractsFor, contractReady } from './prototype-run.js?v=mission-journal-1';
+import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=mission-journal-1';
 const prototype = new URLSearchParams(location.search).get('campaign') !== 'original';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
@@ -82,7 +83,8 @@ function renderPrototypeTools() {
   $('contracts-open').title=selected?selected.detail:'Optional: earn credits with a different goal';
   $('contracts-open').dataset.selected=!!selected;
   $('contracts-open').disabled=!canBuild();
-  $('contract-offers').innerHTML=prototypeContracts(run.difficulty).map(contract=>{
+  $('contracts-help').textContent='Clear a new milestone OR your selected contract to avoid a miss. Each contract pays once per attempt. First completions earn permanent journal stamps.';
+  $('contract-offers').innerHTML=contractsFor(run).map(contract=>{
     const done=run.completedContracts.includes(contract.id),active=selected?.id===contract.id,ready=contractReady(run.program,contract);
     return `<button class="contract-card" data-contract="${contract.id}" aria-pressed="${active}" ${done?'disabled':''}><strong>${contract.name}${done?' · Completed':active?' ✓':''}</strong><span>${contract.detail}</span><small>${done?'Reward already collected':`+${contract.reward} credits · ${ready?'Equipment qualifies':'Refit required'}`}</small></button>`;
   }).join('');
@@ -202,9 +204,16 @@ $('records-menu').addEventListener('click',()=>{
   const profile=expeditionSession.profile;
   $('records-summary').textContent=profile.campaignComplete?'Tau Ceti reached. Your journey is complete.':`Road to Tau Ceti · ${profile.maxDifficulty} of 9 worlds cleared`;
   if (prototype) $('records-summary').textContent=`Road to Tau Ceti · ${profile.prototypeWorlds?.length||0} of 9 worlds cleared`;
-  $('records-content').innerHTML=journeyRecordsMarkup(profile);
+  $('records-content').innerHTML=journeyRecordsMarkup(profile)+(prototype?missionJournalMarkup(profile,expeditionSession.active?.difficulty??profile.maxDifficulty):'');
   $('records-note').textContent=profile.flightRecords.partial?'Older flights may be missing from these records.':'Your expedition records stay with you across retries and replays.';
   openReference('records-dialog');
+});
+$('records-content').addEventListener('change',event=>{
+  if(event.target.id==='journal-world') {
+    const world=Number(event.target.value);
+    document.querySelector('.mission-journal').outerHTML=missionJournalMarkup(expeditionSession.profile,world);
+    $('journal-world').focus({preventScroll:true});
+  }
 });
 $('records-close').addEventListener('click',()=>$('records-dialog').close());
 function unlockNotice(result) {

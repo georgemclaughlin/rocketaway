@@ -1,6 +1,6 @@
-import { newProgram } from './engine.js?v=next-world-1';
-import { partById, fittedParts } from './parts.js?v=next-world-1';
-import { researchLoadout } from './research.js?v=next-world-1';
+import { newProgram } from './engine.js?v=mission-journal-1';
+import { partById, fittedParts } from './parts.js?v=mission-journal-1';
+import { researchLoadout } from './research.js?v=mission-journal-1';
 
 export function kitDetails(kit,profile) {
  const loadout=researchLoadout(profile,kit),program=newProgram();

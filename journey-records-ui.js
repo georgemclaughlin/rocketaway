@@ -1,4 +1,4 @@
-import { worldFor } from './worlds.js?v=next-world-1';
+import { worldFor } from './worlds.js?v=mission-journal-1';
 export function journeyRecordsMarkup(profile) {
   const records=profile.flightRecords;
   const stats=[

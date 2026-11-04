@@ -1,4 +1,4 @@
-import { stepFlight } from './engine.js?v=next-world-1';
+import { stepFlight } from './engine.js?v=mission-journal-1';
 
 export const FAST_FORWARD_SECONDS = 6;
 const PHYSICS_STEP = 1 / 120;
