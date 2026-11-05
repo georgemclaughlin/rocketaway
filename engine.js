@@ -1,5 +1,5 @@
-import { newInventory, restoreInventory } from './parts.js?v=goals-visible-1';
-import { momentumMultiplier } from './experimental.js?v=goals-visible-1';
+import { newInventory, restoreInventory } from './parts.js?v=flight-feel-1';
+import { momentumMultiplier } from './experimental.js?v=flight-feel-1';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [

@@ -1,4 +1,4 @@
-import { CHECKPOINTS, milestoneHeight } from './expeditions.js?v=goals-visible-1';
+import { CHECKPOINTS, milestoneHeight } from './expeditions.js?v=flight-feel-1';
 
 export const JOURNEY_NAMES = ['Liftoff', 'Climbing', 'High above', 'Dark skies', 'Deep sky', 'Departure'];
 export const altitudeLabel = altitude => `${Number((altitude/1000).toFixed(1))} km`;

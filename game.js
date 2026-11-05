@@ -1,25 +1,26 @@
-import { flightAbilityLabel } from './experimental.js?v=goals-visible-1';
-import { drawTerrain } from './world-scenery.js?v=goals-visible-1';
-import { createScienceUI } from './science-ui.js?v=goals-visible-1';
-import { environmentLabel } from './science-data.js?v=goals-visible-1';
-import { missionJournalMarkup } from './mission-journal-ui.js?v=goals-visible-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=goals-visible-1';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, stepFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=goals-visible-1';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=goals-visible-1';
-import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=goals-visible-1';
-import { MODULES } from './modifiers.js?v=goals-visible-1';
-import { createExpeditionUI } from './expedition-ui.js?v=goals-visible-1';
-import { createBuilder, rocketArt } from './builder.js?v=goals-visible-1';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=goals-visible-1';
-import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=goals-visible-1';
-import { createTravel } from './travel.js?v=goals-visible-1';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=goals-visible-1';
-import { launchRating } from './launch-feedback.js?v=goals-visible-1';
-import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from './flight-playback.js?v=goals-visible-1';
-import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=goals-visible-1';
-import { kitDetails } from './kit-details.js?v=goals-visible-1';
-import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, contractsFor, contractReady } from './prototype-run.js?v=goals-visible-1';
-import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=goals-visible-1';
+import { createFlightAudio } from './flight-audio.js?v=flight-feel-1';
+import { flightAbilityLabel } from './experimental.js?v=flight-feel-1';
+import { drawTerrain } from './world-scenery.js?v=flight-feel-1';
+import { createScienceUI } from './science-ui.js?v=flight-feel-1';
+import { environmentLabel } from './science-data.js?v=flight-feel-1';
+import { missionJournalMarkup } from './mission-journal-ui.js?v=flight-feel-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=flight-feel-1';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=flight-feel-1';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=flight-feel-1';
+import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=flight-feel-1';
+import { MODULES } from './modifiers.js?v=flight-feel-1';
+import { createExpeditionUI } from './expedition-ui.js?v=flight-feel-1';
+import { createBuilder, rocketArt } from './builder.js?v=flight-feel-1';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=flight-feel-1';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=flight-feel-1';
+import { createTravel } from './travel.js?v=flight-feel-1';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=flight-feel-1';
+import { launchRating } from './launch-feedback.js?v=flight-feel-1';
+import { FAST_FORWARD_SECONDS, fastForwardRate, presentationRate, advanceFlight } from './flight-playback.js?v=flight-feel-1';
+import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=flight-feel-1';
+import { kitDetails } from './kit-details.js?v=flight-feel-1';
+import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, contractsFor, contractReady } from './prototype-run.js?v=flight-feel-1';
+import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=flight-feel-1';
 const prototype = new URLSearchParams(location.search).get('campaign') !== 'original';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
@@ -28,11 +29,13 @@ astronautArt.src = new URL('./assets/astronaut-cartoon.png?v=2', import.meta.url
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let currentScreen = 'workshop';
 let program = newProgram(), mode = 'workshop', flight = null, width = 0, height = 0;
-let ambientTime = 0, lastTime = 0, armTime = 0, timingPosition = .5, fastForward = false, playbackRate = 1, stars = [], soundEnabled = false, audio, storageAvailable = true;
+let ambientTime = 0, lastTime = 0, armTime = 0, timingPosition = .5, fastForward = false, playbackRate = 1, stars = [], soundEnabled = false, storageAvailable = true;
 let flightMilestonesShown = 0, lastJourneyKey = '';
 let saveFailure = '', rawExpeditionSave = null, rawFreeSave = null;
 let particles = [], recordBefore = 0, recordShown = false, zoneSeen = 0;
 let visualFlightTime=0,detachedHardware=[];
+let normalPlaybackRate = 1, flightGoals = [], flightRings = [], timingTier = '', noticeAnimation;
+const flightAudio = createFlightAudio();
 function readSave(key) {try{return localStorage.getItem(key);}catch{storageAvailable=false;return null;}}
 rawFreeSave=readSave(SAVE_KEY);
 try { program = restoreProgram(JSON.parse(rawFreeSave)); } catch { saveFailure='Your saved game could not be read. Export it before recovering.'; }
@@ -52,11 +55,15 @@ const expeditionUI = createExpeditionUI({ getSession: () => expeditionSession, p
   onResume: () => { expeditionSession.mode = 'expedition'; program = expeditionSession.active.program; launch(expeditionSession.active.launchQuality); }
 });
 const builder = createBuilder({ getProgram: () => program, getReserved:()=>expeditionSession.active?.reservedOffer, onReserve:id=>{if(reserveOffer(expeditionSession,id))persist();}, canEdit: canBuild, getTarget: candidate => buildTarget(candidate).height, getTargetLabel: candidate => buildTarget(candidate).label, onFit: part => {
-  persist(); renderWorkshop(); tone(750, .12);
+  persist(); renderWorkshop();
+  tone(520,.16,'triangle'); tone(780,.2,'sine',.045,.09);
+  const gain = part.height - part.previousHeight;
+  $('build-state').textContent = `FITTED · ${gain >= 0 ? '+' : '−'}${altitudeLabel(Math.abs(gain))} AT 110%`;
+  if (!reducedMotion) $('assembly-art').animate([{transform:'translateY(5px) scale(.96)'},{transform:'translateY(0) scale(1)'}],{duration:320,easing:'cubic-bezier(.2,.8,.2,1)'});
   $('launch-title').textContent = `${part.name}, fitted.`;
   $('launch-description').textContent = 'Ready to see how it flies.';
   $('hangar-status').textContent = `${part.name} fitted. Ready to test.`;
-  announce(`${part.name} fitted. ${program.credits} credits remaining.`);
+  announce(`${part.name} fitted. Estimated height ${(part.previousHeight/1000).toFixed(1)} to ${(part.height/1000).toFixed(1)} kilometers at 110% power. ${program.credits} credits remaining.`);
 } });
 const travelToNextWorld = createTravel(() => { if(arrivePrototype(expeditionSession)){program=expeditionSession.active.program;persist();workshop();announce('Arrived at the Moon. Your rocket and credits are kept. No air drag: rethink your build.');return;} workshop(); announce(expeditionSession.active?.difficulty===8 ? 'Tau Ceti reached. Your journey is complete. Take a moment to enjoy it.' : `Arrived at ${destinationFor(expeditionSession.active).name}. Choose your starting rocket.`); });
 const researchUI=createResearchUI({getSession:()=>expeditionSession,getSelectedKit:()=>expeditionUI.getSelectedKit(),canOpen:()=>mode==='workshop'&&expeditionSession.mode==='expedition'&&(!expeditionSession.active||['build','won','lost'].includes(expeditionSession.active.status)),onPurchase:()=>{persist();renderWorkshop();tone(820,.12);}});
@@ -166,6 +173,7 @@ $('flight-log-menu').addEventListener('click',()=>{$('menu-dialog').close();open
 $('flight-log-close').addEventListener('click',()=>$('flight-log-dialog').close());
 function syncScreens() {
   const modal = !$('overlay').hidden;
+  if (mode !== 'flying') flightAudio.quiet();
   const app = document.querySelector('.app'), run = expeditionSession.active;
   const expeditionMode = expeditionSession.mode === 'expedition';
   app.dataset.view = currentScreen;
@@ -292,19 +300,12 @@ $('run-abandon').addEventListener('click', () => {
     persist(); renderWorkshop(); showScreen('expedition'); $('run-start').focus({ preventScroll: true });
   }
 });
-function tone(frequency, duration = .14, type = 'sine', volume = .045) {
-  if (!soundEnabled) return;
-  try {
-    audio ??= new (window.AudioContext || window.webkitAudioContext)();
-    if (audio.state === 'suspended') audio.resume().catch(() => {});
-    const oscillator = audio.createOscillator(), gain = audio.createGain();
-    oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, audio.currentTime);
-    gain.gain.setValueAtTime(volume, audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + duration);
-    oscillator.connect(gain); gain.connect(audio.destination); oscillator.start(); oscillator.stop(audio.currentTime + duration);
-  } catch { /* Audio is optional. */ }
+function tone(...args) { flightAudio.tone(...args); }
+function chord(root = 660) {
+  [1, 1.25, 1.5].forEach((ratio, index) => tone(root*ratio,.24,'sine',.055,index*.085));
 }
 $('sound').addEventListener('click', () => {
-  soundEnabled = !soundEnabled;
+  soundEnabled = !soundEnabled; flightAudio.enable(soundEnabled);
   $('sound').setAttribute('aria-label', `Turn sound ${soundEnabled ? 'off' : 'on'}`);
   $('sound').setAttribute('aria-pressed', soundEnabled); $('sound-state').textContent = soundEnabled ? 'ON' : 'OFF'; tone(640);
 });
@@ -386,6 +387,15 @@ function updateFlightHud() {
   $('flight-number').textContent = `${environment} ⓘ`;
   $('flight-number').setAttribute('aria-label',`${environment}. Open world guide.`);
   $('flight-status').textContent = flight.done ? 'APOGEE REACHED' : flight.phase === 'powered' ? 'ENGINES FIRING' : 'COASTING';
+  flightAudio.engine(mode === 'flying' && flight.phase === 'powered', Math.max(0,flight.velocity)/12);
+  const nextIndex = flightGoals.findIndex(goal => goal.altitude > flight.peak);
+  const next = flightGoals[nextIndex], previous = flightGoals[nextIndex-1]?.altitude || 0;
+  $('flight-goal').hidden = !flightGoals.length;
+  const progress = next ? Math.max(0,Math.min(1,(flight.peak-previous)/(next.altitude-previous))) : 1;
+  $('flight-goal-label').textContent = next ? `${altitudeLabel(Math.max(0,next.altitude-flight.peak))} to ${next.name} · ${altitudeLabel(next.altitude)}` : 'All altitude goals crossed';
+  $('flight-goal-fill').style.width = `${progress*100}%`;
+  $('flight-goal-progress').setAttribute('aria-valuenow',Math.round(progress*100));
+  $('flight-goal-progress').setAttribute('aria-label', next ? `Progress to ${next.name} at ${altitudeLabel(next.altitude)}` : 'All altitude goals crossed');
 }
 function cancelLaunch() {
   if (mode !== 'arming') return;
@@ -399,14 +409,15 @@ function cancelLaunch() {
 $('cancel-launch').addEventListener('click', cancelLaunch);
 function finishEarly() {
   if (mode !== 'flying' || !inExpedition() || (flight.phase==='powered' && flight.peak < checkpoint(expeditionSession.active))) return;
-  for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);
+  for (let step = 0; step < 12000 && !flight.done; step++) advanceFlight(flight, 1);
   if (flight.done) finish();
 }
 function prepare() {
   if (!canBuild()) return;
   builder.discard();
   $('launch-rating').hidden = true;$('ability-flight').hidden=true;
-  mode = 'arming'; armTime = 0; timingPosition = 0;
+  mode = 'arming'; armTime = 0; timingPosition = 0; timingTier = '';
+  $('flight-goal').hidden = true; $('timing').dataset.rating = 'off';
   $('timing-quality').textContent='90%';$('needle').style.left='0px';
   showScreen('launchpad');
   $('timing').hidden = false; document.querySelector('.launch-console').classList.add('arming');
@@ -425,9 +436,12 @@ function launch(resumeQuality) {
   showScreen('launchpad');
   persist();
   flight = createFlight(program.levels, quality, { plan: program.plan, contractIndex: program.contracts, assembly: assemblySpecs(program) }); mode = 'flying';
-  playbackRate = fastForward ? fastForwardRate(flight) : 1;
+  normalPlaybackRate = presentationRate(flight);
+  playbackRate = fastForward ? Math.max(normalPlaybackRate, fastForwardRate(flight)) : normalPlaybackRate;
   recordBefore = program.best; flightMilestonesShown = inExpedition() ? expeditionSession.active.stage : 0; recordShown = false; zoneSeen = 0; particles = [];
-  visualFlightTime=0;detachedHardware=[];
+  visualFlightTime=0;detachedHardware=[];flightRings=[];
+  flightGoals = inExpedition() ? journeyState(expeditionSession.active).steps.slice(expeditionSession.active.stage) : MILESTONES.map(goal=>({...goal,name:goal.label}));
+  flightImpact('#ffe2a0');
   $('timing').hidden = true; document.querySelector('.launch-console').classList.remove('arming');
   $('launch').disabled = true; $('launch').textContent = 'Flight in progress';
   const rating=launchRating(quality);
@@ -442,7 +456,8 @@ function launch(resumeQuality) {
   $('flight-tools').hidden = false; $('telemetry').hidden = false; $('scene-tag').hidden = true;
   renderSpeed(); $('pause').textContent = 'Ⅱ Pause'; $('pause').setAttribute('aria-label', 'Pause flight');
   syncScreens(); renderJourney();
-  tone(180, .4, 'triangle', .075); updateFlightHud();
+  tone(90, .5, 'triangle', .09); if(rating.tier==='perfect')chord(660);
+  animateNotice(); updateFlightHud();
   announce(`${rating.label} launch. ${rating.power} percent power out of a maximum 120. Flight is automatic.`);
 }
 $('launch').addEventListener('click', () => mode === 'workshop' ? prepare() : mode === 'flying' ? finishEarly() : launch());
@@ -455,15 +470,25 @@ function renderSpeed() {
 }
 $('speed').addEventListener('click', () => {
   fastForward = !fastForward;
-  playbackRate = fastForward ? fastForwardRate(flight) : 1;
+  playbackRate = fastForward ? Math.max(normalPlaybackRate, fastForwardRate(flight)) : normalPlaybackRate;
   renderSpeed(); announce(fastForward ? `Fast forward. About ${FAST_FORWARD_SECONDS} seconds to the result.` : 'Normal flight speed.');
 });
+function animateNotice() {
+  noticeAnimation?.cancel();
+  if (!reducedMotion) noticeAnimation = $('launch-title').animate([{opacity:.3,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:280,easing:'ease-out'});
+}
+function flightImpact(color) {
+  if (reducedMotion) return;
+  flightRings.push({at:visualFlightTime,color}); flightRings=flightRings.slice(-4);
+}
 function showFlightNotice(title, detail) {
   $('launch-title').textContent = title; $('launch-description').textContent = detail;
-  announce(`${title} ${detail}`);
+  animateNotice(); announce(`${title} ${detail}`);
 }
 function pause() {
   if (mode === 'flying') {
+    if (noticeAnimation?.playState === 'running') noticeAnimation.pause();
+    delete $('result').dataset.outcome;
     mode = 'paused'; $('overlay').hidden = false; $('report').hidden = true;
     $('result').hidden = false;
     $('result-eyebrow').textContent = 'TAKE A LITTLE SPACE'; $('result-title').textContent = 'Just floating.';
@@ -473,6 +498,7 @@ function pause() {
     $('return').textContent = 'Keep flying'; $('pause').textContent = '▷ Resume'; $('pause').setAttribute('aria-label', 'Resume flight');
     syncScreens(); $('return').focus({ preventScroll: true }); announce('Flight paused.');
   } else if (mode === 'paused') {
+    if (noticeAnimation?.playState === 'paused') noticeAnimation.play();
     mode = 'flying'; $('overlay').hidden = true; $('pause').textContent = 'Ⅱ Pause'; $('pause').setAttribute('aria-label', 'Pause flight');
     syncScreens(); $('pause').focus({ preventScroll: true }); announce('Flight resumed.');
   }
@@ -481,7 +507,7 @@ $('pause').addEventListener('click', pause);
 function finish() {
   const result = inExpedition() ? settle(expeditionSession, flight) : settleFlight(program, flight);
   if (!result) return;
-  mode = 'report'; $('launch').disabled = true; persist(); renderWorkshop(); updateFlightHud();
+  mode = 'report'; flightAudio.quiet(); $('launch').disabled = true; persist(); renderWorkshop(); updateFlightHud();
   $('flight-advice').hidden=true;
   $('flight-log-open').hidden=true;
   $('result').hidden = false;
@@ -522,11 +548,18 @@ function finish() {
   if(inExpedition())$('bonus-note').innerHTML=`<span class="report-research">+${result.data} research points</span><span>${rating.label} launch · ${rating.power}% power</span>`;
   else $('bonus-note').textContent += ` · ${rating.label} launch · ${rating.power}% power`;
   if(inExpedition()&&isPrototype(expeditionSession.active))renderPrototypeResult(result);
-  syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete'; tone(result.firstWin ? 1040 : 660, .35);
+  syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete';
+  const success = inExpedition() ? result.success : result.record || result.firstWin;
+  $('result').dataset.outcome = success ? 'success' : 'miss';
+  if(success)chord(660);else tone(330,.25,'triangle');
+  if(!reducedMotion) {
+    $('result').animate([{opacity:0,transform:'translateY(12px) scale(.97)'},{opacity:1,transform:'none'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'});
+    $('earnings').animate([{transform:'scale(1.18)',color:'#fff5ce'},{transform:'scale(1)',color:'#f6d47b'}],{duration:600,easing:'ease-out'});
+  }
   announce(`${result.firstWin ? 'Mission complete! ' : ''}Peak altitude ${(result.altitude / 1000).toFixed(2)} kilometers. Earned ${result.total} credits.`);
 }
 function workshop() {
-  mode = 'workshop'; flight = null;
+  mode = 'workshop'; flight = null; flightRings=[]; $('flight-goal').hidden=true;
   $('overlay').hidden = true; $('telemetry').hidden = true; $('scene-tag').hidden = false; $('scene-tag').textContent = 'TAP ROCKET PARTS TO BUILD'; $('flight-tools').hidden = true;
   $('result').hidden = false;
   particles = [];
@@ -631,6 +664,23 @@ function drawScene() {
   const padY = height - 44 - rocketScale * 49;
   const cruiseY = Math.min(height - 45, Math.max((tankHeight + 38) * rocketScale + 12, height * .48));
   const rocketY = padY + (cruiseY - padY) * Math.min(1, altitude / 1300);
+  // Gates are altitude markers, not obstacles. Their distance is normalized per
+  // goal so a Moon departure is as readable as the first Earth milestone.
+  if (flight && ['flying','paused'].includes(mode)) {
+    for (const goal of flightGoals) {
+      const distance = (goal.altitude - altitude) / Math.max(2500,goal.altitude);
+      const y = rocketY - distance * height * 1.8;
+      if (distance > .4 || distance < -.18 || y < 100 || y > height-55) continue;
+      ctx.save(); ctx.globalAlpha = .8;
+      ctx.strokeStyle = '#b8ffe1'; ctx.lineWidth = 2; ctx.setLineDash([12,8]);
+      ctx.beginPath(); ctx.moveTo(16,y); ctx.lineTo(width-16,y); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle = '#102c37';
+      const label = `${goal.name.toUpperCase()} · ${altitudeLabel(goal.altitude)}`;
+      ctx.font = 'bold 10px monospace';
+      ctx.fillRect(16,y-24,ctx.measureText(label).width+16,20);
+      ctx.fillStyle = '#caffdf'; ctx.fillText(label,24,y-10); ctx.restore();
+    }
+  }
   if (altitude > 25000) {
     ctx.save(); ctx.globalAlpha = Math.min(.5, (altitude - 25000) / 100000);
     const earth = ctx.createRadialGradient(width * .5, height * 3.8, height * 3.15, width * .5, height * 3.8, height * 3.5); earth.addColorStop(0, world.terrain[2]); earth.addColorStop(.5, world.color); earth.addColorStop(1, world.color+'00');
@@ -700,6 +750,19 @@ function drawScene() {
     }
   }
   const x = width * .56, powered = mode === 'flying' && flight.phase === 'powered';
+  if (powered) {
+    ctx.save();
+    const glow = ctx.createRadialGradient(x,rocketY+35*rocketScale,0,x,rocketY+35*rocketScale,85*rocketScale);
+    glow.addColorStop(0,'#ffd27c55'); glow.addColorStop(1,'#ff9b4000');
+    ctx.fillStyle=glow;ctx.fillRect(x-90*rocketScale,rocketY-55*rocketScale,180*rocketScale,180*rocketScale);
+    ctx.restore();
+  }
+  if (!reducedMotion) for (const ring of flightRings) {
+    const age=visualFlightTime-ring.at;
+    if(age>1)continue;
+    ctx.save();ctx.globalAlpha=(1-age)*.7;ctx.strokeStyle=ring.color;ctx.lineWidth=3*(1-age)+1;
+    ctx.beginPath();ctx.ellipse(x,rocketY,20+age*width*.5,12+age*height*.25,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+  }
   if (powered && altitude < 1200 && !reducedMotion) { cloud(x - 23, height - 52 + altitude * .06, .55 + flight.time * .2, .25); cloud(x + 25, height - 48 + altitude * .06, .55 + flight.time * .2, .25); }
   rocket(x, rocketY, rocketScale, 0, powered && (flight.quality > 1.13||flight.time<flight.surgeUntil||flight.momentumFull), ambientTime, powered);
   lastRocket = { x, y: rocketY, scale: rocketScale, tankHeight };
@@ -826,7 +889,7 @@ function checkFlightMoments() {
       const reached = journey.steps[journey.reached-1];
       zoneSeen = Math.max(zoneSeen,reached.altitude);
       showFlightNotice(journey.next ? `${reached.name} reached!` : 'Departure target reached!', `${journey.reached} of 6 milestones · ${journey.next ? `next: ${altitudeLabel(journey.next.altitude)}` : 'expedition complete'}`);
-      burst(width*.56,height*.48,'#a5dcc4',30); tone(900,.2);
+      burst(width*.56,height*.48,'#a5dcc4',45); flightImpact('#a5dcc4'); chord(520+journey.reached*80);
       return;
     }
   }
@@ -850,13 +913,21 @@ function frame(now) {
   if (mode === 'arming') {
     armTime += dt; timingPosition = (1 - Math.cos(armTime * 2.3)) / 2;
     $('needle').style.left = `calc(${timingPosition * 100}% - ${timingPosition * 3}px)`;
-    $('timing-quality').textContent = `${Math.round(launchQuality(timingPosition) * 100)}%`;
+    const rating = launchRating(launchQuality(timingPosition));
+    $('timing-quality').textContent = `${rating.power}%`;
+    $('timing').dataset.rating = rating.tier;
+    if (rating.tier === 'perfect' && timingTier !== 'perfect') tone(880,.055,'sine',.025);
+    timingTier = rating.tier;
   }
   if (mode === 'flying') {
-    const wasBoosted = flight.boosted,wasDropped=flight.dropReleased;
+    const wasBoosted = flight.boosted,wasDropped=flight.dropReleased,wasPowered=flight.phase==='powered';
     visualFlightTime+=dt;
     advanceFlight(flight, dt * playbackRate);
-    if (flight.boosted && !wasBoosted && flight.kick > 0) { tone(280, .25, 'triangle'); $('launch-eyebrow').textContent = 'STAGE SEPARATION'; showFlightNotice('Stage separation!', 'Boosters fired. Empty pods away.'); burst(width * .56, height * .55, '#b7cbd5', 18); }
+    if (wasPowered && flight.phase==='coasting') {
+      showFlightNotice('Burn complete. Still climbing.', 'Momentum carries your rocket toward its peak.');
+      tone(220,.22,'triangle',.035);
+    }
+    if (flight.boosted && !wasBoosted && flight.kick > 0) { tone(280, .25, 'triangle'); $('launch-eyebrow').textContent = 'STAGE SEPARATION'; showFlightNotice('Stage separation!', 'Boosters fired. Empty pods away.'); burst(width * .56, height * .55, '#b7cbd5', 18); flightImpact('#b7cbd5'); }
     if(!reducedMotion&&((flight.boosted&&!wasBoosted&&flight.kick>0)||(flight.dropReleased&&!wasDropped))) {
       const y=(lastRocket?.y||height*.48)/height;
       if(flight.boosted&&!wasBoosted&&flight.kick>0)detachedHardware.push({kind:'boosters',at:visualFlightTime,y});

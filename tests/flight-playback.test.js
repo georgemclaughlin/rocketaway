@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createFlight, newProgram, stepFlight } from '../engine.js';
 import { assemblySpecs } from '../parts.js';
-import { FAST_FORWARD_SECONDS, fastForwardRate, advanceFlight } from '../flight-playback.js';
+import { FAST_FORWARD_SECONDS, FLIGHT_PRESENTATION_SECONDS, fastForwardRate, presentationRate, advanceFlight } from '../flight-playback.js';
 
 function worldFlight(world=1,upgraded=true) {
  const p=newProgram();p.launchWorld=world;p.conditionsVersion=3;
@@ -41,4 +41,29 @@ test('fast playback stops for encounters and leaves completed flights untouched'
  fastForwardRate(flight);advanceFlight(flight,5);assert.deepEqual(flight,paused);
  const finished=worldFlight();while(!finished.done)advanceFlight(finished,5);
  const saved=structuredClone(finished);advanceFlight(finished,5);assert.deepEqual(finished,saved);
+});
+
+test('paced flights finish within sixteen presentation seconds with identical fixed-tick outcomes',()=>{
+ for(const world of [0,1,3,5,8])for(const upgraded of [false,true]) {
+  const flight=worldFlight(world,upgraded), baseline=structuredClone(flight), saved=structuredClone(flight);
+  const rate=presentationRate(flight);
+  assert.deepEqual(flight,saved,'measuring cannot advance or mutate the flight');
+  while(!baseline.done)advanceFlight(baseline,1/120);
+  let elapsed=0;
+  while(!flight.done&&elapsed<17){advanceFlight(flight,.017*rate);elapsed+=.017;}
+  assert.ok(flight.done);
+  assert.ok(Math.abs(elapsed-Math.min(baseline.time,FLIGHT_PRESENTATION_SECONDS))<.05);
+  assert.deepEqual(flight,baseline,'staging, abilities, earnings and apogee survive presentation pacing');
+ }
+});
+
+test('paced, fast, resumed paced and instant completion share one fixed-tick trajectory',()=>{
+ const flight=worldFlight(1),baseline=structuredClone(flight),rate=presentationRate(flight);
+ advanceFlight(flight,.413*rate);
+ const saved=structuredClone(flight),fast=Math.max(rate,fastForwardRate(flight));
+ assert.deepEqual(flight,saved);
+ advanceFlight(flight,.237*fast);advanceFlight(flight,.193*rate);
+ while(!flight.done)advanceFlight(flight,1);
+ while(!baseline.done)advanceFlight(baseline,1/120);
+ assert.deepEqual(flight,baseline,'See result also preserves fractional ticks');
 });

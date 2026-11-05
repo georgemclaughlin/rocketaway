@@ -1,15 +1,15 @@
-import { hasNextWorldOffer } from './campaign-save.js?v=goals-visible-1';
-import { fundingFor } from './launch-funding.js?v=goals-visible-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=goals-visible-1';
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=goals-visible-1';
-import { altitudeLabel } from './journey.js?v=goals-visible-1';
-import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=goals-visible-1';
-import { newProgram } from './engine.js?v=goals-visible-1';
-import { fittedParts } from './parts.js?v=goals-visible-1';
-import { rocketArt } from './builder.js?v=goals-visible-1';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=goals-visible-1';
-import { researchButtonState } from './research-ui.js?v=goals-visible-1';
-import { kitDetails } from './kit-details.js?v=goals-visible-1';
+import { hasNextWorldOffer } from './campaign-save.js?v=flight-feel-1';
+import { fundingFor } from './launch-funding.js?v=flight-feel-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=flight-feel-1';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=flight-feel-1';
+import { altitudeLabel } from './journey.js?v=flight-feel-1';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=flight-feel-1';
+import { newProgram } from './engine.js?v=flight-feel-1';
+import { fittedParts } from './parts.js?v=flight-feel-1';
+import { rocketArt } from './builder.js?v=flight-feel-1';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=flight-feel-1';
+import { researchButtonState } from './research-ui.js?v=flight-feel-1';
+import { kitDetails } from './kit-details.js?v=flight-feel-1';
 
 function kitArt(item,profile) {
   return rocketArt(kitDetails(item,profile).parts);

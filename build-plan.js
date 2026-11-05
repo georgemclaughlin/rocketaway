@@ -1,4 +1,4 @@
-import { PART_SLOTS, catalogFor, partById } from './parts.js?v=goals-visible-1';
+import { PART_SLOTS, catalogFor, partById } from './parts.js?v=flight-feel-1';
 
 // A workbench is a quote, not inventory. Validate the entire order before spending.
 export function planBuild(program, choices = {}) {

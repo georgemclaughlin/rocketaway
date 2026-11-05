@@ -1,5 +1,5 @@
-import { WORLDS, flightConditions } from './worlds.js?v=goals-visible-1';
-import { assemblySpecs, partById } from './parts.js?v=goals-visible-1';
+import { WORLDS, flightConditions } from './worlds.js?v=flight-feel-1';
+import { assemblySpecs, partById } from './parts.js?v=flight-feel-1';
 
 export function prototypeContracts(world) {
   if(world>1) {

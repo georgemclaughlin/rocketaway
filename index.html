@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=goals-visible-1">
-  <script type="module" src="./game.js?v=goals-visible-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=flight-feel-1">
+  <script type="module" src="./game.js?v=flight-feel-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -37,7 +37,7 @@
         <div class="flight-telemetry" id="telemetry" hidden><div><span class="label">FUEL</span><div class="fuel-track"><div id="fuel"></div></div></div><div><span class="label">VERTICAL SPEED</span><strong id="velocity">0 m/s</strong></div></div>
       </div>
       <div class="launch-console">
-        <div class="launch-copy"><div class="eyebrow" id="launch-eyebrow">READY WHEN YOU ARE</div><h2 id="launch-title">Great things start small.</h2><p id="launch-description">A little rocket with a very big ambition.</p></div>
+        <div class="launch-copy"><div class="eyebrow" id="launch-eyebrow">READY WHEN YOU ARE</div><h2 id="launch-title">Great things start small.</h2><p id="launch-description">A little rocket with a very big ambition.</p><div id="flight-goal" class="flight-goal" hidden><span id="flight-goal-label"></span><div id="flight-goal-progress" role="progressbar" aria-label="Progress to next altitude milestone" aria-valuemin="0" aria-valuemax="100"><i id="flight-goal-fill"></i></div></div></div>
         <div id="timing" class="timing" hidden><div class="timing-label"><button id="cancel-launch" type="button" aria-label="Cancel launch and return to build">‹ Back</button><span>LAUNCH TIMING</span><b id="timing-quality">100%</b></div><div class="timing-track"><div class="sweet-spot"></div><div id="needle"></div></div><span class="timing-help">Aim for the center · 120% maximum power.</span></div>
         <div class="launch-actions"><div class="flight-tools" id="flight-tools" hidden><button id="speed" class="small-button" aria-label="Fast forward" aria-pressed="false">▶▶ Fast</button><button id="pause" class="small-button" aria-label="Pause flight">Ⅱ Pause</button></div><button class="primary" id="launch">Prepare launch <span aria-hidden="true">↗</span></button></div>
       </div>

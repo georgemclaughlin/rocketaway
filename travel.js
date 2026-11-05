@@ -1,6 +1,6 @@
-import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=goals-visible-1';
-import { fittedParts } from './parts.js?v=goals-visible-1';
-import { rocketArt } from './builder.js?v=goals-visible-1';
+import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=flight-feel-1';
+import { fittedParts } from './parts.js?v=flight-feel-1';
+import { rocketArt } from './builder.js?v=flight-feel-1';
 
 export function createTravel(onArrive) {
   const dialog=document.getElementById('travel-dialog');

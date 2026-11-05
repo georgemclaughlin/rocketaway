@@ -1150,3 +1150,26 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
  .part-picker[data-unified="true"] #candidate-description { display: none; }
  .part-picker[data-unified="true"] .part-comparison,.part-picker[data-unified="true"] .picker-action { grid-row: 3; }
 }
+
+/* Flight feedback stays beside the controls, clear of the rocket and its sky. */
+.flight-goal { margin-top: 8px; color: #bcebd8; font: 11px/1.4 monospace; }
+.flight-goal > span { display: block; margin-bottom: 5px; }
+#flight-goal-progress { height: 4px; overflow: hidden; border-radius: 4px; background: #8fe4c522; }
+#flight-goal-fill { display: block; height: 100%; background: #a5edcc; box-shadow: 0 0 9px #a5edcc66; }
+.launch-copy:has(.flight-goal:not([hidden])) #launch-description { display: none; }
+.timing[data-rating="perfect"] .timing-track { box-shadow: 0 0 0 2px #ffe1a0,0 0 22px #f6d47b40; }
+.timing[data-rating="perfect"] #timing-quality { color: #fff2b9; }
+.timing-track { background: linear-gradient(90deg,#28334a 0 30%,#536e6c 39% 46%,#e5bd61 46% 54%,#536e6c 54% 61%,#28334a 70%); }
+.sweet-spot { background: #f6d47b22; }
+.result[data-outcome="success"] { border-color: #8cdcb5; box-shadow: 0 12px 70px #0006,0 0 36px #84dcb51a; }
+#earnings { display: inline-block; }
+.part-picker[data-unified="true"] .part-comparison > span { font-size: 10px; line-height: 1.3; }
+@media (max-width:700px) {
+  .flight-goal { margin-top: 6px; font-size: 10px; text-align: center; }
+  .launch-copy:has(.flight-goal:not([hidden])) h2 { font-size: 16px; }
+}
+@media (max-height:520px) {
+  .flight-goal { margin-top: 3px; font-size: 10px; }
+  .flight-goal > span { margin-bottom: 3px; }
+  .launch-copy:has(.flight-goal:not([hidden])) h2 { font-size: 14px; }
+}

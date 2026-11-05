@@ -31,6 +31,7 @@ Read this file before changing the project. `README.md` documents the player exp
 - Selecting a part previews it; only Buy & fit / Fit part (or the whole-build equivalents) changes the equipped rocket. Roguelite previews retain choices across sections and quote the complete build. Commit purchases atomically after validating every part and the total cost. Discard and reload clear previews; Launch fitted discards the preview and flies the equipped build. Preview state is temporary and is never stored. Keep fitted and preview values visually distinct. Explain base tradeoffs separately from seeded part bonuses.
 - Height estimates use 110% launch power; timing ranges from 90% to 120%. Show an amber timing cue when the goal needs more than 100% power, even if the 110% estimate just clears it. Reset the displayed meter/power synchronously when arming. Miss advice must distinguish a reachable timing opportunity from a build limitation. Suggest a useful experiment without silently choosing or purchasing a part.
 - Fast Forward is **one on/off toggle**, not a multiplier cycle. It measures the remaining flight once and aims for about six real-time seconds to the result, never slowing a shorter flight. It stays selected between launches during a visit; pause stops advancement. Do not recalculate the rate every frame, which would keep moving the finish away.
+- Ordinary flight presentation measures the trajectory once at ignition and targets at most about 16 viewing seconds. Returning from Fast restores that cached rate; Fast never slows the already paced flight. Altitude gates and progress feedback are cosmetic. Synthesized engine/event audio is opt-in and stops on pause, tab hiding or mute. Launch/milestone rings use presentation time and respect reduced motion. Fit feedback compares actual estimates at 110% power.
 - `flight-playback.js` uses fixed 1/120-second ticks and carries fractional time between frames. Playback speed must not change the outcome. `See result` also resolves the real trajectory and settles rewards only once.
 - The main game phases must fit the viewport without vertical scrolling. Keep flight controls clear of the rocket and destination. World selection deliberately scrolls horizontally with targets at least 48 px wide; keep the selected world visible.
 - Reward feedback distinguishes first/multiple milestones, records, new starting rockets, and world departure. Avoid extra mandatory dialogs. Differences below 10 metres do not earn a new-best headline because they can appear unchanged at displayed precision.
@@ -50,6 +51,7 @@ Read this file before changing the project. `README.md` documents the player exp
 | Starting-build screen and equipment summaries | `expedition-ui.js`, `kit-details.js` |
 | Permanent research mechanics and lab UI | `research.js`, `research-ui.js` |
 | Timing ratings, miss explanations, progress headlines | `launch-feedback.js`, `flight-feedback.js` |
+| Optional synthesized engine and event audio | `flight-audio.js` |
 | Persistent statistics, mission collection, and records display | `flight-records.js`, `journey-records-ui.js`, `mission-journal.js`, `mission-journal-ui.js` |
 | Educational facts and optional world guide | `science-data.js`, `science-ui.js` |
 | Roguelite abilities, contracts, stock, carryover, save guard | `experimental.js`, `missions.js`, `prototype-run.js`, `campaign-save.js`; integration in the existing builder, engine, and UI |
@@ -87,6 +89,8 @@ playwright-cli -s=rocketaway-review close
 
 Useful browser checks:
 
+- `flight-feel.playwright.js`: fitting gains, opt-in audio, ordinary pacing, actual milestone/report feedback, pause, nine flight layouts, and reduced motion.
+
 - `build-plan.playwright.js`: complete-build quotes, multi-part previews/fitting, discard, reload, fitted-launch safety, reduced motion, thirteen viewport layouts, direct rocket-body selection and an actual flight.
 - `build-experience.playwright.js`: six-size combination warnings, flight logs, funded setup, actual first-flight funding, and reload/menu recovery. `launch-funding-audit.js` compares 210 optimal later-world openings with/without the pending contribution (7/210 possible clears in both; all at rank 5).
 
@@ -111,7 +115,7 @@ Useful browser checks:
 - The approved bundled illustration is `assets/astronaut-cartoon.png?v=2`. An earlier portrait was intentionally removed from Git history and its old asset filename remains ignored. Do not recover it, re-add it, or include source/reference photographs. Do not change the cartoon likeness without a request.
 - Respect `.gitignore`; do not force-add ignored material. Use the repository's existing public-safe Git author configuration rather than introducing a personal email.
 - Before pushing, review every staged file for privacy and scope. Keep asset paths relative and retain existing site/repository settings.
-- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. JavaScript and CSS currently use `v=goals-visible-1`; the cartoon's independent `v=2` is intentional.
+- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. JavaScript and CSS currently use `v=flight-feel-1`; the cartoon's independent `v=2` is intentional.
 - Push the validated commit to `main`, then confirm Pages built that commit with `gh api repos/georgemclaughlin/rocketaway/pages/builds/latest --jq '{status,commit}'`. For game changes, run an isolated live-site smoke check and give the user the public game link. A documentation-only change does not require replaying the game.
 
 ## Remaining design opportunity

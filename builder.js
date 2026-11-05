@@ -1,11 +1,11 @@
-import { flightConditions } from './worlds.js?v=goals-visible-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=goals-visible-1';
-import { createFlight, stepFlight } from './engine.js?v=goals-visible-1';
-import { partInsight } from './part-insights.js?v=goals-visible-1';
-import { abilityDescription } from './experimental.js?v=goals-visible-1';
-import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=goals-visible-1';
-import { rocketArt } from './rocket-art.js?v=goals-visible-1';
-import { planBuild, fitBuild } from './build-plan.js?v=goals-visible-1';
+import { flightConditions } from './worlds.js?v=flight-feel-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=flight-feel-1';
+import { createFlight, stepFlight } from './engine.js?v=flight-feel-1';
+import { partInsight } from './part-insights.js?v=flight-feel-1';
+import { abilityDescription } from './experimental.js?v=flight-feel-1';
+import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=flight-feel-1';
+import { rocketArt } from './rocket-art.js?v=flight-feel-1';
+import { planBuild, fitBuild } from './build-plan.js?v=flight-feel-1';
 export { rocketArt };
 
 const estimates = new Map();
@@ -130,10 +130,12 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('candidate-trait').hidden = !candidate.trait;
     $('candidate-trait').textContent = candidate.trait ? `${candidate.trait.name} · ${candidate.trait.detail}` : '';
     $('candidate-description').textContent = partInsight(program, candidateId);
+    $('candidate-height').title = 'Estimated height at 110% launch power';
+    $('comparison-label').title = 'Preview gain compared with the fitted rocket, both at 110% launch power';
     $('candidate-height').textContent = `${(preview.height/1000).toFixed(1)} km`;
     const target = getTarget(preview.program),fittedTarget=getTarget(program);
     $('comparison-label').textContent = !changed ? 'Equipped estimate' : getTargetLabel(preview.program)==='Contract' ? (preview.height>=target?'After fitting: contract ready':`Contract: ${((target-preview.height)/1000).toFixed(1)} km short`) : target ? (preview.height>=target ? `After fitting: clears ${Number((target/1000).toFixed(1))} km` : `After fitting: ${((target-preview.height)/1000).toFixed(1)} km short`) : 'With this part';
-    if (prototype) $('comparison-label').textContent = 'Preview at 110%';
+    if (prototype) $('comparison-label').textContent = `Preview · ${preview.height >= preview.previousHeight ? '+' : ''}${((preview.height-preview.previousHeight)/1000).toFixed(1)} km`;
     $('fitted-height').textContent = `~${(preview.previousHeight/1000).toFixed(1)} km`;
     const readiness=launchReadiness(program,fittedTarget,getTargetLabel(program)==='Contract');
     $('fitted-readiness').textContent=readiness.text;
@@ -203,14 +205,15 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
   $('part-fit').addEventListener('click', () => {
     if (!canEdit()) return;
     const program = getProgram();
+    const previousHeight = estimateHeight(program);
     if (program.rulesVersion === 1) {
       const fitted = fitBuild(program, choices);
       if (!fitted) return;
       choices = {};
-      onFit({ name: fitted.changes.length > 1 ? `${fitted.changes.length}-part build` : partById(fitted.changes[0]).name });
+      onFit({ name: fitted.changes.length > 1 ? `${fitted.changes.length}-part build` : partById(fitted.changes[0]).name, previousHeight, height: estimateHeight(program) });
     } else {
       if (!fitPart(program, candidateId)) return;
-      onFit(partById(candidateId));
+      onFit({ ...partById(candidateId), previousHeight, height: estimateHeight(program) });
     }
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) $('assembly-stage').animate([{boxShadow:'inset 0 0 0 2px #a5dcc4'},{boxShadow:'inset 0 0 0 0px transparent'}],{duration:450});
   });

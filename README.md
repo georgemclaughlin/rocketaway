@@ -68,6 +68,12 @@ Open **http://127.0.0.1:4173** on this computer. A phone on the same Wi-Fi can u
 
 The game fits the viewport and shows one phase at a time on phones and desktop. The hangar is home between launches; launch timing and flight take over the screen. Fast Forward and Pause sit in the bottom control bar, clear of the rocket and planets. The **☰ menu** holds mode switching, sound, ending a run, and resetting the game.
 
+Flights now aim for **at most about 16 seconds of active viewing** at ordinary speed. The presentation rate is measured once at ignition; shorter flights keep their natural duration. Fast Forward remains one toggle targeting about six remaining seconds and never slows an already shorter flight. Both modes and **See result** use the same fixed physics ticks, so timing, equipment, altitude and rewards stay consistent. Pause stops the flight and its canvas effects.
+
+Approaching altitude milestones appear as marked lines across the sky. A live distance and progress bar show how close the next milestone is; launch pulses, engine glow, separation effects and rising milestone chimes make the flight's events distinct. Gold timing lights up the meter. Successful reports arrive with a brief reveal and credit emphasis, with no extra confirmation. Reduced motion removes pulses and animated reveals while retaining the progress information. **☰ → Sound ON** enables locally synthesized engine rumble and event sounds; sound starts off, and pausing or leaving the tab silences the engine.
+
+Part previews show their estimated height gain, and fitting displays the actual change at **110% launch power** above the rocket. Lower estimates remain visible as decreases: a contract or equipment combination can still make that trade worthwhile. Browsing remains a preview until an explicit fit.
+
 ## Road to Tau Ceti
 
 Fresh games open on **Earth**, the first world on the **Road to Tau Ceti**. Choose a starting rocket, then follow **hangar → launch → results → the same hangar**. There are no module drafts or route selections between flights. Existing saves resume their chosen mode; **☰ → Road to Tau Ceti** returns from Free Flight. Each mode keeps its own rocket and credits.
@@ -146,6 +152,7 @@ No build step, dependency installation, external assets, API keys, or backend ar
 - `rocket-insights.js` — build identities, combination warnings and flight-log equipment outcomes.
 - `launch-funding.js` — bounded, once-only transfers between fresh rockets.
 - `world-scenery.js` — stylized terrain rendered directly on canvas.
+- `flight-audio.js` — optional synthesized engine and event sounds, silenced on pause or mute.
 - `parts.js` — component catalog, run-specific part bonuses, inventory, fitting, and assembly statistics.
 - `expeditions.js` — seeded runs, altitude milestones, stock, rewards, progression, and save migration.
 - `missions.js` — legacy contracts and deterministic two-of-four mission boards.
@@ -162,6 +169,8 @@ No build step, dependency installation, external assets, API keys, or backend ar
 - `checks/journey.playwright.js` — repeatable browser checks for world setup, real flight completion, travel, save integrity, phone layouts, and reduced motion.
 
 Run `checks/build-plan.playwright.js` in an isolated session for multi-part preview/purchase, discard, fitted-launch safety, save restoration, reduced motion and thirteen layout sizes, including intermediate phone heights with less space for the hangar. Section controls adapt to the actual rocket-panel height and remain clear of the preview header and fitted estimate. `tests/build-plan.test.js` covers purchase atomicity, combined physics, stock/catalog restrictions and existing-save compatibility.
+
+`checks/flight-feel.playwright.js` covers fitting feedback, optional sound, ordinary flight pacing, real milestone and report feedback, pause, nine flight layouts and reduced motion. `tests/flight-playback.test.js` compares paced, accelerated and instant completion against the same fixed-tick trajectory.
 
 Run `npm test` (Node 18+). There are no npm dependencies. Playwright CLI is used for browser checks of layout, real touch input, uninterrupted flights, previewing/buying/refitting parts, complete progression, and reset behavior.
 
