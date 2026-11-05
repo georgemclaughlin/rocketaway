@@ -1,6 +1,6 @@
-import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=equipment-synergy-1';
-import { fittedParts } from './parts.js?v=equipment-synergy-1';
-import { rocketArt } from './builder.js?v=equipment-synergy-1';
+import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=build-story-1';
+import { fittedParts } from './parts.js?v=build-story-1';
+import { rocketArt } from './builder.js?v=build-story-1';
 
 export function createTravel(onArrive) {
   const dialog=document.getElementById('travel-dialog');

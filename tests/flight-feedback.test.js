@@ -32,6 +32,11 @@ test('part comparisons explain total fuel-duration tradeoffs even with efficient
  p.launchWorld=1;p.parts.equipped.aero='cap';p.partTraits.needle='smooth';
  assert.match(partInsight(p,'needle'),/vacuum/);assert.doesNotMatch(partInsight(p,'needle'),/Less air drag/);
 });
+test('base part tradeoffs stay distinct from a seeded income bonus',()=>{
+ const p=setup().active.program;p.parts.equipped.aero='cap';p.partTraits.needle='science';
+ assert.match(partInsight(p,'needle'),/Less air drag/);
+ assert.doesNotMatch(partInsight(p,'needle'),/More altitude credits/);
+});
 test('first milestones, multiple milestones and new records get distinct headlines',()=>{
  assert.match(progressTitle({cleared:[2500],stage:1}),/first milestone/);
  assert.match(progressTitle({cleared:[2500,10000],stage:1}),/2 milestones/);

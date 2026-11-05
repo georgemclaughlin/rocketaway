@@ -30,7 +30,7 @@ async page=>{
  await page.reload();await page.locator('#run-start').click();
  let run=await page.evaluate(()=>JSON.parse(localStorage.getItem('rocket-away-expeditions-v1')).active);
  assert(run.difficulty===2&&run.program.flights===0&&run.strikes===0,'new funded Mars rocket');
- await page.locator('#contracts-open').click();assert((await page.locator('#contract-offers').innerText()).includes('Mars instruments'),'Mars contracts');await page.locator('#contracts-close').click();
+ await page.locator('#contracts-open').click();assert(await page.locator('#contract-offers [data-contract]').evaluateAll(es=>es.length===2&&es.every(e=>e.dataset.contract.startsWith('world-2-'))),'Mars mission board');await page.locator('#contracts-close').click();
  await page.evaluate(async()=>{const r=await import('./prototype-run.js'),e=await import('./expeditions.js');const s=JSON.parse(localStorage.getItem(e.EXPEDITION_KEY));r.beginFlight(s,1.1);r.settle(s,{done:true,peak:e.milestoneHeight(s.active,5)+1,quality:1.1,payMultiplier:1});localStorage.setItem(e.EXPEDITION_KEY,JSON.stringify(s));});await page.reload();
  assert(await page.locator('[data-world="3"]').getAttribute('aria-pressed')==='true','Mars completion defaults to Ceres');
  // An older, farther campaign can suggest a new launchpad without discarding the current build.

@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=equipment-synergy-1">
-  <script type="module" src="./game.js?v=equipment-synergy-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=build-story-1">
+  <script type="module" src="./game.js?v=build-story-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -74,7 +74,7 @@
           <section class="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1" id="result">
             <div class="eyebrow" id="result-eyebrow">FLIGHT REPORT</div><h2 id="result-title">A little closer.</h2><p id="result-description"></p>
             <div class="report" id="report"><div><span>PEAK ALTITUDE</span><strong id="final-altitude">0 km</strong></div><div><span>CREDITS EARNED</span><strong class="gold" id="earnings">+0</strong></div></div>
-            <p id="flight-advice" hidden></p><p id="bonus-note" class="bonus-note"></p><div id="result-unlocks" hidden></div><p id="result-stock" hidden></p><button id="return" class="primary">Back to workshop <span aria-hidden="true">↗</span></button>
+            <p id="flight-advice" hidden></p><p id="bonus-note" class="bonus-note"></p><div id="result-unlocks" hidden></div><p id="result-stock" hidden></p><div class="result-actions"><button id="flight-log-open" class="small-button" hidden>Flight log</button><button id="return" class="primary">Back to workshop <span aria-hidden="true">↗</span></button></div>
           </section>
         </div>
   </div>
@@ -88,6 +88,7 @@
     <button id="sound" class="small-button" aria-label="Turn sound on" aria-pressed="false">Sound <span id="sound-state">OFF</span></button>
     <button id="research-menu" class="small-button">Permanent research</button>
     <button id="records-menu" class="small-button">Journey records</button>
+    <button id="flight-log-menu" class="small-button">Last flight</button>
     <button id="science-menu" class="small-button">World guide · real space facts</button>
     <button id="run-abandon" class="small-button">End expedition</button>
     <button id="reset-all" class="reset-button" aria-label="Reset entire game">Reset entire game</button>
@@ -110,7 +111,11 @@
     <p class="science-sources"><a id="science-source" target="_blank" rel="noopener noreferrer">NASA facts ↗</a><a id="science-gravity-source" target="_blank" rel="noopener noreferrer">NASA gravity data ↗</a></p>
     <p class="science-note">Real space facts. Flight physics, altitude goals and travel times are simplified for play.</p>
   </dialog>
-  <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><div id="part-reservation" hidden><p>Keep this offer in the shop after your next flight. Reserving is free and does not buy or fit the part. You can keep one offer.</p><button id="reserve-part" class="small-button" aria-pressed="false">Reserve offer</button></div><button id="part-info-close" class="primary">Back to parts</button></dialog>
+  <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><div id="part-info-effects"></div><div id="part-reservation" hidden><p>Keep this offer in the shop after your next flight. Reserving is free and does not buy or fit the part. You can keep one offer.</p><button id="reserve-part" class="small-button" aria-pressed="false">Reserve offer</button></div><button id="part-info-close" class="primary">Back to parts</button></dialog>
+  <dialog id="flight-log-dialog" class="reset-dialog reference-dialog" aria-labelledby="flight-log-title">
+    <div class="menu-heading"><div><div class="eyebrow">YOUR BUILD AT WORK</div><h2 id="flight-log-title">Flight log</h2></div><button id="flight-log-close" class="small-button" autofocus>Back</button></div>
+    <p id="flight-log-comparison"></p><div id="flight-log-stats" class="flight-log-stats"></div><div id="flight-log-effects"></div><p id="flight-log-earnings"></p><p id="flight-log-funding"></p>
+  </dialog>
   <dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">
     <div class="eyebrow">A FRESH START</div>
     <h2 id="reset-title">Reset the entire game?</h2>

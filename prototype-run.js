@@ -1,15 +1,18 @@
 // Roguelite journey. Existing flights retain their physics and equipment.
-import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=equipment-synergy-1';
-import { PARTS, assemblySpecs, catalogFor } from './parts.js?v=equipment-synergy-1';
-import { experimentalCatalog, companionOffers, EQUIPMENT_VERSION, ABILITY_EVENTS } from './experimental.js?v=equipment-synergy-1';
-import { awardResearch } from './research.js?v=equipment-synergy-1';
-import { recordFlightPeak } from './flight-records.js?v=equipment-synergy-1';
-import { contractsFor, missionPool, contractReady } from './missions.js?v=equipment-synergy-1';
-import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=equipment-synergy-1';
-export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=equipment-synergy-1';
-import { WORLDS, flightConditions } from './worlds.js?v=equipment-synergy-1';
+import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=build-story-1';
+import { PARTS, assemblySpecs, catalogFor } from './parts.js?v=build-story-1';
+import { experimentalCatalog, companionOffers, EQUIPMENT_VERSION, ABILITY_EVENTS } from './experimental.js?v=build-story-1';
+import { awardResearch } from './research.js?v=build-story-1';
+import { recordFlightPeak } from './flight-records.js?v=build-story-1';
+import { contractsFor, missionPool, contractReady } from './missions.js?v=build-story-1';
+import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=build-story-1';
+export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=build-story-1';
+import { WORLDS, flightConditions } from './worlds.js?v=build-story-1';
+import { estimateHeight } from './builder.js?v=build-story-1';
+import { flightBuildSummary } from './rocket-insights.js?v=build-story-1';
+import { fundingFor, restoreFunding, reserveLaunchFunding } from './launch-funding.js?v=build-story-1';
 
-export const PROTOTYPE_VERSION=4;
+export const PROTOTYPE_VERSION=5;
 export const isPrototype = run => run?.rulesVersion===1;
 const bounded=(v,max=1e9)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
 const copy=v=>structuredClone(v);
@@ -59,10 +62,14 @@ export function startPrototype(session,options={}) {
   session.prototypeVersion=PROTOTYPE_VERSION;
   session.profile.prototypeWorlds??=[];
   session.profile.missionJournal??=restoreJournal();
-  Object.assign(run,{rulesVersion:1,equipmentVersion,missionVersion:2,worldStartFlights:0,startWorld:difficulty,conditionsVersion:4,offerIndex:0,reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
+  Object.assign(run,{rulesVersion:1,equipmentVersion,missionVersion:2,journeyVersion:1,previousEstimate:null,worldStartFlights:0,startWorld:difficulty,conditionsVersion:4,offerIndex:0,reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
   Object.assign(run.program,{rulesVersion:1,equipmentVersion:run.equipmentVersion,conditionsVersion:4});
   // A checkpoint is a new funded build, never a duplicate arrival stipend.
   if(difficulty===1)run.program.credits+=1100;
+  session.profile.launchFunding=restoreFunding(session.profile.launchFunding);
+  run.startingFunding=fundingFor(session.profile,difficulty);
+  run.pendingFunding=run.startingFunding;
+  session.profile.launchFunding[difficulty]=0;
   restock(run);return true;
 }
 export function beginFlight(session,quality) {
@@ -70,7 +77,7 @@ export function beginFlight(session,quality) {
   const run=session.active;
   if(isPrototype(run)) {
     const contract=selectedContract(run);
-    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0};
+    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0,estimate:estimateHeight(run.program)};
   }
   return true;
 }
@@ -91,7 +98,9 @@ export function settle(session,flight) {
   const flightPay=60+Math.floor(Math.min(altitude*160000/milestoneHeight(run,5),500000)/220*flight.payMultiplier);
   const success=cleared.length>0||!!completed;
   const recoveryPay=success&&flight.recovered?(run.launchSnapshot?.recovery||0):0;
-  const total=flightPay+bonus+contractPay+surveyPay+recoveryPay;
+  const fundingPay=run.journeyVersion===1&&p.flights===0?(run.pendingFunding||0):0;
+  run.pendingFunding=0;
+  const total=flightPay+bonus+contractPay+surveyPay+recoveryPay+fundingPay;
   const firstWorld=run.stage===6&&!session.profile.prototypeWorlds.includes(run.difficulty);
   const data=awardResearch(session,cleared.length,firstWorld);
   p.credits+=total;p.best=Math.max(p.best,altitude);p.flights++;
@@ -99,6 +108,10 @@ export function settle(session,flight) {
   if(!success)run.strikes++;
   run.offerIndex++;restock(run);
   const result={altitude,target,success,total,flightPay,bonus,contractPay,surveyPay,recoveryPay,contract:completed?contract.name:null,data,stage:oldStage+1,power:Math.round(flight.quality*100),cleared,nextTarget:run.stage<6?milestoneHeight(run):null,record:altitude>oldBest,improvement:Math.max(0,altitude-oldBest),events:[...(flight.events||[])],newParts:p.stock.filter(id=>!oldStock.includes(id)),unlockedKits:KITS.filter(k=>k.unlock>oldGates&&k.unlock<=session.profile.totalGates).map(k=>k.id)};
+  result.engineering={...flightBuildSummary(p,flight),estimate:run.launchSnapshot?.estimate??null,previousEstimate:run.previousEstimate??null};
+  run.previousEstimate=run.launchSnapshot?.estimate??null;
+  result.nextFunding=reserveLaunchFunding(session,firstWorld);
+  result.fundingPay=fundingPay;
   run.lastResult=result;run.launchQuality=null;run.launchSnapshot=null;
   run.status=run.stage===6?'won':run.strikes>=3?'lost':'debrief';
   if(run.status==='won') {
@@ -114,15 +127,17 @@ export function arrivePrototype(session) {
   if(!isPrototype(run)||run.status!=='won'||run.difficulty!==0)return false;
   run.difficulty=1;run.stage=0;run.status='build';run.lastResult=null;run.contractId=null;
   run.worldStartFlights=run.program.flights;
+  run.previousEstimate=null;
   run.program.launchWorld=1;run.program.best=0;run.program.won=false;
   restock(run);return true;
 }
 export function restoreSession(raw) {
-  if(raw?.prototypeVersion!==undefined&&![1,2,3,PROTOTYPE_VERSION].includes(raw.prototypeVersion))throw Error('This save needs a newer prototype build.');
+  if(raw?.prototypeVersion!==undefined&&![1,2,3,4,PROTOTYPE_VERSION].includes(raw.prototypeVersion))throw Error('This save needs a newer prototype build.');
   if(raw?.active?.rulesVersion!==undefined&&raw.active.rulesVersion!==1)throw Error('This expedition needs a newer rules version.');
   if(raw?.version!==undefined&&![1,2].includes(raw.version))throw Error('This save needs a newer game build.');
   if(raw?.active?.equipmentVersion!==undefined&&![1,EQUIPMENT_VERSION].includes(raw.active.equipmentVersion))throw Error('This expedition needs newer equipment rules.');
   if(raw?.active?.missionVersion!==undefined&&![1,2].includes(raw.active.missionVersion))throw Error('This expedition needs a newer mission version.');
+  if(raw?.active?.journeyVersion!==undefined&&raw.active.journeyVersion!==1)throw Error('This expedition needs newer journey rules.');
   if(raw?.profile?.missionJournal?.version!==undefined&&raw.profile.missionJournal.version!==1)throw Error('This journal needs a newer game build.');
   if(raw?.active?.conditionsVersion>4)throw Error('This save needs newer flight conditions.');
   if(raw?.active?.conditionsVersion===4&&!raw?.prototypeVersion)throw Error('This expedition requires its prototype save envelope.');
@@ -135,6 +150,7 @@ export function restoreSession(raw) {
   if(legacy.active)legacy.active.conditionsVersion=3;
   const session=restoreExpeditions(legacy);session.prototypeVersion=PROTOTYPE_VERSION;
   session.profile.missionJournal=restoreJournal(raw.profile?.missionJournal);
+  session.profile.launchFunding=restoreFunding(raw.profile?.launchFunding);
   session.profile.prototypeWorlds=WORLDS.map((_,i)=>i).filter(w=>raw.profile?.prototypeWorlds?.includes(w));
   // A player may already have started an Earth replay after the old Moon ending.
   for(const world of session.profile.prototypeWorlds)session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,world+1));
@@ -146,6 +162,10 @@ export function restoreSession(raw) {
   if(run.status==='won')session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,run.difficulty+1));
   Object.assign(run,{rulesVersion:1,equipmentVersion:input.equipmentVersion===2?2:1,missionVersion:input.missionVersion===2?2:1,worldStartFlights:Number.isInteger(input.worldStartFlights)&&input.worldStartFlights>=0&&input.worldStartFlights<=run.program.flights?input.worldStartFlights:null,conditionsVersion:4,startWorld:bounded(input.startWorld,8),offerIndex:bounded(input.offerIndex),reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
   Object.assign(run.program,{rulesVersion:1,equipmentVersion:run.equipmentVersion,conditionsVersion:4});
+  if(input.journeyVersion===1)run.journeyVersion=1;
+  run.startingFunding=bounded(input.startingFunding,200);
+  run.pendingFunding=run.program.flights===0?bounded(input.pendingFunding,200):0;
+  run.previousEstimate=Number.isFinite(input.previousEstimate)?bounded(input.previousEstimate):null;
   const allContracts=WORLDS.flatMap((_,world)=>missionPool(world));
   run.completedContracts=allContracts.filter(c=>input.completedContracts?.includes(c.id)).map(c=>c.id);
   for(const id of run.completedContracts)recordMission(session.profile,id);
@@ -157,13 +177,19 @@ export function restoreSession(raw) {
   if(run.status==='flying') {
     const contract=selectedContract(run);
     // The build is immutable while flying. Reconstruct eligibility from validated equipment.
-    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0};
+    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0,estimate:estimateHeight(run.program)};
   }
   if(run.lastResult) {
     const r=input.lastResult;
     Object.assign(run.lastResult,{success:r.success===true,contractPay:bounded(r.contractPay),surveyPay:bounded(r.surveyPay),recoveryPay:bounded(r.recoveryPay),contract:allContracts.find(c=>c.name===r.contract)?.name||null,events:(Array.isArray(r.events)?r.events:[]).filter(e=>ABILITY_EVENTS.includes(e)).slice(0,5)});
     run.lastResult.nextTarget=run.stage<6?milestoneHeight(run):null;
     run.lastResult.newParts=(r.newParts||[]).filter(id=>validIds.includes(id));
+    run.lastResult.nextFunding=bounded(r.nextFunding,200);
+    run.lastResult.fundingPay=bounded(r.fundingPay,200);
+    if(r.engineering&&typeof r.engineering.name==='string') {
+      const e=r.engineering;
+      run.lastResult.engineering={name:e.name.slice(0,60),effects:(Array.isArray(e.effects)?e.effects:[]).filter(x=>typeof x==='string').slice(0,4).map(x=>x.slice(0,140)),mass:Number.isFinite(e.mass)?Math.max(0,Math.min(20,e.mass)):0,burn:Number.isFinite(e.burn)?Math.max(0,Math.min(600,e.burn)):0,coast:Number.isFinite(e.coast)?Math.max(0,Math.min(600,e.coast)):0,estimate:Number.isFinite(e.estimate)?bounded(e.estimate):null,previousEstimate:Number.isFinite(e.previousEstimate)?bounded(e.previousEstimate):null};
+    }
   }
   return session;
 }

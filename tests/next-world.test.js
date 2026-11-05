@@ -14,6 +14,8 @@ function clearedMoon() {
 }
 test('old Moon completion unlocks Mars on reload without replaying rewards or changing the saved rocket',()=>{
   const old=clearedMoon();old.prototypeVersion=1;old.profile.maxDifficulty=1;
+  // Legacy saves predate departure funding.
+  delete old.active.journeyVersion;delete old.profile.launchFunding;
   const before=structuredClone(old),s=restoreSession(old);
   assert.equal(s.profile.maxDifficulty,2);
   assert.equal(s.active.program.credits,old.active.program.credits);

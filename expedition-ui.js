@@ -1,14 +1,15 @@
-import { hasNextWorldOffer } from './campaign-save.js?v=equipment-synergy-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=equipment-synergy-1';
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=equipment-synergy-1';
-import { altitudeLabel } from './journey.js?v=equipment-synergy-1';
-import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=equipment-synergy-1';
-import { newProgram } from './engine.js?v=equipment-synergy-1';
-import { fittedParts } from './parts.js?v=equipment-synergy-1';
-import { rocketArt } from './builder.js?v=equipment-synergy-1';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=equipment-synergy-1';
-import { researchButtonState } from './research-ui.js?v=equipment-synergy-1';
-import { kitDetails } from './kit-details.js?v=equipment-synergy-1';
+import { hasNextWorldOffer } from './campaign-save.js?v=build-story-1';
+import { fundingFor } from './launch-funding.js?v=build-story-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=build-story-1';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=build-story-1';
+import { altitudeLabel } from './journey.js?v=build-story-1';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=build-story-1';
+import { newProgram } from './engine.js?v=build-story-1';
+import { fittedParts } from './parts.js?v=build-story-1';
+import { rocketArt } from './builder.js?v=build-story-1';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=build-story-1';
+import { researchButtonState } from './research-ui.js?v=build-story-1';
+import { kitDetails } from './kit-details.js?v=build-story-1';
 
 function kitArt(item,profile) {
   return rocketArt(kitDetails(item,profile).parts);
@@ -94,6 +95,7 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, s
         $('expedition-step').textContent=profile.campaignComplete?'JOURNEY COMPLETE · OPTIONAL REPLAY':`ROAD TO TAU CETI · WORLD ${difficulty+1} / 9`;
         $('expedition-summary').textContent=difficulty===0?'Build through Earth and Moon with one rocket. Then continue the journey to Tau Ceti.':`Next: ${next.name}. A fresh rocket and credits; your research stays with you.`;
         $('expedition-footer').querySelector('.kit-unlock').textContent=difficulty===1?'Includes 1,100 checkpoint credits.':'Three misses. Research and worlds are kept.';
+        if(fundingFor(profile,difficulty))$('expedition-footer').querySelector('.kit-unlock').textContent=`+${fundingFor(profile,difficulty)} saved credits arrive after this rocket’s first flight.`;
         if(offeringNext) {
           $('expedition-summary').textContent=`${world.name} unlocked in your earlier save. Start fresh here or resume your ${worldFor(run).name} rocket.`;
           $('expedition-footer').querySelector('.kit-unlock').innerHTML='<button id="run-keep" class="small-button">Back to saved rocket</button>';

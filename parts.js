@@ -1,7 +1,7 @@
-import { modifyAssembly } from './modifiers.js?v=equipment-synergy-1';
-import { researchModifiers } from './research.js?v=equipment-synergy-1';
-import { flightConditions } from './worlds.js?v=equipment-synergy-1';
-import { EXPERIMENTAL_PARTS, experimentalAssembly, experimentalCatalog } from './experimental.js?v=equipment-synergy-1';
+import { modifyAssembly } from './modifiers.js?v=build-story-1';
+import { researchModifiers } from './research.js?v=build-story-1';
+import { flightConditions } from './worlds.js?v=build-story-1';
+import { EXPERIMENTAL_PARTS, experimentalAssembly, experimentalCatalog } from './experimental.js?v=build-story-1';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },

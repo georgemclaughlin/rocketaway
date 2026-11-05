@@ -34,6 +34,12 @@ export const momentumMultiplier=time=>.65+1.25*Math.min(1,Math.max(0,time)/10);
 export function flightAbilityLabel(flight) {
   if(flight.time<flight.surgeUntil)return 'SEPARATION SURGE · 2× THRUST';
   if(flight.momentum&&flight.phase==='powered')return `MOMENTUM · ${Math.round(momentumMultiplier(flight.time)*100)}% THRUST`;
+  if(!flight.events?.length&&flight.phase==='powered') {
+    if(flight.feather&&flight.endurance)return 'LIGHT + LONG BURN';
+    if(flight.endurance)return 'ENDURANCE · +75% BURN';
+    if(flight.instrument)return 'SCIENCE · +70% BURN';
+    if(flight.feather)return 'LIGHTWEIGHT · +25% THRUST';
+  }
   return flight.events?.at(-1)||'';
 }
 export function experimentalAssembly(stats,parts,program) {

@@ -1,9 +1,9 @@
-import { partForProgram } from './parts.js?v=equipment-synergy-1';
-import { flightConditions } from './worlds.js?v=equipment-synergy-1';
+import { partForProgram, partById } from './parts.js?v=build-story-1';
+import { flightConditions } from './worlds.js?v=build-story-1';
 
 const word=(delta,more,less)=>delta>=0?more:less;
 export function partInsight(program,id) {
- const part=partForProgram(program,id),old=partForProgram(program,program.parts.equipped[part.slot]);
+ const part=partById(id),old=partById(program.parts.equipped[part.slot]);
  if(part.id===old.id)return part.detail;
  const mass=part.mass-old.mass,conditions=flightConditions(program.launchWorld,program.conditionsVersion??1);
  if(part.slot==='aero') {

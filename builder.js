@@ -1,8 +1,9 @@
-import { flightConditions } from './worlds.js?v=equipment-synergy-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=equipment-synergy-1';
-import { createFlight, stepFlight } from './engine.js?v=equipment-synergy-1';
-import { partInsight } from './part-insights.js?v=equipment-synergy-1';
-import { abilityDescription } from './experimental.js?v=equipment-synergy-1';
+import { flightConditions } from './worlds.js?v=build-story-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=build-story-1';
+import { createFlight, stepFlight } from './engine.js?v=build-story-1';
+import { partInsight } from './part-insights.js?v=build-story-1';
+import { abilityDescription } from './experimental.js?v=build-story-1';
+import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=build-story-1';
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
@@ -22,13 +23,30 @@ export function previewPart(program, id) {
   return { program: preview, height: estimateHeight(preview), previousHeight: estimateHeight(program), stats: assemblySpecs(preview), previousStats: assemblySpecs(program) };
 }
 
+export function launchReadiness(program,target,contract=false) {
+  if(!target)return {text:'Estimated at 110% launch power',state:'true'};
+  const expected=estimateHeight(program);
+  if(expected>=target) {
+    if(estimateHeight(program,1)<target)return {text:'Aim for gold',state:'timing'};
+    return {text:contract?'Contract within reach':'Within reach',state:'true'};
+  }
+  if(estimateHeight(program,1.2)>=target)return {text:'Gold can reach it',state:'timing'};
+  return {text:`${((target-expected)/1000).toFixed(1)} km short`,state:'false'};
+}
+
 export function rocketArt(parts, selected, preview) {
   const tankHeight = parts.tank.height * .75 + 30, top = 155 - tankHeight;
   const outline = slot => `fill="${preview && selected === slot ? '#b4ddce' : '#ece5c9'}" stroke="${selected === slot ? '#f6d47b' : '#7c9099'}" stroke-width="${selected === slot ? 3 : 1}"`;
   const cone = parts.aero.shape === 'round' ? `M86 ${top} Q86 ${top-23} 100 ${top-33} Q114 ${top-23} 114 ${top}Z` : parts.aero.shape === 'capsule' ? `M82 ${top} L86 ${top-29} Q100 ${top-40} 114 ${top-29}L118 ${top}Z` : `M86 ${top} L100 ${top-42} L114 ${top}Z`;
   const bells = parts.engine.shape === 'cluster' ? '<path d="M83 169h10l4 18H79z M96 169h9l4 18H92z M108 169h10l4 18h-18z"/>' : `<path d="M90 169h20l7 ${parts.engine.shape === 'long' ? 24 : 17}H83z"/>`;
   const boosters = parts.boosters.kick ? `<g data-build-slot="boosters" ${outline('boosters')}><rect x="62" y="${144-parts.boosters.kick*4}" width="14" height="${30+parts.boosters.kick*4}" rx="7"/><rect x="124" y="${144-parts.boosters.kick*4}" width="14" height="${30+parts.boosters.kick*4}" rx="7"/></g>` : '<g data-build-slot="boosters" stroke="#718299" stroke-dasharray="3 4" fill="none"><rect x="62" y="137" width="14" height="37" rx="7"/><rect x="124" y="137" width="14" height="37" rx="7"/></g>';
-  return `<svg viewBox="0 0 200 218" aria-hidden="true"><path d="M12 202H188M100 9V203" stroke="#63838a" stroke-opacity=".22" stroke-dasharray="3 5"/><ellipse cx="100" cy="202" rx="44" ry="5" fill="#091321" opacity=".5"/>${boosters}<g data-build-slot="engine" ${outline('engine')}><path d="M87 145L72 179l17-5h22l17 5-15-34z"/>${bells}</g><g data-build-slot="tank" ${outline('tank')}><rect x="86" y="${top}" width="28" height="${tankHeight+14}" rx="3"/><path d="M87 ${top+9}h26M87 153h26" stroke="#c9ad62" stroke-width="4"/><rect x="91" y="${top+20}" width="18" height="12" rx="2" fill="#314b60" stroke="none"/></g><path data-build-slot="aero" d="${cone}" ${outline('aero')}/></svg>`;
+  const hardware=[
+    parts.tank.ability==='drop'?`<rect x="84" y="${top+tankHeight*.55}" width="32" height="14" fill="#79b9ac" stroke="#d9eae1"/>`:'',
+    parts.tank.ability==='reserve'?`<path d="M86 ${top+20}h28" stroke="#7a91ac" stroke-width="7"/>`:'',
+    parts.engine.ability?`<path d="M90 174h20M88 179h24M86 184h28" stroke="${parts.engine.ability==='momentum'?'#eba475':'#9bc8ba'}" stroke-width="2"/>`:'',
+    parts.aero.ability==='feather'?`<path d="M92 ${top-4}l8-26 8 26" fill="none" stroke="#79cbb0" stroke-width="2"/>`:'',
+  ].join('');
+  return `<svg viewBox="0 0 200 218" aria-hidden="true"><path d="M12 202H188M100 9V203" stroke="#63838a" stroke-opacity=".22" stroke-dasharray="3 5"/><ellipse cx="100" cy="202" rx="44" ry="5" fill="#091321" opacity=".5"/>${boosters}<g data-build-slot="engine" ${outline('engine')}><path d="M87 145L72 179l17-5h22l17 5-15-34z"/>${bells}</g><g data-build-slot="tank" ${outline('tank')}><rect x="86" y="${top}" width="28" height="${tankHeight+14}" rx="3"/><path d="M87 ${top+9}h26M87 153h26" stroke="#c9ad62" stroke-width="4"/><rect x="91" y="${top+20}" width="18" height="12" rx="2" fill="#314b60" stroke="none"/></g><path data-build-slot="aero" d="${cone}" ${outline('aero')}/><g pointer-events="none">${hardware}</g></svg>`;
 }
 
 function partArt(part) {
@@ -87,7 +105,7 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
       button.disabled = !canEdit();
     }
     $('assembly-art').innerHTML = rocketArt(parts, slotId, false);
-    $('assembly-hint').textContent = flightConditions(program.launchWorld,program.conditionsVersion??1).label || 'EQUIPPED · tap a section to choose parts';
+    $('assembly-hint').textContent = prototype ? `${buildIdentity(program)} · ${conditions.drag===0?'vacuum':conditions.drag>1?'thick air':'air drag'}` : conditions.label || 'EQUIPPED · tap a section to choose parts';
     for (const button of document.querySelectorAll('button[data-build-slot]')) {
       button.setAttribute('aria-pressed', button.dataset.buildSlot === slotId);
       button.querySelector('strong').textContent = parts[button.dataset.buildSlot].name;
@@ -106,9 +124,9 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     const target = getTarget(preview.program),fittedTarget=getTarget(program);
     $('comparison-label').textContent = equipped ? 'Equipped estimate' : getTargetLabel(preview.program)==='Contract' ? (preview.height>=target?'After fitting: contract ready':`Contract: ${((target-preview.height)/1000).toFixed(1)} km short`) : target ? (preview.height>=target ? `After fitting: clears ${Number((target/1000).toFixed(1))} km` : `After fitting: ${((target-preview.height)/1000).toFixed(1)} km short`) : 'With this part';
     $('fitted-height').textContent = `~${(preview.previousHeight/1000).toFixed(1)} km`;
-    const margin = fittedTarget ? (preview.previousHeight-fittedTarget)/1000 : null;
-    $('fitted-readiness').textContent = fittedTarget ? (margin >= 0 ? (getTargetLabel(program)==='Contract'?'Contract within reach':'Within reach') : estimateHeight(program,1.2) >= fittedTarget ? 'Gold can reach it' : `${Math.abs(margin).toFixed(1)} km short`) : 'Estimated at 110% launch power';
-    $('fitted-readiness').dataset.ready = margin === null || margin >= 0 ? 'true' : estimateHeight(program,1.2)>=fittedTarget?'timing':'false';
+    const readiness=launchReadiness(program,fittedTarget,getTargetLabel(program)==='Contract');
+    $('fitted-readiness').textContent=readiness.text;
+    $('fitted-readiness').dataset.ready=readiness.state;
     $('fitted-readiness').title = 'Estimates use 110% power. Gold timing can give up to 120%.';
     document.querySelector('.part-comparison').hidden = equipped;
     const difference = (preview.height-preview.previousHeight)/1000;
@@ -134,6 +152,15 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
       $('candidate-trait').hidden=false;$('candidate-trait').textContent=candidate.detail;
       $('part-info-description').textContent=`Experimental part. ${candidate.detail}`;
     }
+    const interaction=equipped?null:combinationChange(program,preview.program);
+    $('candidate-description').dataset.warning=!!interaction?.warning;
+    if(interaction)$('candidate-description').textContent=interaction.text;
+    const effects=buildEffects(preview.program);
+    $('part-info-effects').replaceChildren(...effects.map(effect=>{
+      const line=document.createElement('p');
+      line.textContent=`${effect.active?'✓':'○'} ${effect.part}: ${effect.active?effect.detail:effect.reason}.`;
+      line.dataset.active=effect.active;return line;
+    }));
     requestAnimationFrame(keepPreviewVisible);
   }
 

@@ -1,5 +1,5 @@
-import { newInventory, restoreInventory } from './parts.js?v=equipment-synergy-1';
-import { momentumMultiplier } from './experimental.js?v=equipment-synergy-1';
+import { newInventory, restoreInventory } from './parts.js?v=build-story-1';
+import { momentumMultiplier } from './experimental.js?v=build-story-1';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [

@@ -1,7 +1,7 @@
-import { WORLDS } from './worlds.js?v=equipment-synergy-1';
-import { missionPool } from './missions.js?v=equipment-synergy-1';
-import { restoreJournal, JOURNAL_KITS } from './mission-journal.js?v=equipment-synergy-1';
-import { PART_SLOTS, partById, PART_TRAITS } from './parts.js?v=equipment-synergy-1';
+import { WORLDS } from './worlds.js?v=build-story-1';
+import { missionPool } from './missions.js?v=build-story-1';
+import { restoreJournal, JOURNAL_KITS } from './mission-journal.js?v=build-story-1';
+import { PART_SLOTS, partById, PART_TRAITS } from './parts.js?v=build-story-1';
 
 const kitNames={scrapper:'Scrapper',stager:'Stagehand',scientist:'Scientist'};
 export function missionJournalMarkup(profile,world=0) {
