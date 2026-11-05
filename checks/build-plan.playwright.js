@@ -37,21 +37,30 @@ async page => {
     return (estimateHeight(planBuild(p, { engine: 'instrument-engine', aero: 'lab' }).program) / 1000).toFixed(1);
   });
   assert((await page.locator('#candidate-height').innerText()).includes(expected), 'estimate includes both pending parts even on a fitted section');
-  for (const [width, height] of [[320,568],[375,667],[390,844],[667,375],[844,390],[1366,768]]) {
+  for (const [width, height] of [[320,568],[360,600],[375,620],[375,667],[390,700],[390,720],[390,740],[390,780],[390,844],[414,736],[667,375],[844,390],[1366,768]]) {
     await page.setViewportSize({ width, height });
+    await page.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect?.getTiming().iterations !== Infinity).map(a => a.finished.catch(() => {}))));
+    // Select every physical section after each resize, including the body itself.
+    for (const id of ['aero','tank','engine','boosters']) {
+      await slot(id);
+      assert(await page.locator(`button[data-build-slot="${id}"]`).getAttribute('aria-pressed') === 'true', `${width}x${height}: ${id} selection`);
+    }
+    await page.locator('#assembly-art [data-build-slot="tank"]').click();
+    assert(await page.locator('button[data-build-slot="tank"]').getAttribute('aria-pressed') === 'true', 'rocket body itself selects the tank');
     await page.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect?.getTiming().iterations !== Infinity).map(a => a.finished.catch(() => {}))));
     const bad = await page.evaluate(() => {
       const stage = document.querySelector('#assembly-stage').getBoundingClientRect(), footer = document.querySelector('.rocket-readiness').getBoundingClientRect();
+      const reset = document.querySelector('#build-reset').getBoundingClientRect();
       const controls = [...document.querySelectorAll('button[data-build-slot]'), document.querySelector('#build-reset')];
       return controls.filter(e => {
         const r = e.getBoundingClientRect();
-        return r.width < 44 || r.height < 44 || r.top < stage.top || r.bottom > footer.top + 1 || !e.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+        return r.width < 44 || r.height < 44 || r.top < stage.top || (e.matches('[data-build-slot]') && r.top < reset.bottom - 1) || r.bottom > footer.top + 1 || !e.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
       }).map(e => e.id || e.dataset.buildSlot);
     });
     assert(!bad.length, `${width}x${height}: clipped workbench controls ${bad}`);
     assert(await page.locator('.app').evaluate(e => e.scrollHeight <= e.clientHeight + 1), 'app fits');
     assert(await page.locator('#part-fit').evaluate(e => { const r=e.getBoundingClientRect(); return r.bottom<=innerHeight && r.width>=44 && r.height>=44 && e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)); }), 'whole-build purchase is visible and tappable');
-    await page.screenshot({ path: `/tmp/rocketaway-workbench-${width}.png` });
+    await page.screenshot({ path: `/tmp/rocketaway-workbench-${width}-${height}.png` });
   }
   await page.locator('#part-fit').click();
   const fitted = await read();
@@ -78,5 +87,5 @@ async page => {
   await slot('engine'); await part('spark');
   assert(await page.locator('#assembly-art svg').evaluate(e => getComputedStyle(e).animationName === 'none'), 'reduced motion suppresses assembly animation');
   assert(!errors.length, JSON.stringify(errors));
-  return { passed: 'Whole-build previews, combined quote, atomic fitting, discard, reload, fitted launch, six layouts, reduced motion and a real flight', errors };
+  return { passed: 'Whole-build previews, combined quote, atomic fitting, discard, reload, fitted launch, thirteen layouts, direct rocket-body selection, reduced motion and a real flight', errors };
 }

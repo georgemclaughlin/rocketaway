@@ -161,7 +161,7 @@ No build step, dependency installation, external assets, API keys, or backend ar
 - `tests/` — mechanics, parts, persistence, reward integrity, and full campaign tests.
 - `checks/journey.playwright.js` — repeatable browser checks for world setup, real flight completion, travel, save integrity, phone layouts, and reduced motion.
 
-Run `checks/build-plan.playwright.js` in an isolated session for multi-part preview/purchase, discard, fitted-launch safety, save restoration, reduced motion and all six layout sizes. `tests/build-plan.test.js` covers purchase atomicity, combined physics, stock/catalog restrictions and existing-save compatibility.
+Run `checks/build-plan.playwright.js` in an isolated session for multi-part preview/purchase, discard, fitted-launch safety, save restoration, reduced motion and thirteen layout sizes, including intermediate phone heights with less space for the hangar. Section controls adapt to the actual rocket-panel height and remain clear of the preview header and fitted estimate. `tests/build-plan.test.js` covers purchase atomicity, combined physics, stock/catalog restrictions and existing-save compatibility.
 
 Run `npm test` (Node 18+). There are no npm dependencies. Playwright CLI is used for browser checks of layout, real touch input, uninterrupted flights, previewing/buying/refitting parts, complete progression, and reset behavior.
 

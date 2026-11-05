@@ -73,7 +73,7 @@ Keep new domain logic independent of DOM/storage where practical. Avoid circular
 
 1. Run `npm test` for relevant mechanics/persistence changes. It uses Node's built-in test runner, with no dependency installation needed.
 2. Run appropriate `checks/*.playwright.js` in a **new, uniquely named isolated browser session**. These scripts deliberately seed or clear that session's storage. Never attach them to a player's browser.
-3. Check phones at 320×568, 375×667, and 390×844; landscape at 667×375 and 844×390; and desktop at 1366×768 when layout is affected. Check readable text, overlap, tap targets, and essential actions as well as overflow bounds. Inspect screenshots for visual changes.
+3. Check phones at 320×568, 375×667, and 390×844; landscape at 667×375 and 844×390; and desktop at 1366×768 when layout is affected. Also check intermediate phone heights (including 390×720, 390×740, and 414×736), which expose browser-toolbar and panel-height failures. The hangar uses its actual panel height to arrange section controls. Check readable text, overlap, tap targets, and essential actions as well as overflow bounds. Inspect screenshots for visual changes.
 4. Inspect the CLI's `### Result` / `### Error` output: a script assertion may be reported despite a zero shell exit code. Check browser console errors. Save temporary scripts, browser configuration, logs, and screenshots outside tracked files; close only the test session you opened.
 5. Run `git diff --check` and review the staged diff. Do not rerun unrelated checks once they pass unless new changes or failures justify it.
 
@@ -87,7 +87,7 @@ playwright-cli -s=rocketaway-review close
 
 Useful browser checks:
 
-- `build-plan.playwright.js`: complete-build quotes, multi-part previews/fitting, discard, reload, fitted-launch safety, reduced motion, six viewport layouts and an actual flight.
+- `build-plan.playwright.js`: complete-build quotes, multi-part previews/fitting, discard, reload, fitted-launch safety, reduced motion, thirteen viewport layouts, direct rocket-body selection and an actual flight.
 - `build-experience.playwright.js`: six-size combination warnings, flight logs, funded setup, actual first-flight funding, and reload/menu recovery. `launch-funding-audit.js` compares 210 optimal later-world openings with/without the pending contribution (7/210 possible clears in both; all at rank 5).
 
 - `equipment.playwright.js`: new ability previews/fitting, six hangar/flight/report layouts, ramp feedback clear of the rocket, pause/resume, real combination flights, and recovery/contract/survey earnings.
@@ -111,7 +111,7 @@ Useful browser checks:
 - The approved bundled illustration is `assets/astronaut-cartoon.png?v=2`. An earlier portrait was intentionally removed from Git history and its old asset filename remains ignored. Do not recover it, re-add it, or include source/reference photographs. Do not change the cartoon likeness without a request.
 - Respect `.gitignore`; do not force-add ignored material. Use the repository's existing public-safe Git author configuration rather than introducing a personal email.
 - Before pushing, review every staged file for privacy and scope. Keep asset paths relative and retain existing site/repository settings.
-- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. The app currently uses `v=workbench-1`; the cartoon's independent `v=2` is intentional.
+- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. JavaScript currently uses `v=workbench-1` and CSS uses `v=workbench-mobile-1`; the cartoon's independent `v=2` is intentional.
 - Push the validated commit to `main`, then confirm Pages built that commit with `gh api repos/georgemclaughlin/rocketaway/pages/builds/latest --jq '{status,commit}'`. For game changes, run an isolated live-site smoke check and give the user the public game link. A documentation-only change does not require replaying the game.
 
 ## Remaining design opportunity
