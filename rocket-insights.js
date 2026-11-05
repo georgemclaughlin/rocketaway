@@ -1,5 +1,5 @@
 // Build explanations use the same resolved equipment/research as the simulator.
-import { assemblySpecs, fittedParts } from './parts.js?v=build-story-1';
+import { assemblySpecs, fittedParts } from './parts.js?v=workbench-1';
 
 export function buildEffects(program) {
   if(program.rulesVersion!==1)return [];

@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=build-story-1">
-  <script type="module" src="./game.js?v=build-story-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=workbench-1">
+  <script type="module" src="./game.js?v=workbench-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -45,9 +45,10 @@
     <aside class="workshop" id="workshop" aria-labelledby="workshop-title">
       <div class="workshop-heading"><div><h2 id="workshop-title" tabindex="-1">Your rocket</h2><p id="hangar-status">Buy a part, or launch your rocket as-is.</p></div></div>
       <div class="assembly-stage" id="assembly-stage">
+        <div class="build-toolbar" hidden><strong id="build-state" role="status">YOUR ROCKET</strong><button id="build-reset" class="small-button" hidden>Discard</button></div>
         <span class="assembly-hint" id="assembly-hint">Tap a rocket section to change it</span>
         <div id="assembly-art" class="assembly-art"></div>
-        <div id="assembly-slots"></div><div class="rocket-readiness"><span>Estimated at 110% · <b id="fitted-height"></b></span><small id="fitted-readiness"></small></div>
+        <div id="assembly-slots"></div><div class="rocket-readiness"><span>Fitted at 110% · <b id="fitted-height"></b></span><small id="fitted-readiness"></small></div>
       </div>
       <section class="part-picker" aria-labelledby="candidate-name">
         <div class="picker-heading"><span id="category-label">ENGINE</span><span id="candidate-position">1 / 4</span></div>

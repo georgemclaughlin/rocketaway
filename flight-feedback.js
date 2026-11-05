@@ -1,7 +1,7 @@
-import { catalogFor } from './parts.js?v=build-story-1';
-import { estimateHeight, previewPart } from './builder.js?v=build-story-1';
-import { buildExperiment } from './part-insights.js?v=build-story-1';
-import { altitudeLabel } from './journey.js?v=build-story-1';
+import { catalogFor } from './parts.js?v=workbench-1';
+import { estimateHeight, previewPart } from './builder.js?v=workbench-1';
+import { buildExperiment } from './part-insights.js?v=workbench-1';
+import { altitudeLabel } from './journey.js?v=workbench-1';
 
 export function missedFlightAdvice(run,result) {
  const perfect=estimateHeight(run.program,1.2),shortfall=Math.max(0,result.target-result.altitude),misses=Math.max(0,3-run.strikes);

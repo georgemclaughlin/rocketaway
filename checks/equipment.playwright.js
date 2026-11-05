@@ -16,9 +16,11 @@ async page=>{
  for(const [width,height] of sizes) {
   await page.setViewportSize({width,height});
   for(const [slot,id,phrase] of [['engine','momentum-engine','Short burn'],['tank','drop-tank','Sheds'],['boosters','return-boosters','Recover +90']]) {
+   // These cases compare individual parts; whole-build plans are covered separately.
+   if(await page.locator('#build-reset').isVisible())await page.locator('#build-reset').click();
    await page.locator(`button[data-build-slot="${slot}"]`).click();
    await page.locator(`[data-part="${id}"]`).click();
-   assert((await page.locator('#candidate-description').innerText()).includes(phrase),`ability preview ${id}`);
+   assert((await page.locator('#candidate-description').textContent()).includes(phrase),`ability preview ${id}`);
    const issues=await page.locator('#workshop,.part-picker,#candidate-description,#part-fit,#shop-launch').evaluateAll(es=>es.filter(e=>{const r=e.getBoundingClientRect();return r.left<0||r.top<0||r.right>innerWidth+1||r.bottom>innerHeight+1||e.scrollHeight>e.clientHeight+2;}).map(e=>e.id||e.className));
    assert(!issues.length,JSON.stringify({width,height,id,issues}));
    await page.locator('#part-info').click();

@@ -28,7 +28,7 @@ Read this file before changing the project. `README.md` documents the player exp
 - Completed attempts default to the furthest unlocked world; earlier worlds are explicit replay choices. Old Moon-complete saves must unlock Mars without replaying rewards. Preserve the dedicated ending and optional replay after Eris.
 - Credits buy parts for the current rocket. Research points buy permanent, kit-specific upgrades. Preserve the visible research button and its distinct states for an affordable current-kit upgrade, other-kit upgrades, and no affordable upgrade.
 - The roguelite uses one horizontally scrolling parts shelf per selected rocket section, showing owned/stocked standard and experimental equipment together. Keep the selected preview visible after resizing. Contracts belong in the journey goal area; reservation belongs in the part Info dialog. Do not restore the changing Standard/Experimental toggle or make browsing jump sections.
-- Selecting a part previews it; only Buy & fit / Fit part changes the equipped rocket. Keep fitted and preview values visually distinct. Explain base tradeoffs separately from seeded part bonuses.
+- Selecting a part previews it; only Buy & fit / Fit part (or the whole-build equivalents) changes the equipped rocket. Roguelite previews retain choices across sections and quote the complete build. Commit purchases atomically after validating every part and the total cost. Discard and reload clear previews; Launch fitted discards the preview and flies the equipped build. Preview state is temporary and is never stored. Keep fitted and preview values visually distinct. Explain base tradeoffs separately from seeded part bonuses.
 - Height estimates use 110% launch power; timing ranges from 90% to 120%. Show an amber timing cue when the goal needs more than 100% power, even if the 110% estimate just clears it. Reset the displayed meter/power synchronously when arming. Miss advice must distinguish a reachable timing opportunity from a build limitation. Suggest a useful experiment without silently choosing or purchasing a part.
 - Fast Forward is **one on/off toggle**, not a multiplier cycle. It measures the remaining flight once and aims for about six real-time seconds to the result, never slowing a shorter flight. It stays selected between launches during a visit; pause stops advancement. Do not recalculate the rate every frame, which would keep moving the finish away.
 - `flight-playback.js` uses fixed 1/120-second ticks and carries fractional time between frames. Playback speed must not change the outcome. `See result` also resolves the real trajectory and settles rewards only once.
@@ -44,7 +44,7 @@ Read this file before changing the project. `README.md` documents the player exp
 | --- | --- |
 | Layout, canvas, input, persistence, screen transitions | `index.html`, `style.css`, `game.js` |
 | Physics and legacy Free Flight | `engine.js`, `flight-playback.js`, `modifiers.js` |
-| Catalog, assembly, seeded part traits, fitting, previews | `parts.js`, `builder.js`, `part-insights.js`, `rocket-insights.js` |
+| Catalog, assembly, seeded part traits, fitting, previews | `parts.js`, `builder.js`, `build-plan.js`, `rocket-art.js`, `part-insights.js`, `rocket-insights.js` |
 | Expedition state, stock, rewards, save migration | `expeditions.js`, `launch-funding.js` |
 | Worlds, versioned conditions, milestone map, travel | `worlds.js`, `journey.js`, `travel.js`, `world-scenery.js` |
 | Starting-build screen and equipment summaries | `expedition-ui.js`, `kit-details.js` |
@@ -87,6 +87,7 @@ playwright-cli -s=rocketaway-review close
 
 Useful browser checks:
 
+- `build-plan.playwright.js`: complete-build quotes, multi-part previews/fitting, discard, reload, fitted-launch safety, reduced motion, six viewport layouts and an actual flight.
 - `build-experience.playwright.js`: six-size combination warnings, flight logs, funded setup, actual first-flight funding, and reload/menu recovery. `launch-funding-audit.js` compares 210 optimal later-world openings with/without the pending contribution (7/210 possible clears in both; all at rank 5).
 
 - `equipment.playwright.js`: new ability previews/fitting, six hangar/flight/report layouts, ramp feedback clear of the rocket, pause/resume, real combination flights, and recovery/contract/survey earnings.
@@ -110,7 +111,7 @@ Useful browser checks:
 - The approved bundled illustration is `assets/astronaut-cartoon.png?v=2`. An earlier portrait was intentionally removed from Git history and its old asset filename remains ignored. Do not recover it, re-add it, or include source/reference photographs. Do not change the cartoon likeness without a request.
 - Respect `.gitignore`; do not force-add ignored material. Use the repository's existing public-safe Git author configuration rather than introducing a personal email.
 - Before pushing, review every staged file for privacy and scope. Keep asset paths relative and retain existing site/repository settings.
-- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. The app currently uses `v=build-story-1`; the cartoon's independent `v=2` is intentional.
+- Modules and CSS use query-string cache versions. Update the entry-point URLs and affected transitive import graph coherently when deploying changed code; avoid mixing revisions of shared modules. The app currently uses `v=workbench-1`; the cartoon's independent `v=2` is intentional.
 - Push the validated commit to `main`, then confirm Pages built that commit with `gh api repos/georgemclaughlin/rocketaway/pages/builds/latest --jq '{status,commit}'`. For game changes, run an isolated live-site smoke check and give the user the public game link. A documentation-only change does not require replaying the game.
 
 ## Remaining design opportunity
