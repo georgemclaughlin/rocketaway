@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=workbench-mobile-1">
-  <script type="module" src="./game.js?v=workbench-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=goals-visible-1">
+  <script type="module" src="./game.js?v=goals-visible-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -20,7 +20,7 @@
       <div class="journey-heading"><strong id="journey-destination"></strong><span class="journey-tools"><span id="journey-count"></span></span></div>
       <ol id="journey-steps" class="journey-steps" aria-label="Your expedition milestones"></ol>
       <div class="journey-footer"><strong id="journey-current"></strong><span id="journey-lives"></span></div>
-      <button id="contracts-open" class="contract-goal" hidden><span><small>OPTIONAL GOAL</small><strong id="contract-selection">Choose a contract</strong></span><span aria-hidden="true">›</span></button>
+      <button id="contracts-open" class="contract-goal" hidden><span class="contract-copy"><small>OPTIONAL<span class="contract-label-tail"> GOAL</span></small><strong id="contract-selection">Choose a goal</strong></span><span id="contract-prize" class="contract-prize"></span><span class="contract-arrow" aria-hidden="true">›</span></button>
     </div>
     <div class="mission-heading"><span id="mission-status">MISSION 01 · REACH SPACE</span><span id="progress-caption"><b id="best">0.0</b> / <span id="goal-limit">100</span> <span id="goal-unit">km</span></span></div>
     <div class="mission-track" role="progressbar" aria-label="Best altitude toward space" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="mission-progress"><div id="mission-fill"></div></div>

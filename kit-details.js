@@ -1,6 +1,6 @@
-import { newProgram } from './engine.js?v=workbench-1';
-import { partById, fittedParts } from './parts.js?v=workbench-1';
-import { researchLoadout } from './research.js?v=workbench-1';
+import { newProgram } from './engine.js?v=goals-visible-1';
+import { partById, fittedParts } from './parts.js?v=goals-visible-1';
+import { researchLoadout } from './research.js?v=goals-visible-1';
 
 export function kitDetails(kit,profile) {
  const loadout=researchLoadout(profile,kit),program=newProgram();

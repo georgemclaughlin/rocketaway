@@ -1,11 +1,11 @@
-import { flightConditions } from './worlds.js?v=workbench-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=workbench-1';
-import { createFlight, stepFlight } from './engine.js?v=workbench-1';
-import { partInsight } from './part-insights.js?v=workbench-1';
-import { abilityDescription } from './experimental.js?v=workbench-1';
-import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=workbench-1';
-import { rocketArt } from './rocket-art.js?v=workbench-1';
-import { planBuild, fitBuild } from './build-plan.js?v=workbench-1';
+import { flightConditions } from './worlds.js?v=goals-visible-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=goals-visible-1';
+import { createFlight, stepFlight } from './engine.js?v=goals-visible-1';
+import { partInsight } from './part-insights.js?v=goals-visible-1';
+import { abilityDescription } from './experimental.js?v=goals-visible-1';
+import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=goals-visible-1';
+import { rocketArt } from './rocket-art.js?v=goals-visible-1';
+import { planBuild, fitBuild } from './build-plan.js?v=goals-visible-1';
 export { rocketArt };
 
 const estimates = new Map();

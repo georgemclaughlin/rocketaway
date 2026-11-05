@@ -1,16 +1,16 @@
 // Roguelite journey. Existing flights retain their physics and equipment.
-import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=workbench-1';
-import { PARTS, assemblySpecs, catalogFor } from './parts.js?v=workbench-1';
-import { experimentalCatalog, companionOffers, EQUIPMENT_VERSION, ABILITY_EVENTS } from './experimental.js?v=workbench-1';
-import { awardResearch } from './research.js?v=workbench-1';
-import { recordFlightPeak } from './flight-records.js?v=workbench-1';
-import { contractsFor, missionPool, contractReady } from './missions.js?v=workbench-1';
-import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=workbench-1';
-export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=workbench-1';
-import { WORLDS, flightConditions } from './worlds.js?v=workbench-1';
-import { estimateHeight } from './builder.js?v=workbench-1';
-import { flightBuildSummary } from './rocket-insights.js?v=workbench-1';
-import { fundingFor, restoreFunding, reserveLaunchFunding } from './launch-funding.js?v=workbench-1';
+import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=goals-visible-1';
+import { PARTS, assemblySpecs, catalogFor } from './parts.js?v=goals-visible-1';
+import { experimentalCatalog, companionOffers, EQUIPMENT_VERSION, ABILITY_EVENTS } from './experimental.js?v=goals-visible-1';
+import { awardResearch } from './research.js?v=goals-visible-1';
+import { recordFlightPeak } from './flight-records.js?v=goals-visible-1';
+import { contractsFor, missionPool, contractReady } from './missions.js?v=goals-visible-1';
+import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=goals-visible-1';
+export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=goals-visible-1';
+import { WORLDS, flightConditions } from './worlds.js?v=goals-visible-1';
+import { estimateHeight } from './builder.js?v=goals-visible-1';
+import { flightBuildSummary } from './rocket-insights.js?v=goals-visible-1';
+import { fundingFor, restoreFunding, reserveLaunchFunding } from './launch-funding.js?v=goals-visible-1';
 
 export const PROTOTYPE_VERSION=5;
 export const isPrototype = run => run?.rulesVersion===1;
