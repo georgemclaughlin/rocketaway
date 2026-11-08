@@ -2,6 +2,8 @@
 
 Status: The public roguelite now continues past Moon through the existing nine-world route to Tau Ceti, with next-world selection fixed at the owner’s request. The original campaign is preserved separately and accessible from the menu. Phases 1–3 have a playable first implementation and automated coverage. Phase 4 remains open for human feedback and pacing revisions; the grouped three-world expeditions and expanded research below remain proposed.
 
+The [component research proposal](#proposed-component-research--research-and-implementation-plan-2026-11-07) adds a source-backed direction for the next research prototype. It is not implemented; its prices and effects remain playtest hypotheses.
+
 ## Current implementation findings
 
 Moon completion now unlocks Mars, and later worlds use fresh funded rockets with their existing targets plus experimental parts and two equipment contracts. Setup defaults to the furthest unlocked world; replay is explicit. Older Moon-complete saves upgrade without repeating rewards. Original-campaign world/kit unlocks are recognised once while the original save and any interrupted rocket remain preserved. The later-world audit completed 210/210 sampled starts across five seeds, three kits, and research ranks 0/5; six earned full journeys also pass. Grouped carryover beyond Earth–Moon is not yet implemented.
@@ -350,3 +352,114 @@ Release verification: 125 Node tests pass, including six earned full journeys. I
 The owner reported that the previous pass did not feel noticeably improved and emphasized fun as the priority. This iteration makes experimentation easier: preview multiple sections together, see the combined rocket/estimate/price, and explicitly buy and fit the whole order. Switching sections retains the preview; Discard, reload, and Launch fitted clear it without spending. Existing equipment physics, prices, stock, progression, and saves remain unchanged. The hangar centers a larger assembled rocket and marks every pending section. Info explains inactive partners even when both pieces are only previewed, and lists the full purchase.
 
 Validation: 130 Node tests pass. Isolated browser checks cover complete-build purchases, unaffordable orders, discard/reload, launching fitted equipment, reduced motion, six viewport sizes, equipment abilities, reports, next-world setup, and the ending. A separate fresh browser run used ordinary controls and automated 108% timing to reach 13.78, 81.16, and 178.18 km in three launches, buying an Ember, then Endurance + Long, then Needle + Composite. Comparing tanks for that final combination gave 181.1 km for 450 credits, 188.9 km for 630, and 191.2 km for 1,090. These are observations from one opening, not proof of enjoyment or a complete campaign playtest. Longer carried expeditions remain open design work.
+
+## Proposed component research — research and implementation plan (2026-11-07)
+
+Status: proposal prepared at the owner's request after feedback that research should improve particular rocket components. This section is not implemented, is not a claim of validated balance, and does not change the live game's rules. Start with a playable engine slice before building the full catalog.
+
+### Reference findings
+
+These are selected design references, not a ranking of games or proof that a mechanic caused their success. Sources were reviewed on 2026-11-07; older developer posts describe their design at that time. The applications to Rocket Away below are our design inferences.
+
+| Reference | Evidence | Application to Rocket Away |
+| --- | --- | --- |
+| Deep Rock Galactic | The developers described replacing weapon upgrades with a broader modification system to support loadout choices; they also refunded previous expenditure to preserve the value of existing progress. [Developer update notes](https://www.deeprockgalactic.com/updatesold) | Give individual components named choices. Preserve all purchased kit ranks and their benefits during the transition. |
+| Deep Rock Galactic overclocks | The developer FAQ distinguishes modest improvements without drawbacks, moderate modifications with drawbacks, and larger changes with substantial drawbacks. It emphasizes trying different loadouts. This is historical design commentary, not a current acquisition guide. [Developer FAQ](https://steamcommunity.com/app/548430/discussions/1/1639788130271437622/) | Combine a small permanent component improvement with optional specializations. Keep an ordinary configuration available and make switching unlocked specializations free. |
+| Hades | Supergiant introduced permanently upgradeable weapons and unlockable alternate weapon forms through Weapon Aspects. [Superstar update notes](https://www.supergiantgames.com/blog/hades-superstar-update-patch-notes/) | Research should give a rocket a recognizable specialty and make future build experiments appealing. A specialty belongs to specific hardware, with its effect visible in flight. |
+| FTL | Subset describes managing ship power distribution and alternative responses involving engines, weapons and boarding, alongside ship upgrades. [Developer's Steam description](https://store.steampowered.com/app/212680/FTL_Faster_Than_Light/) | Assess the complete rocket: changing one component can change which companion is valuable. Keep those decisions in the hangar; do not add power management during flight. |
+| Moon Sweepers | The official description separates better cleaning tools, carrying capacity, depots and vehicles. This may be the owner's moon-cleaning reference; its identity has not been confirmed. [Official Steam description](https://store.steampowered.com/app/5335510/Moon_Sweepers/) | Let a player diagnose a concrete limitation and improve the relevant piece. Show what the purchase changes in the next use, not only its level number. |
+
+The central hypothesis: research becomes satisfying when a player can explain what problem a purchase solves, see its effect on their rocket, and later make a different choice for another build. Four linear percentage ladders alone would still leave much of the existing problem intact.
+
+### Player-facing structure
+
+Open the existing Research button to the selected starting kit and a compact rocket diagram with four selectable sections: engine, fuel tank, nose/capsule, and boosters. Each section shows three research nodes: one calibration and two alternative specializations. Only the selected section's details are expanded; avoid a large scrolling tree. Existing kit-rank upgrades remain available in a clearly labeled Kit research panel with their original prices, benefits and starter parts.
+
+- **Calibration:** a small permanent improvement to that component category for the researched kit. Each calibration has one level initially, not an endless percentage ladder.
+- **Specializations:** permanently unlock two different ways to configure that component. One specialization or the ordinary configuration can be fitted per section. Both specializations can eventually be owned; they never stack together on the same section.
+- Research remains kit-specific. A Scrapper engine purchase applies to compatible engines on Scrapper rockets, not Stagehand or Scientist rockets. Share the initial node definitions across kits, with separate ownership; retain existing kit identities through their current perks and equipment.
+- Research improves a component category, so upgrading from Spark to Ember does not discard the engine research. Specialized parts show explicit compatibility and the actual resolved effect. Do not create a separate research grind for every catalog item.
+- Credits continue buying equipment for the current rocket. Research points buy permanent engineering knowledge. No new currency, random research drops, waiting timers, or mandatory research popup.
+
+### Initial branch content
+
+These are design candidates. Only the engine slice receives provisional numerical values below; tune all effects through simulation and play before treating them as specifications.
+
+| Section | Permanent calibration | Specialization A | Specialization B | Main decision |
+| --- | --- | --- | --- | --- |
+| Engine | Improved combustion: a modest thrust increase | High-pressure feed: stronger thrust with a shorter burn | Cruise feed: longer burn with weaker thrust | Getting a heavy rocket moving versus sustaining acceleration |
+| Fuel tank | Lighter tank shell: reduce tank dry mass only | Lightweight shell: less dry mass with less fuel capacity | Extended reservoir: more fuel and a longer burn with a heavier tank | Ignition weight versus endurance |
+| Nose / capsule | Lighter structure: reduce this component's dry mass | Streamlining: lower drag with added structural mass | Minimal shell: lower mass with more drag | Atmospheric worlds versus airless worlds and lightweight combinations |
+| Boosters | Improved couplers: a modest kick increase | High-impulse assembly: stronger kick with heavier pods | Lightweight casings: lighter pods with a smaller kick | Early acceleration versus the weight carried until separation |
+
+Avoid improving every stat at once. Tank capacity changes must alter fuel mass and burn consistently. Dry-mass changes must propagate to the associated detachable mass. An upgrade to the nose must not secretly lighten the entire rocket. Booster research has no effect when no boosters are fitted, and the UI must say so.
+
+Keep the current special-part contracts intact: Momentum retains its versioned ramp curve; Drop tank releases only dry mass; Return boosters retain the fixed qualifying 90-credit recovery and never pay on misses. The first research pass can affect their resolved component statistics but must not rewrite those abilities or their eligibility conditions. Extra ability-specific branches are deferred until the basic component model is enjoyable.
+
+### Prototype economy and first experience
+
+Retain the existing research income: one point per completed flight, two per newly crossed milestone, and four for a first world clear. Retain all current kit-rank costs and benefits.
+
+Prototype prices: three research points for a calibration, then five for each specialization in that section. Buying that section's calibration is the only research prerequisite for its specializations. Other sections and higher kit ranks are not required. Existing kit access requirements still apply. That would be 13 points per completed section and 52 per kit for the full four-section proposal, in addition to the existing ranks; these costs are hypotheses, not a desired grind length.
+
+A first flight clearing one milestone earns three points, enough for a concrete component purchase. A miss earns one point and still contributes. The first complete engine path should become available within a few productive launches; measure the actual delay while old kit-rank purchases compete for the same points. Do not raise world targets or require extra launches to pay for the new tree. An unresearched rocket must remain viable.
+
+Provisional engine test values:
+
+- Improved combustion calibration: +3% resolved engine thrust.
+- High-pressure feed: multiply calibrated thrust by 1.08 and resolved burn duration by 0.92.
+- Cruise feed: multiply calibrated thrust by 0.94 and resolved burn duration by 1.12.
+- Ordinary configuration: calibration only. Retains no specialization penalty.
+
+These are deliberately testable starting points, not a promise of balanced or perceptible gains. If both specializations behave almost identically, or one wins across all useful builds, revise their mechanics before adding ranks or more nodes. Do not make Momentum ramp earlier, create extra reserve fuel, or increase recovery earnings as an incidental consequence.
+
+### Preview, purchase and fitting
+
+A node must name its kit, affected parts, exact stat changes, cost, and activation timing. For the matching current rocket, show the before/after whole-build estimate at 110% power alongside burn duration, launch mass and relevant ability conditions. For another kit or an old-version rocket, clearly mark the future-rocket scope and do not invent a current-flight benefit.
+
+Selecting a node only previews it. Buying a calibration applies that stated permanent bonus to a compatible idle rocket, like existing research; it never buys or swaps a part. Buying a specialization unlocks it but leaves the fitted configuration unchanged. Offer an explicit Preview in hangar action after research, without opening another mandatory dialog.
+
+The existing complete-build preview must include pending specialization changes. Fit build commits parts, any credit purchases and tuning choices together after validation. Owned specializations cost nothing to switch; no per-flight fee or permanent branch lock. Discard and reload clear previews. Launch fitted ignores uncommitted choices. Swapping to an incompatible part shows that the tuning is inactive and explains why; it never silently substitutes a different specialization.
+
+Preserve the research button's affordable-selected-kit, affordable-other-kit and no-affordable-upgrade distinctions. Include both legacy ranks and new nodes when computing availability. Make future-rocket activation explicit for legacy active attempts. Research remains an optional hangar action, with every main phase fitting the required phone viewports.
+
+### Make the result tangible
+
+The engine slice must demonstrate its identity in both numbers and presentation: high-pressure feed has a stronger initial plume and earlier burnout; cruise feed sustains a longer burn. Effect labels derive from the actual resolved simulation, with reduced-motion alternatives. The report and Flight log name the fitted tuning and retain the equal-power build comparison. Do not label a lower-altitude utility build a failure if it completes the selected contract.
+
+Example experiment: compare an ordinary engine against both feeds on a heavy Earth rocket, then compare them again with a long tank on an airless world. Show the consequences before committing. The proposed research is successful if the player has a reason to change the answer, not merely a reason to buy every node.
+
+### Save and implementation boundaries
+
+Introduce this first in versioned roguelite attempts; the original campaign keeps its current research behavior. Existing kit ranks, spent progress, research balance, unlocks, journal entries and winning builds remain intact. Keep legacy rank purchases available to both old and new players. Do not refund ranks while also keeping their benefits, which would duplicate their value.
+
+Add bounded per-kit component unlocks to profile research and fitted tuning IDs to the rocket. Snapshot the applicable unlocks/stat modifiers and selected tunings at ignition. Old attempts without the new research version keep their previous physics until the next fresh rocket; an interrupted flight must always resume its saved configuration first. The menu must explain when a purchase is for future rockets.
+
+A proposed new save version must make older builds reject unsupported research/tuning data without overwriting it. Keep the existing storage keys and validate both campaigns in the envelope. Use explicit migrations, never inferred purchases or historical tuning records.
+
+Likely implementation work:
+
+1. A pure component-research catalog/resolver alongside `research.js`, with explicit component scope, prerequisites, costs, compatibility and deterministic stat ordering.
+2. Apply component modifiers to component data before aggregate assembly in `parts.js`; preserve existing traits, kit research and experimental ability rules. Document the ordering and clamp physical quantities where required.
+3. Extend `build-plan.js`, `builder.js` and estimate cache keys to include research ownership/version, fitted tunings and pending tuning previews. Use the same resolved assembly for previews, playback and instant results.
+4. Extend `research-ui.js` and the part Info/build preview flow while retaining explicit purchase and fit actions.
+5. Update save validation, interrupted-flight snapshots, `flight-records.js` and mission-journal winning builds to retain actual tunings. Missing old data stays absent; world transitions still clear comparisons.
+
+### Delivery and decision gates
+
+1. **Engine slice:** implement one calibration and two feeds for Scrapper in an isolated prototype. Include real purchase, preview, fitting, flight effects, report and save/reload. The current live game remains unchanged while this slice is evaluated.
+2. **Playtest the choice:** try ordinary starting equipment, heavier tanks, long-burn combinations, research ranks zero and five, and Earth/Moon/later-world conditions. Run earned launches as well as seeded diagnostic builds. Give the owner a playable comparison before expanding the tree.
+3. **Expand only useful branches:** if the engine choices are distinguishable and worth switching, implement the remaining three sections and kit-specific ownership. Keep the catalog at one calibration and two specializations per section for this release.
+4. **Balance and compatibility:** run unit tests for correct scope, modifier ordering, atomic purchases, legacy saves, campaign switching, interrupted flights, once-only rewards and exact playback parity. Extend optimal affordable-opening audits across five seeds, all kits, nine worlds and ranks zero/five. Test researched tuning combinations as well as normal earned progression, reservations, contracts, carried Moon rockets and fresh Moon starts. Check maxed profiles and banked points; research must not make every opening an automatic clear.
+5. **Mobile review and publication:** run isolated browser checks at all required portrait, intermediate-height, landscape and desktop sizes; inspect screenshots, focus, tap targets and reduced motion. Update documentation and the cache graph, publish a validated implementation, and verify the live save/launch/purchase flow.
+
+Playtest acceptance questions:
+
+- After a purchase, can the player explain which component changed and see a useful effect on the next flight?
+- Can they identify cases where each specialization is worth fitting, and cases where ordinary configuration is preferable?
+- Does buying another engine preserve their research investment?
+- Can they change their mind without another fee, lost unlocks or accidental purchases?
+- Does the new lab remain quick to use on a small phone?
+- Is there a useful next research goal without extra grinding or forced losses?
+
+Automated completion rates establish correctness and expose balance problems. They cannot establish that the new decisions are enjoyable. If a specialization is consistently dominated, imperceptible, or confusing in play, revise or remove it before expanding the catalog.
