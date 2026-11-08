@@ -1,6 +1,7 @@
+import { componentResearchSnapshot } from './component-research.js?v=component-research-1';
 // Bounded, permanent collection records. No storage or DOM dependencies.
-import { missionPool } from './missions.js?v=flight-feel-1';
-import { PART_SLOTS, partById, assemblySpecs, restorePartTraits } from './parts.js?v=flight-feel-1';
+import { missionPool } from './missions.js?v=component-research-1';
+import { PART_SLOTS, partById, assemblySpecs, restorePartTraits } from './parts.js?v=component-research-1';
 
 export const JOURNAL_KITS=['scrapper','stager','scientist'];
 const int=(value,max=1e9)=>Number.isFinite(value)?Math.max(0,Math.min(max,Math.floor(value))):0;
@@ -9,7 +10,7 @@ const missionIds=Array.from({length:9},(_,world)=>missionPool(world)).flat().map
 function restoreRocket(raw) {
   if(!raw||!JOURNAL_KITS.includes(raw.kit)||!Number.isInteger(raw.launches)||raw.launches<1||raw.launches>1e9||!Number.isFinite(raw.mass)||raw.mass<=0||raw.mass>100)return null;
   if(!PART_SLOTS.every(slot=>partById(raw.equipped?.[slot.id])?.slot===slot.id))return null;
-  return {launches:raw.launches,mass:raw.mass,kit:raw.kit,rank:int(raw.rank,5),seed:int(raw.seed,4294967295),
+  return {...componentResearchSnapshot({...raw,rulesVersion:1}),launches:raw.launches,mass:raw.mass,kit:raw.kit,rank:int(raw.rank,5),seed:int(raw.seed,4294967295),
     equipped:Object.fromEntries(PART_SLOTS.map(slot=>[slot.id,raw.equipped[slot.id]])),traits:restorePartTraits(raw.traits)};
 }
 export function restoreJournal(raw) {
@@ -43,7 +44,7 @@ export function recordWorldClear(profile,run) {
   const entry=run.difficulty===1&&run.startWorld===0?'carried':'fresh';
   const mass=assemblySpecs(run.program).mass,previous=row.best[entry];
   if(previous&&(previous.launches<launches||(previous.launches===launches&&previous.mass<=mass)))return false;
-  row.best[entry]={launches,mass,kit:run.kit,rank:int(run.program.research?.rank,5),seed:run.seed,
+  row.best[entry]={...componentResearchSnapshot(run.program),launches,mass,kit:run.kit,rank:int(run.program.research?.rank,5),seed:run.seed,
     equipped:structuredClone(run.program.parts.equipped),traits:restorePartTraits(run.program.partTraits)};
   return true;
 }

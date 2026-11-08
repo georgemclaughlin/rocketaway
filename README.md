@@ -40,7 +40,7 @@ Abilities have fixed specifications and replace random traits on their experimen
 
 **Optional goal → Choose a goal**, in a gold card beside the flight goals above the rocket, shows the available credit rewards and offers two finite objectives per world and attempt, drawn from four equipment missions. New attempts mix lightweight or booster-free builds, side boosters, science capsules, and pointed fairings. One early and one later mission keep the same total reward budget; reloads and shop refreshes never reroll the pair. Existing attempts keep their original objectives. The selected goal stays visible in a mint card with its exact credit reward; completed goals show a checkmark. A new altitude milestone **or** completion of the selected contract avoids a miss; if neither succeeds, the flight uses one miss. Each contract pays once. Equipment eligibility is determined at ignition, and completed contracts cannot be used again for miss protection. Contract-aware previews distinguish a reachable contract from the next altitude goal. Three misses end the current attempt (shared across Earth–Moon, then per world); research and unlocked worlds survive.
 
-**☰ → Journey records → Flight journal** gives optional replay a purpose: collect **36 mission stamps**, earn **27 kit badges** by clearing each world with each starting kit, and save your fewest-launch winning rockets. Stamps survive losses and retries; a mission can still pay once on a later attempt, but its permanent stamp is collected only once. Each record includes the winning parts, seeded traits, research rank, and launch mass. Fewer launches win; lighter rockets break ties. Fresh Moon starts and carried arrivals have separate records, and only launches within that world count. The journal is view-only. Earlier progress remains unlocked; missing historical build records are not invented.
+**☰ → Journey records → Flight journal** gives optional replay a purpose: collect **36 mission stamps**, earn **27 kit badges** by clearing each world with each starting kit, and save your fewest-launch winning rockets. Stamps survive losses and retries; a mission can still pay once on a later attempt, but its permanent stamp is collected only once. Each record includes the winning parts, seeded traits, research rank, component calibrations and fitted tunings (when recorded), and launch mass. Fewer launches win; lighter rockets break ties. Fresh Moon starts and carried arrivals have separate records, and only launches within that world count. The journal is view-only. Earlier progress remains unlocked; missing historical build records are not invented.
 
 Prototype conditions version 4 uses Earth milestones of **2.5, 10, 25, 70, 160, and 240 km**, and Moon milestones of **350, 700, 1,100, 1,700, 2,400, and 3,200 km**. Later roguelite worlds use their established version 3 forces, targets, and starting grants with experimental equipment enabled. Their contracts target the second milestone with no boosters or with side boosters fitted, and the fourth with a science capsule or pointed fairing. The original campaign still starts version 3 runs; old runs retain their original conditions. Roguelite save version 5 protects departure funding and flight logs, and migrates versions 1/2/3/4 without changing existing flights, mission pairs, equipment pools, or economy. Older roguelite builds reject version 5 instead of discarding new progress. Unsupported saves are preserved with an export option instead of being overwritten.
 
@@ -101,7 +101,22 @@ In the menu, **End expedition** asks for confirmation. **Free Flight** lets you 
 
 Each completed expedition flight earns 1 research point, plus 2 per milestone cleared that flight and 4 for clearing a world for the first time. Even a miss earns a point. Ending a run manually does not. Rewards are settled once and remain through losses, world changes, and browser reloads.
 
-The lab highlights your current rocket and shows one next upgrade at a time, with before-and-after stats, its price, and the points you will have left. Starter parts are labeled for future rockets.
+The roguelite lab has **Engine, Tank, Nose, Boosters**, and **Kit perks** tabs. Each component has one permanent calibration (3 points) and two optional specializations (5 points each, after its calibration). Ownership is separate for each starting kit and carries across replacement parts: an engine upgrade works on Spark, Ember and experimental engines alike. The lab compares height at 110% launch power, fuel duration and total mass for your current compatible rocket.
+
+| Component | Calibration | Specialization A | Specialization B |
+| --- | --- | --- | --- |
+| Engine | +3% thrust | High-pressure feed: +12% thrust, −10% burn | Cruise feed: +12% burn, −8% thrust |
+| Tank | −5% tank dry mass | Light shell: −25% tank dry mass, −5% fuel and burn | Extended reservoir: +10% fuel and burn, +40% tank dry mass |
+| Nose | −5% section mass | Streamlined shell: −14% drag, +12% section mass | Minimal shell: −20% section mass, +16% drag |
+| Boosters | +4% impulse | High impulse: +12% impulse, +15% booster mass | Light casings: −20% booster mass, −10% impulse |
+
+Calibration applies immediately to a compatible idle rocket. Unlocking a specialization never fits it: choose **Preview in hangar**, compare the complete build, then **Fit tuning** or **Buy & fit build**. The part **Tune** button lets you change between owned specializations and Standard for free. Only one tuning per component is fitted. Standard keeps the calibration. Switching sections retains all pending part/tuning choices; Discard, reload, and Launch fitted clear previews without spending. Bare booster mounts receive no booster benefit.
+
+Component modifiers apply to seeded component statistics before assembly and existing kit bonuses. Fuel-capacity choices alter both fuel mass and duration; Drop tank research also scales its discarded dry structure. Momentum's ramp, Reserve tank's separation requirement, and Return boosters' qualifying 90-credit recovery remain intact. Flights and the Flight log identify fitted tunings; journal winning builds retain them.
+
+New roguelite rockets use component research version 1. Existing rockets without this version keep their previous physics until a fresh rocket; the lab labels their component purchases for future rockets. Interrupted flights retain their ignition configuration. Save version 6 protects these fields from older builds without changing storage keys. Original campaign and Free Flight retain their prior research behavior.
+
+**Kit perks** keeps the previous permanent ranks, prices and benefits below. Starter parts are labeled for future rockets.
 
 Each starting build has five permanent research ranks, costing 3, 5, 8, 12, and 18 research points. Spend on one specialization or spread research across the builds you use. Stagehand and Scientist research opens with the corresponding starting build.
 
@@ -114,6 +129,10 @@ Each starting build has five permanent research ranks, costing 3, 5, 8, 12, and 
 Bonuses are additive across ranks and apply only when flying that build. A purchase updates the current matching rocket’s physics and estimates immediately. Starting credits and parts apply when the next rocket is created, so research never overwrites fitted parts mid-run. The starting-build illustrations and rank labels reflect those permanent unlocks. Higher-tier starting parts replace the earlier part in the same slot, while earlier unlocked parts remain owned for free refitting.
 
 Existing saves receive a one-time research balance of 2 research points per recorded milestone plus 4 per recorded win. Reloading does not repeat this grant. **Reset entire game** also clears research; ending a single expedition keeps it. Free Flight keeps its existing progression and is unaffected.
+
+Component balance is reproducible with `node checks/component-research-audit.js` (`branches`, `openings`, `earned`, or `later` selects one audit). All 120 sampled Earth–Moon/fresh-Moon earned cases completed, with component research bought from actual simulated earnings. Full Earth–Moon runs took 4–9 launches with components versus 4–8 without. At perfect timing, exhaustive affordable opening builds across five seeds, three kits, nine worlds and ranks 0/5 could clear a world in 14/270 cases without components, 26/270 with calibrations, and 57/270 with all component research; the max-kit-rank subset was 11/135, 23/135 and 54/135. No Earth opening cleared, and rank-0 clear cases did not increase. Fully researched later-world replays are deliberately faster. These are simulations, not player telemetry or proof of enjoyment. All 210 later-world cases with components pre-owned completed in 2–5 launches using earned equipment credits; that refit policy produced no first-launch clears. Independent browser play also checked four launches with earned purchases from zero research.
+
+`checks/component-lab.playwright.js` and `checks/component-build.playwright.js` cover research scope, purchases, explicit fitting, reloads, tuned flight parity, and nine viewport sizes. All tests must use isolated saves.
 
 ## Free Flight: build and fly
 
@@ -160,7 +179,7 @@ No build step, dependency installation, external assets, API keys, or backend ar
 - `expedition-ui.js` — world selection, starting rockets, and saved-flight recovery.
 - `worlds.js` — real-world route, scenery palettes, destination names, and progression strip.
 - `travel.js` — skippable, reduced-motion-aware travel celebration.
-- `research.js` — permanent research economy, rank effects, starting blueprints, and migration.
+- `research.js`, `component-research.js` — permanent research economy, scoped component calibrations/tunings, rank effects, starting blueprints, and migration.
 - `research-ui.js` — optional research lab and purchase feedback.
 - `journey.js` — the shared milestone map, named stops, and live journey progress.
 - `modifiers.js` — legacy module/route effects retained for existing saves.

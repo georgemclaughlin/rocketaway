@@ -1,26 +1,27 @@
-import { createFlightAudio } from './flight-audio.js?v=flight-feel-1';
-import { flightAbilityLabel } from './experimental.js?v=flight-feel-1';
-import { drawTerrain } from './world-scenery.js?v=flight-feel-1';
-import { createScienceUI } from './science-ui.js?v=flight-feel-1';
-import { environmentLabel } from './science-data.js?v=flight-feel-1';
-import { missionJournalMarkup } from './mission-journal-ui.js?v=flight-feel-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=flight-feel-1';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=flight-feel-1';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=flight-feel-1';
-import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=flight-feel-1';
-import { MODULES } from './modifiers.js?v=flight-feel-1';
-import { createExpeditionUI } from './expedition-ui.js?v=flight-feel-1';
-import { createBuilder, rocketArt } from './builder.js?v=flight-feel-1';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=flight-feel-1';
-import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=flight-feel-1';
-import { createTravel } from './travel.js?v=flight-feel-1';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=flight-feel-1';
-import { launchRating } from './launch-feedback.js?v=flight-feel-1';
-import { FAST_FORWARD_SECONDS, fastForwardRate, presentationRate, advanceFlight } from './flight-playback.js?v=flight-feel-1';
-import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=flight-feel-1';
-import { kitDetails } from './kit-details.js?v=flight-feel-1';
-import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, contractsFor, contractReady } from './prototype-run.js?v=flight-feel-1';
-import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=flight-feel-1';
+import { componentNode } from './component-research.js?v=component-research-1';
+import { createFlightAudio } from './flight-audio.js?v=component-research-1';
+import { flightAbilityLabel } from './experimental.js?v=component-research-1';
+import { drawTerrain } from './world-scenery.js?v=component-research-1';
+import { createScienceUI } from './science-ui.js?v=component-research-1';
+import { environmentLabel } from './science-data.js?v=component-research-1';
+import { missionJournalMarkup } from './mission-journal-ui.js?v=component-research-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=component-research-1';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=component-research-1';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=component-research-1';
+import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=component-research-1';
+import { MODULES } from './modifiers.js?v=component-research-1';
+import { createExpeditionUI } from './expedition-ui.js?v=component-research-1';
+import { createBuilder, rocketArt } from './builder.js?v=component-research-1';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=component-research-1';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=component-research-1';
+import { createTravel } from './travel.js?v=component-research-1';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=component-research-1';
+import { launchRating } from './launch-feedback.js?v=component-research-1';
+import { FAST_FORWARD_SECONDS, fastForwardRate, presentationRate, advanceFlight } from './flight-playback.js?v=component-research-1';
+import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=component-research-1';
+import { kitDetails } from './kit-details.js?v=component-research-1';
+import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, contractsFor, contractReady } from './prototype-run.js?v=component-research-1';
+import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=component-research-1';
 const prototype = new URLSearchParams(location.search).get('campaign') !== 'original';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
@@ -66,7 +67,7 @@ const builder = createBuilder({ getProgram: () => program, getReserved:()=>exped
   announce(`${part.name} fitted. Estimated height ${(part.previousHeight/1000).toFixed(1)} to ${(part.height/1000).toFixed(1)} kilometers at 110% power. ${program.credits} credits remaining.`);
 } });
 const travelToNextWorld = createTravel(() => { if(arrivePrototype(expeditionSession)){program=expeditionSession.active.program;persist();workshop();announce('Arrived at the Moon. Your rocket and credits are kept. No air drag: rethink your build.');return;} workshop(); announce(expeditionSession.active?.difficulty===8 ? 'Tau Ceti reached. Your journey is complete. Take a moment to enjoy it.' : `Arrived at ${destinationFor(expeditionSession.active).name}. Choose your starting rocket.`); });
-const researchUI=createResearchUI({getSession:()=>expeditionSession,getSelectedKit:()=>expeditionUI.getSelectedKit(),canOpen:()=>mode==='workshop'&&expeditionSession.mode==='expedition'&&(!expeditionSession.active||['build','won','lost'].includes(expeditionSession.active.status)),onPurchase:()=>{persist();renderWorkshop();tone(820,.12);}});
+const researchUI=createResearchUI({prototype,onPreviewTuning:(slot,id)=>{if(builder.previewTuning(slot,id)){showScreen('workshop');$('part-fit').focus({preventScroll:true});}},getSession:()=>expeditionSession,getSelectedKit:()=>expeditionUI.getSelectedKit(),canOpen:()=>mode==='workshop'&&expeditionSession.mode==='expedition'&&(!expeditionSession.active||['build','won','lost'].includes(expeditionSession.active.status)),onPurchase:()=>{persist();renderWorkshop();tone(820,.12);}});
 $('research-open').addEventListener('click',()=>researchUI.open());
 $('expedition-footer').addEventListener('click',event=>{if(event.target.closest('#research-hub'))researchUI.open();});
 $('research-menu').addEventListener('click',()=>{$('menu-dialog').close();researchUI.open();});
@@ -197,7 +198,7 @@ function syncScreens() {
   $('run-expeditions').setAttribute('aria-pressed', expeditionMode);
   $('reset-all').disabled = mode !== 'workshop';
   const data=expeditionSession.profile.research.data;
-  const researchButton=researchButtonState(expeditionSession.profile,expeditionUI.getSelectedKit());
+  const researchButton=researchButtonState(expeditionSession.profile,expeditionUI.getSelectedKit(),prototype);
   for(const id of ['research-open','research-hub','research-menu']){
     if(!$(id))continue;
     $(id).disabled=mode!=='workshop'||!expeditionMode||!!(run&&!['build','won','lost'].includes(run.status));
@@ -778,7 +779,8 @@ function rocket(x, y, scale, rotation, boosting = false, time = ambientTime, fla
   ctx.save(); ctx.translate(x, y); ctx.rotate(rotation); ctx.scale(scale, scale);
   if (flameEnabled) {
     const ramp=flight?.momentum&&flight.phase==='powered' ? .65+1.25*Math.min(1,flight.time/10) : 1;
-    const length = Math.min(88,(boosting ? 66 : 48)*ramp) * (1 + Math.sin(time * 25) * .10);
+    const tuningFlame=program.componentResearchVersion===1 ? (program.tunings?.engine==='pressure-feed' ? 1.12 : program.tunings?.engine==='cruise-feed' ? .92 : 1) : 1;
+    const length = Math.min(88,(boosting ? 66 : 48)*ramp*tuningFlame) * (1 + Math.sin(time * 25) * .10);
     ctx.fillStyle = '#f19a6f33'; ctx.beginPath(); ctx.ellipse(0, 53, 23, length * .7, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = flight&&flight.time<flight.surgeUntil?'#91e6db':parts.engine.ability==='endurance'?'#e8b66d':'#ee9a70'; ctx.beginPath(); ctx.moveTo(-13, 34); ctx.quadraticCurveTo(-15, 54, 0, 35 + length); ctx.quadraticCurveTo(15, 54, 13, 34); ctx.fill();
     ctx.fillStyle = '#ffe9a4'; ctx.beginPath(); ctx.moveTo(-7, 34); ctx.lineTo(0, 35 + length * .6); ctx.lineTo(7, 34); ctx.fill();
@@ -935,7 +937,7 @@ function frame(now) {
       detachedHardware=detachedHardware.slice(-4);
     }
     updateFlightHud();
-    if(flight.rulesVersion===1){const label=flightAbilityLabel(flight);$('ability-flight').hidden=!label;$('ability-flight').textContent=label;}
+    if(flight.rulesVersion===1){const tuning=program.componentResearchVersion===1?componentNode(program.tunings?.engine)?.name:'';const label=[flightAbilityLabel(flight),tuning].filter(Boolean).join(' · ');$('ability-flight').hidden=!label;$('ability-flight').textContent=label;}
     checkFlightMoments();
     if (flight.done) finish();
   }

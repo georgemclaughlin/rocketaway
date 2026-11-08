@@ -61,9 +61,9 @@ export function experimentalAssembly(stats,parts,program) {
   if(program.equipmentVersion===2) {
     result.equipmentVersion=2;
     result.momentum=parts.engine.ability==='momentum';
-    // Research modifies all dry mass equally, including the detachable section.
+    // Tank research scales the detachable structure before kit-wide dry-mass research.
     const baseDry=.5+Object.values(parts).reduce((sum,part)=>sum+part.mass,0)-parts.tank.fuelMass;
-    result.dropMass=parts.tank.ability==='drop'?.20*stats.dryMass/baseDry:0;
+    result.dropMass=parts.tank.ability==='drop'?.20*(parts.tank.componentDryFactor??1)*stats.dryMass/baseDry:0;
     result.recovery=parts.boosters.ability==='recovery'?90:0;
   }
   return result;

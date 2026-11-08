@@ -1,5 +1,5 @@
-import { EARTH_LAYERS, SCIENCE_WORLDS, GRAVITY_SOURCE, earthLayerAt } from './science-data.js?v=flight-feel-1';
-import { WORLDS, TAU_CETI, worldMarkup, flightConditions } from './worlds.js?v=flight-feel-1';
+import { EARTH_LAYERS, SCIENCE_WORLDS, GRAVITY_SOURCE, earthLayerAt } from './science-data.js?v=component-research-1';
+import { WORLDS, TAU_CETI, worldMarkup, flightConditions } from './worlds.js?v=component-research-1';
 export function createScienceUI() {
   const $=id=>document.getElementById(id);
   let world=0,layer=0,legacyWorld=null;

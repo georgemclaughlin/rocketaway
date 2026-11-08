@@ -1,15 +1,15 @@
-import { hasNextWorldOffer } from './campaign-save.js?v=flight-feel-1';
-import { fundingFor } from './launch-funding.js?v=flight-feel-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=flight-feel-1';
-import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=flight-feel-1';
-import { altitudeLabel } from './journey.js?v=flight-feel-1';
-import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=flight-feel-1';
-import { newProgram } from './engine.js?v=flight-feel-1';
-import { fittedParts } from './parts.js?v=flight-feel-1';
-import { rocketArt } from './builder.js?v=flight-feel-1';
-import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=flight-feel-1';
-import { researchButtonState } from './research-ui.js?v=flight-feel-1';
-import { kitDetails } from './kit-details.js?v=flight-feel-1';
+import { hasNextWorldOffer } from './campaign-save.js?v=component-research-1';
+import { fundingFor } from './launch-funding.js?v=component-research-1';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=component-research-1';
+import { CONDITIONS_VERSION, flightConditions } from './worlds.js?v=component-research-1';
+import { altitudeLabel } from './journey.js?v=component-research-1';
+import { KITS, milestoneHeight, startExpedition, expeditionLoadout } from './expeditions.js?v=component-research-1';
+import { newProgram } from './engine.js?v=component-research-1';
+import { fittedParts } from './parts.js?v=component-research-1';
+import { rocketArt } from './builder.js?v=component-research-1';
+import { WORLDS, TAU_CETI, worldFor, destinationFor, worldRoute, worldMarkup } from './worlds.js?v=component-research-1';
+import { researchButtonState } from './research-ui.js?v=component-research-1';
+import { kitDetails } from './kit-details.js?v=component-research-1';
 
 function kitArt(item,profile) {
   return rocketArt(kitDetails(item,profile).parts);
@@ -89,7 +89,7 @@ export function createExpeditionUI({ getSession, onBuild, onResume, onExplore, s
         const details=kitDetails(item,profile);
         return `<button class="expedition-card kit-card" data-kit="${item.id}" aria-pressed="${kit===item.id}"><span class="card-icon kit-rocket">${kitArt(item,profile)}</span><strong>${item.name}${loadout.rank?` <small>R${loadout.rank}</small>`:''}<span class="kit-check" aria-hidden="true">${kit===item.id?' ✓':''}</span></strong><p><span class="kit-equipment">${details.equipment}</span><span class="kit-benefit">${details.benefit}</span></p><b>${loadout.credits} credits</b></button>`;
       }).join('');
-      const researchButton=researchButtonState(profile,kit);
+      const researchButton=researchButtonState(profile,kit,prototype);
       $('expedition-footer').innerHTML=`<p class="kit-unlock">${flightConditions(difficulty).grant?`Starting credits include ${flightConditions(difficulty).grant} world funding.`:ended?'Fresh rocket. Your research stays yours.':'Choose parts, then test your build. Tau Ceti awaits.'}</p><div class="start-actions"><button id="research-hub" class="research-action ${researchButton.available?'research-ready':''}" data-research-state="${researchButton.state}" aria-label="${researchButton.ariaLabel}">${researchButton.label}</button><button id="run-start" class="primary">Build rocket ↗</button></div>`;
       if(prototype) {
         $('expedition-step').textContent=profile.campaignComplete?'JOURNEY COMPLETE · OPTIONAL REPLAY':`ROAD TO TAU CETI · WORLD ${difficulty+1} / 9`;

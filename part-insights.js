@@ -1,5 +1,5 @@
-import { partForProgram, partById } from './parts.js?v=flight-feel-1';
-import { flightConditions } from './worlds.js?v=flight-feel-1';
+import { partForProgram, partById } from './parts.js?v=component-research-1';
+import { flightConditions } from './worlds.js?v=component-research-1';
 
 const word=(delta,more,less)=>delta>=0?more:less;
 export function partInsight(program,id) {

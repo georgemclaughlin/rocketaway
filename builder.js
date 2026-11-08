@@ -1,16 +1,17 @@
-import { flightConditions } from './worlds.js?v=flight-feel-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=flight-feel-1';
-import { createFlight, stepFlight } from './engine.js?v=flight-feel-1';
-import { partInsight } from './part-insights.js?v=flight-feel-1';
-import { abilityDescription } from './experimental.js?v=flight-feel-1';
-import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=flight-feel-1';
-import { rocketArt } from './rocket-art.js?v=flight-feel-1';
-import { planBuild, fitBuild } from './build-plan.js?v=flight-feel-1';
+import { COMPONENT_RESEARCH, componentNode } from './component-research.js?v=component-research-1';
+import { flightConditions } from './worlds.js?v=component-research-1';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=component-research-1';
+import { createFlight, stepFlight } from './engine.js?v=component-research-1';
+import { partInsight } from './part-insights.js?v=component-research-1';
+import { abilityDescription } from './experimental.js?v=component-research-1';
+import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=component-research-1';
+import { rocketArt } from './rocket-art.js?v=component-research-1';
+import { planBuild, fitBuild } from './build-plan.js?v=component-research-1';
 export { rocketArt };
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
-  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1)+'|'+(program.rulesVersion||0)+'|'+(program.equipmentVersion||1);
+  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1)+'|'+(program.rulesVersion||0)+'|'+(program.equipmentVersion||1)+'|'+(program.componentResearchVersion||0)+'|'+(program.componentResearch||[]).slice().sort().join(',')+'|'+PART_SLOTS.map(slot=>program.tunings?.[slot.id]||'standard').join('/');
   if (estimates.has(key)) return estimates.get(key);
   const flight = createFlight(program.levels, quality, { plan: 'explorer', assembly: assemblySpecs(program) });
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);
@@ -58,8 +59,8 @@ function partArt(part) {
 
 export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => null, getTargetLabel=()=>'', getReserved=()=>null, onReserve=()=>{} }) {
   const $ = id => document.getElementById(id);
-  let slotId = 'engine', candidateId = null, shelfSlot = null, choices = {}, draftProgram = null, draftFlight = null;
-  function discard() { choices = {}; candidateId = null; render(); }
+  let slotId = 'engine', candidateId = null, shelfSlot = null, choices = {}, tuningChoices = {}, draftProgram = null, draftFlight = null;
+  function discard() { choices = {}; tuningChoices = {}; candidateId = null; render(); }
   function keepPreviewVisible() {
     const shelf=$('part-shelf'),selected=shelf.querySelector('[aria-pressed="true"]');
     if(!selected||!shelf.clientWidth)return;
@@ -72,7 +73,7 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
   function render() {
     const program = getProgram(), conditions=flightConditions(program.launchWorld,program.conditionsVersion??1);
     if (draftProgram !== program || draftFlight !== program.flights) {
-      choices = {}; candidateId = null; draftProgram = program; draftFlight = program.flights;
+      choices = {}; tuningChoices = {}; candidateId = null; draftProgram = program; draftFlight = program.flights;
     }
     if (partById(candidateId)?.slot !== slotId) candidateId = program.parts.equipped[slotId];
     const prototype=program.rulesVersion===1;
@@ -80,13 +81,13 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     const options = catalogFor(program).filter(part => part.slot === slotId && (!prototype||available(part)));
     document.querySelector('.part-picker').dataset.unified=prototype;
     if(!options.some(p=>p.id===candidateId))candidateId=options[0]?.id||program.parts.equipped[slotId];
-    let plan = prototype ? planBuild(program, choices) : null;
-    if (prototype && !plan) { choices = {}; plan = planBuild(program); candidateId = program.parts.equipped[slotId]; }
+    let plan = prototype ? planBuild(program, choices, tuningChoices) : null;
+    if (prototype && !plan) { choices = {}; tuningChoices = {}; plan = planBuild(program); candidateId = program.parts.equipped[slotId]; }
     const draft = plan?.program;
     const candidate = partForProgram(program, candidateId), preview = prototype
       ? { program: draft, height: estimateHeight(draft), previousHeight: estimateHeight(program), stats: assemblySpecs(draft), previousStats: assemblySpecs(program) }
       : previewPart(program, candidateId);
-    const parts = fittedParts(prototype ? draft : program), changed = prototype ? plan.changes.length > 0 : program.parts.equipped[slotId] !== candidateId;
+    const parts = fittedParts(prototype ? draft : program), changed = prototype ? plan.changeCount > 0 : program.parts.equipped[slotId] !== candidateId;
     const equipped = program.parts.equipped[slotId] === candidateId, owned = program.parts.owned.includes(candidateId);
     const shelfKey=slotId+'/'+options.map(part=>part.id).join('/');
     if (shelfSlot !== shelfKey) {
@@ -102,14 +103,14 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
       button.classList.toggle('affordable', !unavailable && !program.parts.owned.includes(part.id) && part.price <= program.credits);
       button.disabled = !canEdit();
     }
-    const artKey = PART_SLOTS.map(slot => parts[slot.id].id).join('/') + '/' + slotId + '/' + (plan?.changes.join('/') || '');
+    const artKey = PART_SLOTS.map(slot => parts[slot.id].id).join('/') + '/' + slotId + '/' + (plan?.changes.join('/') || '') + '/' + (plan?.tuningChanges.join('/') || '');
     if ($('assembly-art').dataset.key !== artKey) {
-      $('assembly-art').innerHTML = rocketArt(parts, slotId, prototype && changed, plan?.changes || []);
+      $('assembly-art').innerHTML = rocketArt(parts, slotId, prototype && changed, [...(plan?.changes || []),...(plan?.tuningChanges || []).map(slot=>parts[slot].id)]);
       $('assembly-art').dataset.key = artKey;
     }
     $('assembly-stage').dataset.workbench = prototype;
     $('assembly-stage').dataset.planning = prototype && changed;
-    $('build-state').textContent = changed && prototype ? `PREVIEW · ${plan.changes.length} ${plan.changes.length === 1 ? 'PART' : 'PARTS'}` : 'YOUR ROCKET';
+    $('build-state').textContent = changed && prototype ? plan.tuningChanges.length ? `PREVIEW · ${plan.changeCount} CHANGE${plan.changeCount===1?'':'S'}` : `PREVIEW · ${plan.changes.length} ${plan.changes.length === 1 ? 'PART' : 'PARTS'}` : 'YOUR ROCKET';
     $('build-reset').hidden = !prototype || !changed;
     $('build-reset').disabled = !canEdit();
     $('build-state').parentElement.hidden = !prototype;
@@ -117,7 +118,7 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     for (const button of document.querySelectorAll('button[data-build-slot]')) {
       button.setAttribute('aria-pressed', button.dataset.buildSlot === slotId);
       button.querySelector('strong').textContent = parts[button.dataset.buildSlot].name;
-      const pending = prototype && plan.changes.includes(parts[button.dataset.buildSlot].id);
+      const pending = prototype && (plan.changes.includes(parts[button.dataset.buildSlot].id) || plan.tuningChanges.includes(button.dataset.buildSlot));
       button.dataset.pending = pending;
       button.setAttribute('aria-label', `${button.querySelector('span').textContent}: ${parts[button.dataset.buildSlot].name}, ${pending ? 'preview, not fitted' : 'equipped'}`);
       button.disabled = !canEdit();
@@ -150,15 +151,16 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     $('candidate-tradeoff').textContent = preview.stats.thrust/(preview.stats.gravity??.5) < 1 ? 'Too heavy for this engine. Try a lighter tank.' : slotId==='aero'&&conditions.drag===0?`No air drag here · ${weight.toFixed(2)}t total`:equipped ? `${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total` : `${preview.previousStats.burn.toFixed(1)} → ${burn.toFixed(1)}s fuel · ${weight.toFixed(2)}t total`;
     const stocked = !Array.isArray(program.stock)||program.stock.includes(candidateId)||owned;
     $('part-fit').textContent = !stocked ? 'Not stocked here' : equipped ? 'Fitted ✓' : owned ? 'Fit part · free' : program.credits >= candidate.price ? `Buy & fit · ✦ ${candidate.price}` : `Need ✦ ${candidate.price-program.credits} more`;
-    if (prototype) $('part-fit').textContent = !changed ? 'Fitted ✓' : !plan.affordable ? `Need ✦ ${plan.cost-program.credits} more` : plan.cost ? `Buy & fit${plan.changes.length > 1 ? ' build' : ''} · ✦ ${plan.cost}` : `Fit ${plan.changes.length > 1 ? 'build' : 'part'} · free`;
+    if (prototype) $('part-fit').textContent = !changed ? 'Fitted ✓' : !plan.affordable ? `Need ✦ ${plan.cost-program.credits} more` : plan.cost ? `Buy & fit${plan.changeCount > 1 ? ' build' : ''} · ✦ ${plan.cost}` : `Fit ${plan.changeCount > 1 ? 'build' : plan.tuningChanges.length ? 'tuning' : 'part'} · free`;
     $('shop-launch').firstChild.textContent = prototype && changed ? 'Launch fitted ' : 'Launch rocket ';
     $('shop-launch').title = prototype && changed ? 'Launch your fitted rocket. Unpurchased preview changes are discarded.' : 'Launch your fitted rocket';
     $('part-info-title').textContent = candidate.name;
     $('part-info-description').textContent = candidate.detail + (candidate.trait ? ` This run: ${candidate.trait.name.toLowerCase()} — ${candidate.trait.detail}.` : '');
-    const order = prototype && changed ? `Preview changes: ${plan.changes.map(id => partById(id).name).join(' + ')}. Total: ${plan.cost} credits. ` : '';
+    const changeNames = prototype ? [...plan.changes.map(id => partById(id).name),...plan.tuningChanges.map(slot=>componentNode(draft.tunings[slot])?.name || `${PART_SLOTS.find(s=>s.id===slot).name}: standard`)] : [];
+    const order = prototype && changed ? `Preview changes: ${changeNames.join(' + ')}. Total: ${plan.cost} credits. ` : '';
     $('part-info-stats').textContent = `${order}${$('candidate-state').textContent}. ${prototype ? 'Complete preview' : 'With this part'}: ${burn.toFixed(1)}s fuel, ${weight.toFixed(2)} tonnes. Height estimates use 110% launch power; actual timing affects the result. ${flightConditions(program.launchWorld,program.conditionsVersion??1).tip}`;
     $('part-fit').disabled = !canEdit() || (prototype ? !changed || !plan.affordable : !stocked || equipped || (!owned && program.credits < candidate.price));
-    $('part-fit').title = prototype && changed ? `Fit ${plan.changes.map(id => partById(id).name).join(', ')}. Total cost: ${plan.cost} credits.` : '';
+    $('part-fit').title = prototype && changed ? `Fit ${changeNames.join(', ')}. Total cost: ${plan.cost} credits.` : '';
     $('part-reservation').hidden=!candidate.ability||owned||!stocked;
     $('reserve-part').textContent=getReserved()===candidateId?'Reserved · release offer':'Reserve offer · free';
     $('reserve-part').setAttribute('aria-pressed',getReserved()===candidateId);
@@ -182,6 +184,18 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
       line.textContent=`${effect.active?'✓':'○'} ${effect.part}: ${effect.active?effect.detail:effect.reason}.`;
       line.dataset.active=effect.active;return line;
     }));
+    const section = COMPONENT_RESEARCH.find(section=>section.id===slotId);
+    const availableTunings = program.componentResearchVersion===1 ? section?.tunings.filter(node=>program.componentResearch?.includes(node.id)) || [] : [];
+    $('part-tuning').hidden = !availableTunings.length;
+    $('part-info').textContent = availableTunings.length ? 'Tune' : 'Info';
+    $('part-info').setAttribute('aria-label',availableTunings.length ? 'Part details and tuning' : 'Part details');
+    if (availableTunings.length) {
+      const selectedTuning=draft.tunings[slotId]||'standard', fittedTuning=program.tunings?.[slotId]||'standard';
+      $('part-tuning-title').textContent = `${section.name} tuning`;
+      $('part-tuning-options').innerHTML=[{id:'standard',name:'Standard'},...availableTunings].map(node=>`<button class="small-button" data-tuning="${node.id}" aria-pressed="${node.id===selectedTuning}">${node.name}<small>${node.id===fittedTuning?'Fitted':node.id===selectedTuning?'Preview':'Owned · free'}</small></button>`).join('');
+      $('part-tuning-note').textContent = `${componentNode(selectedTuning)?.description || 'Uses your permanent calibration without a specialization.'} ${slotId==='boosters'&&!parts.boosters.kick?'No effect without side boosters. ':''}Preview only. Use Fit in the hangar to commit.`;
+      if ((selectedTuning!=='standard'||plan.tuningChanges.includes(slotId)) && $('candidate-description').dataset.warning!=='true') $('candidate-description').textContent = `${componentNode(selectedTuning)?.name || 'Standard tuning'}: ${componentNode(selectedTuning)?.description || 'Calibration only.'}`;
+    }
     requestAnimationFrame(keepPreviewVisible);
   }
 
@@ -207,10 +221,10 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
     const program = getProgram();
     const previousHeight = estimateHeight(program);
     if (program.rulesVersion === 1) {
-      const fitted = fitBuild(program, choices);
+      const fitted = fitBuild(program, choices, tuningChoices);
       if (!fitted) return;
-      choices = {};
-      onFit({ name: fitted.changes.length > 1 ? `${fitted.changes.length}-part build` : partById(fitted.changes[0]).name, previousHeight, height: estimateHeight(program) });
+      choices = {}; tuningChoices = {};
+      onFit({ name: fitted.changeCount > 1 ? `${fitted.changeCount}-change build` : fitted.tuningChanges.length ? componentNode(program.tunings[fitted.tuningChanges[0]])?.name || 'Standard tuning' : partById(fitted.changes[0]).name, previousHeight, height: estimateHeight(program) });
     } else {
       if (!fitPart(program, candidateId)) return;
       onFit({ ...partById(candidateId), previousHeight, height: estimateHeight(program) });
@@ -219,5 +233,13 @@ export function createBuilder({ getProgram, canEdit, onFit, getTarget = () => nu
   });
   $('reserve-part')?.addEventListener('click',()=>{if(canEdit()){onReserve(getReserved()===candidateId?null:candidateId);render();}});
   $('build-reset').addEventListener('click', () => { if (canEdit()) discard(); });
-  return { render, selectSlot, discard };
+  function previewTuning(slot,id) {
+    if(!canEdit() || !planBuild(getProgram(),choices,{...tuningChoices,[slot]:id}))return false;
+    tuningChoices[slot]=id;selectSlot(slot);return true;
+  }
+  $('part-tuning-options').addEventListener('click',event=>{
+    const button=event.target.closest('[data-tuning]');
+    if(button&&previewTuning(slotId,button.dataset.tuning))$('part-tuning-options').querySelector(`[data-tuning="${button.dataset.tuning}"]`)?.focus();
+  });
+  return { render, selectSlot, discard, previewTuning };
 }

@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=flight-feel-1">
-  <script type="module" src="./game.js?v=flight-feel-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=component-research-1">
+  <script type="module" src="./game.js?v=component-research-1"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -112,7 +112,7 @@
     <p class="science-sources"><a id="science-source" target="_blank" rel="noopener noreferrer">NASA facts ↗</a><a id="science-gravity-source" target="_blank" rel="noopener noreferrer">NASA gravity data ↗</a></p>
     <p class="science-note">Real space facts. Flight physics, altitude goals and travel times are simplified for play.</p>
   </dialog>
-  <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><div id="part-info-effects"></div><div id="part-reservation" hidden><p>Keep this offer in the shop after your next flight. Reserving is free and does not buy or fit the part. You can keep one offer.</p><button id="reserve-part" class="small-button" aria-pressed="false">Reserve offer</button></div><button id="part-info-close" class="primary">Back to parts</button></dialog>
+  <dialog id="part-dialog" class="reset-dialog" aria-labelledby="part-info-title"><h2 id="part-info-title"></h2><p id="part-info-description"></p><p id="part-info-stats"></p><div id="part-info-effects"></div><section id="part-tuning" hidden aria-labelledby="part-tuning-title"><h3 id="part-tuning-title"></h3><div id="part-tuning-options" role="group" aria-label="Preview a component tuning"></div><p id="part-tuning-note"></p></section><div id="part-reservation" hidden><p>Keep this offer in the shop after your next flight. Reserving is free and does not buy or fit the part. You can keep one offer.</p><button id="reserve-part" class="small-button" aria-pressed="false">Reserve offer</button></div><button id="part-info-close" class="primary">Back to parts</button></dialog>
   <dialog id="flight-log-dialog" class="reset-dialog reference-dialog" aria-labelledby="flight-log-title">
     <div class="menu-heading"><div><div class="eyebrow">YOUR BUILD AT WORK</div><h2 id="flight-log-title">Flight log</h2></div><button id="flight-log-close" class="small-button" autofocus>Back</button></div>
     <p id="flight-log-comparison"></p><div id="flight-log-stats" class="flight-log-stats"></div><div id="flight-log-effects"></div><p id="flight-log-earnings"></p><p id="flight-log-funding"></p>
@@ -128,6 +128,7 @@
     <div class="research-header"><div><div class="eyebrow">PERMANENT ROCKET UPGRADES</div><h2 id="research-title">Research lab</h2></div><button id="research-close" class="small-button">Back</button></div>
     <div class="research-wallet"><strong id="research-balance">You have 0 research points</strong><span>Upgrades last across worlds and retries.</span></div>
     <div class="research-selector"><span>Choose a rocket to improve</span><div id="research-tabs" role="group" aria-label="Rocket build to research"></div></div>
+    <div id="research-component-controls" hidden><div id="research-sections" role="group" aria-label="Rocket component to research"></div><div id="research-nodes" role="group" aria-label="Component upgrade choices"></div></div>
     <section class="research-offer" aria-labelledby="research-track-title">
       <div class="research-track-heading"><span id="research-offer-label">NEXT UPGRADE</span><span id="research-rank"></span></div>
       <h3 id="research-track-title"></h3><p id="research-benefit"></p><ol id="research-steps"></ol><p id="research-timing"></p>
@@ -135,6 +136,7 @@
     <p id="research-earning">Earn points: flight +1 · milestone +2 · new world +4</p>
     <p id="research-cost"></p><div id="research-status" role="status" aria-live="polite"></div>
     <button id="research-buy" class="primary"></button>
+    <button id="research-preview" class="primary" hidden>Preview in hangar →</button>
   </dialog>
   <dialog id="travel-dialog" aria-labelledby="travel-title" aria-describedby="travel-caption">
     <div class="eyebrow">ROAD TO TAU CETI</div><h2 id="travel-title"></h2>

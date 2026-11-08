@@ -1,7 +1,8 @@
-import { modifyAssembly } from './modifiers.js?v=flight-feel-1';
-import { researchModifiers } from './research.js?v=flight-feel-1';
-import { flightConditions } from './worlds.js?v=flight-feel-1';
-import { EXPERIMENTAL_PARTS, experimentalAssembly, experimentalCatalog } from './experimental.js?v=flight-feel-1';
+import { resolveComponentParts } from './component-research.js?v=component-research-1';
+import { modifyAssembly } from './modifiers.js?v=component-research-1';
+import { researchModifiers } from './research.js?v=component-research-1';
+import { flightConditions } from './worlds.js?v=component-research-1';
+import { EXPERIMENTAL_PARTS, experimentalAssembly, experimentalCatalog } from './experimental.js?v=component-research-1';
 export const PART_SLOTS = [
   { id: 'aero', name: 'Nose cone', icon: '◇' },
   { id: 'tank', name: 'Fuel tank', icon: '▥' },
@@ -91,7 +92,7 @@ export function fittedParts(program) {
   return Object.fromEntries(PART_SLOTS.map(slot=>[slot.id,partForProgram(program,program.parts.equipped[slot.id])]));
 }
 export function assemblySpecs(program) {
-  const parts=fittedParts(program), research=researchModifiers(program), baseMass=.5+Object.values(parts).reduce((sum,part)=>sum+part.mass,0);
+  const parts=resolveComponentParts(program,fittedParts(program)), research=researchModifiers(program), baseMass=.5+Object.values(parts).reduce((sum,part)=>sum+part.mass,0);
   const mass=(baseMass-parts.tank.fuelMass)*research.dry+parts.tank.fuelMass,conditions=flightConditions(program.launchWorld,program.conditionsVersion??1);
   return experimentalAssembly(modifyAssembly({thrust:parts.engine.thrust/mass,burn:parts.tank.burn*parts.engine.efficiency*research.burn,drag:parts.aero.drag*conditions.drag,gravity:conditions.gravity,kick:parts.boosters.kick/mass*research.kick*(program.conditionsVersion>=2?4:1),
     mass,dryMass:mass-parts.tank.fuelMass,fuelMass:parts.tank.fuelMass,stageMass:parts.boosters.mass*.8*research.dry,pay:parts.aero.pay*research.pay,

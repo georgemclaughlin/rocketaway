@@ -1,18 +1,19 @@
 // Roguelite journey. Existing flights retain their physics and equipment.
-import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=flight-feel-1';
-import { PARTS, assemblySpecs, catalogFor } from './parts.js?v=flight-feel-1';
-import { experimentalCatalog, companionOffers, EQUIPMENT_VERSION, ABILITY_EVENTS } from './experimental.js?v=flight-feel-1';
-import { awardResearch } from './research.js?v=flight-feel-1';
-import { recordFlightPeak } from './flight-records.js?v=flight-feel-1';
-import { contractsFor, missionPool, contractReady } from './missions.js?v=flight-feel-1';
-import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=flight-feel-1';
-export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=flight-feel-1';
-import { WORLDS, flightConditions } from './worlds.js?v=flight-feel-1';
-import { estimateHeight } from './builder.js?v=flight-feel-1';
-import { flightBuildSummary } from './rocket-insights.js?v=flight-feel-1';
-import { fundingFor, restoreFunding, reserveLaunchFunding } from './launch-funding.js?v=flight-feel-1';
+import { newExpeditions, restoreExpeditions, startExpedition, beginExpeditionFlight, settleExpedition, abandonExpedition, KITS, milestoneHeight } from './expeditions.js?v=component-research-1';
+import { PARTS, assemblySpecs, catalogFor } from './parts.js?v=component-research-1';
+import { experimentalCatalog, companionOffers, EQUIPMENT_VERSION, ABILITY_EVENTS } from './experimental.js?v=component-research-1';
+import { componentResearchSnapshot, normalizeComponentUnlocks, normalizeTunings } from './component-research.js?v=component-research-1';
+import { awardResearch, syncResearch } from './research.js?v=component-research-1';
+import { recordFlightPeak } from './flight-records.js?v=component-research-1';
+import { contractsFor, missionPool, contractReady } from './missions.js?v=component-research-1';
+import { restoreJournal, recordMission, recordWorldClear } from './mission-journal.js?v=component-research-1';
+export { prototypeContracts, contractsFor, contractReady } from './missions.js?v=component-research-1';
+import { WORLDS, flightConditions } from './worlds.js?v=component-research-1';
+import { estimateHeight } from './builder.js?v=component-research-1';
+import { flightBuildSummary } from './rocket-insights.js?v=component-research-1';
+import { fundingFor, restoreFunding, reserveLaunchFunding } from './launch-funding.js?v=component-research-1';
 
-export const PROTOTYPE_VERSION=5;
+export const PROTOTYPE_VERSION=6;
 export const isPrototype = run => run?.rulesVersion===1;
 const bounded=(v,max=1e9)=>Number.isFinite(v)?Math.max(0,Math.min(max,Math.floor(v))):0;
 const copy=v=>structuredClone(v);
@@ -62,8 +63,10 @@ export function startPrototype(session,options={}) {
   session.prototypeVersion=PROTOTYPE_VERSION;
   session.profile.prototypeWorlds??=[];
   session.profile.missionJournal??=restoreJournal();
-  Object.assign(run,{rulesVersion:1,equipmentVersion,missionVersion:2,journeyVersion:1,previousEstimate:null,worldStartFlights:0,startWorld:difficulty,conditionsVersion:4,offerIndex:0,reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
+  Object.assign(run,{rulesVersion:1,componentResearchVersion:1,equipmentVersion,missionVersion:2,journeyVersion:1,previousEstimate:null,worldStartFlights:0,startWorld:difficulty,conditionsVersion:4,offerIndex:0,reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
   Object.assign(run.program,{rulesVersion:1,equipmentVersion:run.equipmentVersion,conditionsVersion:4});
+  run.program.componentResearchVersion=1;
+  syncResearch(session);
   // A checkpoint is a new funded build, never a duplicate arrival stipend.
   if(difficulty===1)run.program.credits+=1100;
   session.profile.launchFunding=restoreFunding(session.profile.launchFunding);
@@ -77,7 +80,7 @@ export function beginFlight(session,quality) {
   const run=session.active;
   if(isPrototype(run)) {
     const contract=selectedContract(run);
-    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0,estimate:estimateHeight(run.program)};
+    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),...componentResearchSnapshot(run.program),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0,estimate:estimateHeight(run.program)};
   }
   return true;
 }
@@ -108,7 +111,7 @@ export function settle(session,flight) {
   if(!success)run.strikes++;
   run.offerIndex++;restock(run);
   const result={altitude,target,success,total,flightPay,bonus,contractPay,surveyPay,recoveryPay,contract:completed?contract.name:null,data,stage:oldStage+1,power:Math.round(flight.quality*100),cleared,nextTarget:run.stage<6?milestoneHeight(run):null,record:altitude>oldBest,improvement:Math.max(0,altitude-oldBest),events:[...(flight.events||[])],newParts:p.stock.filter(id=>!oldStock.includes(id)),unlockedKits:KITS.filter(k=>k.unlock>oldGates&&k.unlock<=session.profile.totalGates).map(k=>k.id)};
-  result.engineering={...flightBuildSummary(p,flight),estimate:run.launchSnapshot?.estimate??null,previousEstimate:run.previousEstimate??null};
+  result.engineering={...componentResearchSnapshot(p),...flightBuildSummary(p,flight),estimate:run.launchSnapshot?.estimate??null,previousEstimate:run.previousEstimate??null};
   run.previousEstimate=run.launchSnapshot?.estimate??null;
   result.nextFunding=reserveLaunchFunding(session,firstWorld);
   result.fundingPay=fundingPay;
@@ -132,11 +135,12 @@ export function arrivePrototype(session) {
   restock(run);return true;
 }
 export function restoreSession(raw) {
-  if(raw?.prototypeVersion!==undefined&&![1,2,3,4,PROTOTYPE_VERSION].includes(raw.prototypeVersion))throw Error('This save needs a newer prototype build.');
+  if(raw?.prototypeVersion!==undefined&&![1,2,3,4,5,PROTOTYPE_VERSION].includes(raw.prototypeVersion))throw Error('This save needs a newer prototype build.');
   if(raw?.active?.rulesVersion!==undefined&&raw.active.rulesVersion!==1)throw Error('This expedition needs a newer rules version.');
   if(raw?.version!==undefined&&![1,2].includes(raw.version))throw Error('This save needs a newer game build.');
   if(raw?.active?.equipmentVersion!==undefined&&![1,EQUIPMENT_VERSION].includes(raw.active.equipmentVersion))throw Error('This expedition needs newer equipment rules.');
   if(raw?.active?.missionVersion!==undefined&&![1,2].includes(raw.active.missionVersion))throw Error('This expedition needs a newer mission version.');
+  if([raw?.active?.componentResearchVersion,raw?.active?.program?.componentResearchVersion].some(version=>version!==undefined&&version!==1))throw Error('This expedition needs newer component research rules.');
   if(raw?.active?.journeyVersion!==undefined&&raw.active.journeyVersion!==1)throw Error('This expedition needs newer journey rules.');
   if(raw?.profile?.missionJournal?.version!==undefined&&raw.profile.missionJournal.version!==1)throw Error('This journal needs a newer game build.');
   if(raw?.active?.conditionsVersion>4)throw Error('This save needs newer flight conditions.');
@@ -162,6 +166,11 @@ export function restoreSession(raw) {
   if(run.status==='won')session.profile.maxDifficulty=Math.max(session.profile.maxDifficulty,Math.min(8,run.difficulty+1));
   Object.assign(run,{rulesVersion:1,equipmentVersion:input.equipmentVersion===2?2:1,missionVersion:input.missionVersion===2?2:1,worldStartFlights:Number.isInteger(input.worldStartFlights)&&input.worldStartFlights>=0&&input.worldStartFlights<=run.program.flights?input.worldStartFlights:null,conditionsVersion:4,startWorld:bounded(input.startWorld,8),offerIndex:bounded(input.offerIndex),reservedOffer:null,contractId:null,completedContracts:[],launchSnapshot:null});
   Object.assign(run.program,{rulesVersion:1,equipmentVersion:run.equipmentVersion,conditionsVersion:4});
+  if(input.componentResearchVersion===1&&input.program?.componentResearchVersion===1) {
+    run.componentResearchVersion=1;run.program.componentResearchVersion=1;
+    run.program.componentResearch=normalizeComponentUnlocks(input.program.componentResearch);
+    run.program.tunings=normalizeTunings(input.program.tunings,run.program.componentResearch);
+  }
   if(input.journeyVersion===1)run.journeyVersion=1;
   run.startingFunding=bounded(input.startingFunding,200);
   run.pendingFunding=run.program.flights===0?bounded(input.pendingFunding,200):0;
@@ -177,7 +186,7 @@ export function restoreSession(raw) {
   if(run.status==='flying') {
     const contract=selectedContract(run);
     // The build is immutable while flying. Reconstruct eligibility from validated equipment.
-    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0,estimate:estimateHeight(run.program)};
+    run.launchSnapshot={world:run.difficulty,contractId:contract?.id||null,eligible:!!contract&&contractReady(run.program,contract),equipped:copy(run.program.parts.equipped),...componentResearchSnapshot(run.program),survey:assemblySpecs(run.program).survey===true,recovery:assemblySpecs(run.program).recovery||0,estimate:estimateHeight(run.program)};
   }
   if(run.lastResult) {
     const r=input.lastResult;
@@ -188,7 +197,7 @@ export function restoreSession(raw) {
     run.lastResult.fundingPay=bounded(r.fundingPay,200);
     if(r.engineering&&typeof r.engineering.name==='string') {
       const e=r.engineering;
-      run.lastResult.engineering={name:e.name.slice(0,60),effects:(Array.isArray(e.effects)?e.effects:[]).filter(x=>typeof x==='string').slice(0,4).map(x=>x.slice(0,140)),mass:Number.isFinite(e.mass)?Math.max(0,Math.min(20,e.mass)):0,burn:Number.isFinite(e.burn)?Math.max(0,Math.min(600,e.burn)):0,coast:Number.isFinite(e.coast)?Math.max(0,Math.min(600,e.coast)):0,estimate:Number.isFinite(e.estimate)?bounded(e.estimate):null,previousEstimate:Number.isFinite(e.previousEstimate)?bounded(e.previousEstimate):null};
+      run.lastResult.engineering={...componentResearchSnapshot({...e,rulesVersion:1}),name:e.name.slice(0,60),effects:(Array.isArray(e.effects)?e.effects:[]).filter(x=>typeof x==='string').slice(0,12).map(x=>x.slice(0,140)),mass:Number.isFinite(e.mass)?Math.max(0,Math.min(20,e.mass)):0,burn:Number.isFinite(e.burn)?Math.max(0,Math.min(600,e.burn)):0,coast:Number.isFinite(e.coast)?Math.max(0,Math.min(600,e.coast)):0,estimate:Number.isFinite(e.estimate)?bounded(e.estimate):null,previousEstimate:Number.isFinite(e.previousEstimate)?bounded(e.previousEstimate):null};
     }
   }
   return session;

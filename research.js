@@ -1,3 +1,4 @@
+import { componentNode, normalizeComponentUnlocks, normalizeTunings } from './component-research.js?v=component-research-1';
 // Permanent expedition research. No DOM, storage, or dependency on the game loop.
 export const RESEARCH_COSTS = [3,5,8,12,18];
 export const RESEARCH_TRACKS = [
@@ -19,6 +20,7 @@ export function restoreResearch(raw,profile={}) {
  }
  research.data=int(raw.data);
  for(const track of RESEARCH_TRACKS)research.levels[track.id]=int(raw.levels?.[track.id],5);
+ if(raw.components&&typeof raw.components==='object')research.components=Object.fromEntries(RESEARCH_TRACKS.map(track=>[track.id,normalizeComponentUnlocks(raw.components[track.id])]));
  return research;
 }
 export const researchRank=(profile,id)=>int(profile.research?.levels?.[id],5);
@@ -29,7 +31,13 @@ export function researchLoadout(profile,kit) {
 }
 export function syncResearch(session) {
  if(!session.active)return;
- session.active.program.research={kit:session.active.kit,rank:researchRank(session.profile,session.active.kit)};
+ const {active,profile}=session;
+ active.program.research={kit:active.kit,rank:researchRank(profile,active.kit)};
+ // Interrupted flights use their saved component snapshot, never a new profile view.
+ if(active.program.componentResearchVersion===1&&active.status!=='flying') {
+  active.program.componentResearch=normalizeComponentUnlocks(profile.research?.components?.[active.kit]);
+  active.program.tunings=normalizeTunings(active.program.tunings,active.program.componentResearch);
+ }
 }
 export function buyResearch(session,id) {
  const track=RESEARCH_TRACKS.find(t=>t.id===id),cost=researchCost(session.profile,id);
@@ -49,4 +57,22 @@ export function awardResearch(session,cleared,firstWorld) {
  session.profile.research??=newResearch();
  session.profile.research.data+=data;
  return data;
+}
+
+export const componentOwned=(profile,kit,id)=>normalizeComponentUnlocks(profile.research?.components?.[kit]).includes(id);
+export function canBuyComponentResearch(session,kit,id) {
+ const node=componentNode(id),track=RESEARCH_TRACKS.find(track=>track.id===kit);
+ if(!node||!track||!session.prototypeVersion||session.mode!=='expedition'||session.profile.totalGates<track.unlock)return false;
+ if(session.active&&!['build','won','lost'].includes(session.active.status))return false;
+ if(componentOwned(session.profile,kit,id)||!Number.isFinite(session.profile.research?.data)||session.profile.research.data<node.cost)return false;
+ return node.kind==='calibration'||componentOwned(session.profile,kit,`${node.slot}-calibration`);
+}
+export function buyComponentResearch(session,kit,id) {
+ if(!canBuyComponentResearch(session,kit,id))return false;
+ const node=componentNode(id),research=session.profile.research;
+ research.components??=Object.fromEntries(RESEARCH_TRACKS.map(track=>[track.id,[]]));
+ research.data-=node.cost;
+ research.components[kit]=normalizeComponentUnlocks([...(research.components[kit]||[]),id]);
+ syncResearch(session);
+ return true;
 }

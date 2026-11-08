@@ -1,5 +1,6 @@
 // Build explanations use the same resolved equipment/research as the simulator.
-import { assemblySpecs, fittedParts } from './parts.js?v=flight-feel-1';
+import { componentNode, componentResearchSnapshot } from './component-research.js?v=component-research-1';
+import { assemblySpecs, fittedParts } from './parts.js?v=component-research-1';
 
 export function buildEffects(program) {
   if(program.rulesVersion!==1)return [];
@@ -14,6 +15,11 @@ export function buildEffects(program) {
   if(s.dropMass)add('drop',p.tank,true,`drops ${s.dropMass.toFixed(2)}t of dry mass`,'');
   if(s.survey)add('survey',p.aero,true,'+90 credits per new milestone','');
   if(s.recovery)add('recovery',p.boosters,true,'+90 credits after separation on success','');
+  const research=componentResearchSnapshot(program);
+  for(const id of Object.values(research.tunings||{})) {
+    const node=componentNode(id);
+    if(node)effects.push({key:`tuning-${node.slot}`,part:node.name,active:node.slot!=='boosters'||s.hasBoosters,detail:node.description,reason:node.slot==='boosters'?'needs side boosters':''});
+  }
   return effects;
 }
 

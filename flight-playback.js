@@ -1,4 +1,4 @@
-import { stepFlight } from './engine.js?v=flight-feel-1';
+import { stepFlight } from './engine.js?v=component-research-1';
 
 export const FAST_FORWARD_SECONDS = 6;
 export const FLIGHT_PRESENTATION_SECONDS = 16;
