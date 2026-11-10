@@ -125,3 +125,7 @@ Useful browser checks:
 ## Remaining design opportunity
 
 The roguelite route reaches Tau Ceti. Optional replay now has mission stamps, kit badges, and per-world winning rocket records. The equipment pass adds three interacting parts and companion offers. Longer carried expedition groups and discovery unlocks still need design and playtesting. Preserve the focused mobile hangar and keep collection goals optional.
+
+## Isolated workshop experiment
+
+`workshop.html` is an owner-authorized Earth–Moon experiment, separate from both campaigns. `workshop-model.js` owns its loan budget, six-marker ladders, fitting and settlement; `workshop.js` and `workshop.css` own its UI. It reuses unchanged physics, parts and rocket art at `component-research-1`; workshop entry assets use `workshop-3`. Preserve its separate `rocket-away-workshop-v1` save and never route it through campaign storage. Its explicit exceptions are full-value loan swaps, unlimited retries, a fixed Science payload, workshop-only altitude targets, no research, and one carried Earth–Moon rocket. See README for funding and targets. Run `tests/workshop.test.js` and isolated `checks/workshop.playwright.js` when changing it. The public campaign default stays unchanged; access the experiment by its direct link.
