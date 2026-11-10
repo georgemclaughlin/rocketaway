@@ -28,7 +28,7 @@ async page => {
  await page.locator('#continue').click();
  // Earn a complete journey; choose affordable builds using the same public domain model.
  for(let turn=0;turn<12;turn++){
-  const pick=await page.evaluate(async()=>{const m=await import('./workshop-model.js?v=workshop-3');const s=JSON.parse(localStorage.getItem('rocket-away-workshop-v1'));if(s.cleared[1]===6)return null;let best;for(const engine of m.BENCH.engine)for(const tank of m.BENCH.tank)for(const boosters of m.BENCH.boosters){const build={aero:'lab',engine,tank,boosters};if(m.cost(build)<=s.budget){const peak=m.measured(build,s.world,.9).peak;if(!best||peak>best.peak)best={build,peak};}}return best.build;});
+  const pick=await page.evaluate(async()=>{const m=await import('./workshop-model.js?v=workshop-art-3');const s=JSON.parse(localStorage.getItem('rocket-away-workshop-v1'));if(s.cleared[1]===6)return null;let best;for(const engine of m.BENCH.engine)for(const tank of m.BENCH.tank)for(const boosters of m.BENCH.boosters){const build={aero:'lab',engine,tank,boosters};if(m.cost(build)<=s.budget){const peak=m.measured(build,s.world,.9).peak;if(!best||peak>best.peak)best={build,peak};}}return best.build;});
   if(!pick)break;
   for(const slot of ['engine','tank','boosters']){await page.locator(`[data-slot="${slot}"]`).click();await page.locator(`[data-part="${pick[slot]}"]`).click();}
   if(await page.locator('#fit').isEnabled())await page.locator('#fit').click();
