@@ -1,8 +1,8 @@
-import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch, componentOwned, canBuyComponentResearch, buyComponentResearch } from './research.js?v=component-research-1';
+import { RESEARCH_TRACKS, researchRank, researchCost, buyResearch, componentOwned, canBuyComponentResearch, buyComponentResearch } from './research.js?v=discovery-4';
 
-import { COMPONENT_RESEARCH, COMPONENT_NODES, componentNode, normalizeComponentUnlocks } from './component-research.js?v=component-research-1';
-import { estimateHeight } from './builder.js?v=component-research-1';
-import { assemblySpecs } from './parts.js?v=component-research-1';
+import { COMPONENT_RESEARCH, COMPONENT_NODES, componentNode, normalizeComponentUnlocks } from './component-research.js?v=discovery-4';
+import { estimateHeight } from './builder.js?v=discovery-4';
+import { assemblySpecs } from './parts.js?v=discovery-4';
 
 function componentAffordable(profile,kit) {
  return COMPONENT_NODES.some(node=>!componentOwned(profile,kit,node.id)&&profile.research.data>=node.cost&&(node.kind==='calibration'||componentOwned(profile,kit,COMPONENT_RESEARCH.find(branch=>branch.id===node.slot).calibration.id)));

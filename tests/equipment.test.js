@@ -113,7 +113,7 @@ test('legacy rocket outcomes and next offers remain identical to the preceding r
   [5,'scientist',95152.41670182369,11002,['reserve-tank','separation-engine']],
  ];
  for(const [world,kit,peak,credits,offers] of cases) {
-  const raw=start(world,kit);raw.prototypeVersion=3;delete raw.active.equipmentVersion;delete raw.active.program.equipmentVersion;
+  const raw=start(world,kit);raw.prototypeVersion=3;delete raw.active.discoveryVersion;delete raw.active.program.discoveryVersion;delete raw.active.discoveries;delete raw.active.program.core;delete raw.active.equipmentVersion;delete raw.active.program.equipmentVersion;
   const s=restoreSession(raw),ids=kit==='scrapper'?['reserve-tank','separation-engine','solids']:['survey-capsule','instrument-engine','composite'];
   const p=fit(s,ids);beginFlight(s,1.17);const f=fly(p,1.17);settle(s,f);
   assert.equal(f.peak,peak);assert.equal(p.credits,credits);assert.deepEqual(p.stock.filter(id=>catalogFor(p).find(p=>p.id===id).ability),offers);

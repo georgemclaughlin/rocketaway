@@ -6,6 +6,20 @@ A small rocket-building game: buy components, assemble a rocket, and launch it t
 
 The [roguelite design and implementation plan](ROGUELITE_PLAN.md) describes the proposed longer campaign. The roguelite journey is the default on the public site and continues through all nine launch worlds to Tau Ceti. The original nine-world campaign remains available from the game menu, with separate saved progress.
 
+## Recover something worth rebuilding around
+
+New Earth–Moon expeditions now have **discoveries**: fictional salvage caches at Earth's first, third and fifth markers. Each contains a seeded experimental core and a free companion part. Recover several markers in one flight and collect every cache crossed. Fresh Moon starts use the same three marker positions on the Moon. Later worlds retain their existing rules.
+
+Open **Discoveries** beside Research to preview and explicitly fit one core. Switching is free. Companion parts are owned, but must be fitted separately; recovery never silently changes your rocket. A core preview uses the fitted build. Fitting the core discards pending part previews, without buying equipment. Cores and recovered parts travel with your Earth rocket to the Moon, then retire with that expedition.
+
+- **Cascade coupler + Twin kickers:** two extra kicks, each 60% of the original booster impulse, fire three and six seconds after separation. Combine it with a Reserve tank and Separation engine for a sequence of releases and thrust bursts.
+- **Star sail + Feather shell:** without boosters and at ≤1.60 tonnes launch mass, a sail deploys after burnout, reducing arcade coast gravity by 30%. This is a deliberately fictional arcade ability, not a scientific model of solar sailing.
+- **Echo scanner + Survey capsule:** a compatible capsule extends engine and reserve burn by 35%. Three scans at 4, 8 and 12 seconds while powered charge an eight-second **3× thrust overdrive**. A simultaneous Separation surge does not multiply it further. Each scan also pays 60 credits on a flight that earns a new milestone or selected contract; misses pay no scan bonus. The report separates scans from other earnings.
+
+Salvage signals appear along the flight path, and reports name recovered hardware. Existing reservations and fitted-equipment companions retain stock priority; otherwise an offer helps build around a recovered core. Flight logs and winning rockets retain core details. The carried Earth–Moon ending recaps the expedition before the existing journey continues to Mars.
+
+These mechanics start with **new Earth or Moon rockets**, not an already-saved attempt. Existing rockets keep their physics and progress. No reset is needed: finish or end the current expedition, then choose an unlocked Earth/Moon launchpad. Save version 7 and discovery version 1 preserve cores and interrupted flights; unsupported future saves remain untouched. The separate Workshop page is an earlier experiment, not the current roguelite direction.
+
 ## Roguelite journey
 
 ```sh
@@ -114,7 +128,7 @@ Calibration applies immediately to a compatible idle rocket. Unlocking a special
 
 Component modifiers apply to seeded component statistics before assembly and existing kit bonuses. Fuel-capacity choices alter both fuel mass and duration; Drop tank research also scales its discarded dry structure. Momentum's ramp, Reserve tank's separation requirement, and Return boosters' qualifying 90-credit recovery remain intact. Flights and the Flight log identify fitted tunings; journal winning builds retain them.
 
-New roguelite rockets use component research version 1. Existing rockets without this version keep their previous physics until a fresh rocket; the lab labels their component purchases for future rockets. Interrupted flights retain their ignition configuration. Save version 6 protects these fields from older builds without changing storage keys. Original campaign and Free Flight retain their prior research behavior.
+New roguelite rockets use component research version 1. Existing rockets without this version keep their previous physics until a fresh rocket; the lab labels their component purchases for future rockets. Interrupted flights retain their ignition configuration. Save version 7 protects these fields and discovery cores from older builds without changing storage keys. Original campaign and Free Flight retain their prior research behavior.
 
 **Kit perks** keeps the previous permanent ranks, prices and benefits below. Starter parts are labeled for future rockets.
 
@@ -274,3 +288,7 @@ Parts are loans against a reusable **500** starting bench budget: swapping retur
 Workshop-only Earth markers: **2.5, 8, 18, 35, 65, 100 km**. Moon markers: **100, 200, 350, 550, 800, 1,100 km**. Completing Earth carries the rocket and budget to Moon; completing Moon offers continued experimentation. These targets are arcade challenges, not scientific mission requirements. This experiment uses only `rocket-away-workshop-v1`, preserves interrupted ignition, and never reads or changes campaign saves. Unrecognized workshop saves are preserved and writes disabled.
 
 `tests/workshop.test.js` verifies atomic loans, persistence, once-only settlement, optimal openings, earned progression and playback parity. `checks/workshop.playwright.js` runs in an isolated session at `/workshop.html`, covering nine viewport sizes, previews, reloads, pause, interrupted flight and an earned Earth–Moon route. The automated route uses See result; it does not establish that watching the flights is enjoyable. The playtest question is whether a refit makes you curious enough to launch again.
+
+Discovery verification: all **160 Node tests** pass. The final earned policy completed **36/36** Earth–Moon/fresh-Moon cases across seeds 42/43/44 (all three first-core orders), three kits and research ranks 0/5. Full Earth–Moon took **3–5 launches** under that optimizing policy; fresh Moon took two. All three cores were selected in useful cases. A separate opening comparison covered 60 cases with all component tunings unlocked and perfect timing: discovery eligibility changed no opening estimate, because cores must first be recovered. These are simulations, not player telemetry.
+
+Hands-on agent UI play completed an earned Cascade-to-sail expedition in six launches during tuning, and a scanner-first expedition in six launches including a miss and a three-point calibration. The scanner run exposed its weak late-Earth payoff and was continued with the revised overdrive. A separate resumed-flight fixture checks the sail visual and saved core. Nine sizes cover hangar, flight and report; the small-phone Research label was adjusted after screenshot inspection. These checks do not prove the game is fun for a person.

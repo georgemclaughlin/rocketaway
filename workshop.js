@@ -1,10 +1,10 @@
-import { workshopScene } from './workshop-scene.js?v=workshop-art-3';
-import { BENCH,TARGETS,newWorkshop,cost,program,ignition,measured,fit,launch,settle,restore,advice } from './workshop-model.js?v=workshop-art-3';
-import { partById,fittedParts } from './parts.js?v=component-research-1';
-import { rocketArt } from './rocket-art.js?v=component-research-1';
-import { launchQuality } from './engine.js?v=component-research-1';
-import { advanceFlight,presentationRate,fastForwardRate } from './flight-playback.js?v=component-research-1';
-import { flightAbilityLabel } from './experimental.js?v=component-research-1';
+import { workshopScene } from './workshop-scene.js?v=workshop-art-4';
+import { BENCH,TARGETS,newWorkshop,cost,program,ignition,measured,fit,launch,settle,restore,advice } from './workshop-model.js?v=workshop-art-4';
+import { partById,fittedParts } from './parts.js?v=discovery-4';
+import { rocketArt } from './rocket-art.js?v=discovery-4';
+import { launchQuality } from './engine.js?v=discovery-4';
+import { advanceFlight,presentationRate,fastForwardRate } from './flight-playback.js?v=discovery-4';
+import { flightAbilityLabel } from './experimental.js?v=discovery-4';
 const $=id=>document.getElementById(id), key='rocket-away-workshop-v1', km=n=>`${(n/1000).toLocaleString(undefined,{maximumFractionDigits:1})} km`;
 $('scenery').innerHTML=workshopScene;
 let state=newWorkshop(), blocked=false;

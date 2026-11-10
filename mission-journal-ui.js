@@ -1,8 +1,9 @@
-import { COMPONENT_RESEARCH, componentNode } from './component-research.js?v=component-research-1';
-import { WORLDS } from './worlds.js?v=component-research-1';
-import { missionPool } from './missions.js?v=component-research-1';
-import { restoreJournal, JOURNAL_KITS } from './mission-journal.js?v=component-research-1';
-import { PART_SLOTS, partById, PART_TRAITS } from './parts.js?v=component-research-1';
+import { coreById } from './discoveries.js?v=discovery-4';
+import { COMPONENT_RESEARCH, componentNode } from './component-research.js?v=discovery-4';
+import { WORLDS } from './worlds.js?v=discovery-4';
+import { missionPool } from './missions.js?v=discovery-4';
+import { restoreJournal, JOURNAL_KITS } from './mission-journal.js?v=discovery-4';
+import { PART_SLOTS, partById, PART_TRAITS } from './parts.js?v=discovery-4';
 
 const kitNames={scrapper:'Scrapper',stager:'Stagehand',scientist:'Scientist'};
 function savedComponentMarkup(record,slot) {
@@ -24,6 +25,6 @@ export function missionJournalMarkup(profile,world=0) {
     <h4>Mission collection</h4><p>Two missions are offered per attempt. New attempts can offer different pairs; unfinished stamps do not block your journey.</p>
     <ul class="journal-missions">${missionPool(world).map(c=>`<li data-earned="${journal.missions.includes(c.id)}"><strong>${journal.missions.includes(c.id)?'✓':'○'} ${c.name}</strong><span>${c.detail}</span></li>`).join('')}</ul>
     <h4>Winning rockets</h4><p>Fewest launches within this world; lighter winning rockets break ties. Research can improve records. Carried Moon arrivals have their own record.</p>
-    ${Object.entries(row?.best||{}).map(([entry,r])=>`<details class="journal-rocket"><summary>${entry==='carried'?'Arrived from Earth':'Fresh start'} · ${r.launches} launch${r.launches===1?'':'es'}<span>${kitNames[r.kit]} · ${r.mass.toFixed(2)} t · Research ${r.rank}/5</span></summary><ul>${PART_SLOTS.map(slot=>{const id=r.equipped[slot.id],trait=PART_TRAITS.find(t=>t.id===r.traits[id]);return `<li><span>${slot.name}</span><strong>${partById(id).name}</strong>${trait?`<small>${trait.name} · ${trait.detail}</small>`:''}${savedComponentMarkup(r,slot.id)}</li>`;}).join('')}</ul><p>Saved winning build. View only; your current rocket stays fitted.</p></details>`).join('')||'<p class="journal-empty">Clear this world to save a winning rocket here. Earlier wins remain unlocked; detailed records start with this update.</p>'}
+    ${Object.entries(row?.best||{}).map(([entry,r])=>`<details class="journal-rocket"><summary>${entry==='carried'?'Arrived from Earth':'Fresh start'} · ${r.launches} launch${r.launches===1?'':'es'}<span>${kitNames[r.kit]} · ${r.mass.toFixed(2)} t · Research ${r.rank}/5</span></summary><ul>${PART_SLOTS.map(slot=>{const id=r.equipped[slot.id],trait=PART_TRAITS.find(t=>t.id===r.traits[id]);return `<li><span>${slot.name}</span><strong>${partById(id).name}</strong>${trait?`<small>${trait.name} · ${trait.detail}</small>`:''}${savedComponentMarkup(r,slot.id)}</li>`;}).join('')}</ul><p>${r.discoveryVersion===1?`Core: ${coreById(r.core)?.name||'None'}. `:''}Saved winning build. View only; your current rocket stays fitted.</p></details>`).join('')||'<p class="journal-empty">Clear this world to save a winning rocket here. Earlier wins remain unlocked; detailed records start with this update.</p>'}
   </section>`;
 }

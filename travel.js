@@ -1,6 +1,6 @@
-import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=component-research-1';
-import { fittedParts } from './parts.js?v=component-research-1';
-import { rocketArt } from './builder.js?v=component-research-1';
+import { worldFor, destinationFor, worldMarkup } from './worlds.js?v=discovery-4';
+import { fittedParts } from './parts.js?v=discovery-4';
+import { rocketArt } from './builder.js?v=discovery-4';
 
 export function createTravel(onArrive) {
   const dialog=document.getElementById('travel-dialog');

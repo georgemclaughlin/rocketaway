@@ -1,5 +1,5 @@
-import { PART_SLOTS, catalogFor, partById } from './parts.js?v=component-research-1';
-import { componentNode, normalizeTunings } from './component-research.js?v=component-research-1';
+import { PART_SLOTS, catalogFor, partById } from './parts.js?v=discovery-4';
+import { componentNode, normalizeTunings } from './component-research.js?v=discovery-4';
 
 // A workbench is a quote, not inventory. Validate the entire order before spending.
 export function planBuild(program, choices = {}, tuningChoices = {}) {

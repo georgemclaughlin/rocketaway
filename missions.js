@@ -1,5 +1,5 @@
-import { WORLDS, flightConditions } from './worlds.js?v=component-research-1';
-import { assemblySpecs, partById } from './parts.js?v=component-research-1';
+import { WORLDS, flightConditions } from './worlds.js?v=discovery-4';
+import { assemblySpecs, partById } from './parts.js?v=discovery-4';
 
 export function prototypeContracts(world) {
   if(world>1) {

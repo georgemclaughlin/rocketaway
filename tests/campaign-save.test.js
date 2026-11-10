@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { openCampaignSave, packCampaignSave } from '../campaign-save.js';
 import { newExpeditions, startExpedition, beginExpeditionFlight } from '../expeditions.js';
-import { startPrototype } from '../prototype-run.js';
+import { startPrototype, PROTOTYPE_VERSION } from '../prototype-run.js';
 
 test('opening roguelite preserves an existing interrupted campaign exactly', () => {
   const legacy = newExpeditions();
@@ -11,7 +11,7 @@ test('opening roguelite preserves an existing interrupted campaign exactly', () 
   const before = structuredClone(legacy);
   const opened = openCampaignSave(legacy);
   assert.equal(opened.session.active, null);
-  assert.equal(opened.session.prototypeVersion, 6);
+  assert.equal(opened.session.prototypeVersion, PROTOTYPE_VERSION);
   startPrototype(opened.session, { seed: 7 });
   const stored = packCampaignSave(opened.session, opened.other);
   assert.deepEqual(stored.originalCampaign, before);

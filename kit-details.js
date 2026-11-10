@@ -1,6 +1,6 @@
-import { newProgram } from './engine.js?v=component-research-1';
-import { partById, fittedParts } from './parts.js?v=component-research-1';
-import { researchLoadout } from './research.js?v=component-research-1';
+import { newProgram } from './engine.js?v=discovery-4';
+import { partById, fittedParts } from './parts.js?v=discovery-4';
+import { researchLoadout } from './research.js?v=discovery-4';
 
 export function kitDetails(kit,profile) {
  const loadout=researchLoadout(profile,kit),program=newProgram();

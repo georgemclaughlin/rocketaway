@@ -1,27 +1,29 @@
-import { componentNode } from './component-research.js?v=component-research-1';
-import { createFlightAudio } from './flight-audio.js?v=component-research-1';
-import { flightAbilityLabel } from './experimental.js?v=component-research-1';
-import { drawTerrain } from './world-scenery.js?v=component-research-1';
-import { createScienceUI } from './science-ui.js?v=component-research-1';
-import { environmentLabel } from './science-data.js?v=component-research-1';
-import { missionJournalMarkup } from './mission-journal-ui.js?v=component-research-1';
-import { journeyRecordsMarkup } from './journey-records-ui.js?v=component-research-1';
-import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=component-research-1';
-import { fittedParts, assemblySpecs, partById } from './parts.js?v=component-research-1';
-import { KITS, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=component-research-1';
-import { MODULES } from './modifiers.js?v=component-research-1';
-import { createExpeditionUI } from './expedition-ui.js?v=component-research-1';
-import { createBuilder, rocketArt } from './builder.js?v=component-research-1';
-import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=component-research-1';
-import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=component-research-1';
-import { createTravel } from './travel.js?v=component-research-1';
-import { createResearchUI, researchButtonState } from './research-ui.js?v=component-research-1';
-import { launchRating } from './launch-feedback.js?v=component-research-1';
-import { FAST_FORWARD_SECONDS, fastForwardRate, presentationRate, advanceFlight } from './flight-playback.js?v=component-research-1';
-import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=component-research-1';
-import { kitDetails } from './kit-details.js?v=component-research-1';
-import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, contractsFor, contractReady } from './prototype-run.js?v=component-research-1';
-import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=component-research-1';
+import { coreById, nextCache, cacheSites, DISCOVERY_EVENTS } from './discoveries.js?v=discovery-4';
+import { createDiscoveryUI } from './discovery-ui.js?v=discovery-4';
+import { componentNode } from './component-research.js?v=discovery-4';
+import { createFlightAudio } from './flight-audio.js?v=discovery-4';
+import { flightAbilityLabel } from './experimental.js?v=discovery-4';
+import { drawTerrain } from './world-scenery.js?v=discovery-4';
+import { createScienceUI } from './science-ui.js?v=discovery-4';
+import { environmentLabel } from './science-data.js?v=discovery-4';
+import { missionJournalMarkup } from './mission-journal-ui.js?v=discovery-4';
+import { journeyRecordsMarkup } from './journey-records-ui.js?v=discovery-4';
+import { SAVE_KEY, MILESTONES, newProgram, restoreProgram, launchQuality, createFlight, settleFlight, flightPlan, missionGoal, currentContract } from './engine.js?v=discovery-4';
+import { fittedParts, assemblySpecs, partById } from './parts.js?v=discovery-4';
+import { KITS, milestoneHeight, EXPEDITION_KEY, newExpeditions, checkpoint, continueExpedition, abandonExpedition } from './expeditions.js?v=discovery-4';
+import { MODULES } from './modifiers.js?v=discovery-4';
+import { createExpeditionUI } from './expedition-ui.js?v=discovery-4';
+import { createBuilder, rocketArt } from './builder.js?v=discovery-4';
+import { journeyState, journeyMarkup, altitudeLabel } from './journey.js?v=discovery-4';
+import { CONDITIONS_VERSION, worldFor, destinationFor, WORLDS } from './worlds.js?v=discovery-4';
+import { createTravel } from './travel.js?v=discovery-4';
+import { createResearchUI, researchButtonState } from './research-ui.js?v=discovery-4';
+import { launchRating } from './launch-feedback.js?v=discovery-4';
+import { FAST_FORWARD_SECONDS, fastForwardRate, presentationRate, advanceFlight } from './flight-playback.js?v=discovery-4';
+import { missedFlightAdvice, progressTitle } from './flight-feedback.js?v=discovery-4';
+import { kitDetails } from './kit-details.js?v=discovery-4';
+import { startPrototype, beginFlight, settle, arrivePrototype, isPrototype, selectedContract, chooseContract, reserveOffer, contractsFor, contractReady } from './prototype-run.js?v=discovery-4';
+import { openCampaignSave, packCampaignSave, hasNextWorldOffer } from './campaign-save.js?v=discovery-4';
 const prototype = new URLSearchParams(location.search).get('campaign') !== 'original';
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d');
@@ -31,6 +33,7 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let currentScreen = 'workshop';
 let program = newProgram(), mode = 'workshop', flight = null, width = 0, height = 0;
 let ambientTime = 0, lastTime = 0, armTime = 0, timingPosition = .5, fastForward = false, playbackRate = 1, stars = [], soundEnabled = false, storageAvailable = true;
+let seenDiscoverySignals=new Set();
 let flightMilestonesShown = 0, lastJourneyKey = '';
 let saveFailure = '', rawExpeditionSave = null, rawFreeSave = null;
 let particles = [], recordBefore = 0, recordShown = false, zoneSeen = 0;
@@ -83,7 +86,9 @@ function buildTarget(candidate=program) {
   const run=expeditionSession.active,target=checkpoint(run),contract=isPrototype(run)?selectedContract(run):null;
   return contract&&contractReady(candidate,contract)&&contract.target<=target?{height:contract.target,label:'Contract'}:{height:target,label:'Milestone'};
 }
+const discoveryUI=createDiscoveryUI({getRun:()=>inExpedition()?expeditionSession.active:null,canEdit:canBuild,onFit:()=>{builder.discard();persist();renderWorkshop();tone(620,.18);}});
 function renderPrototypeTools() {
+  discoveryUI.render();
   const run=expeditionSession.active;
   const visible=inExpedition()&&isPrototype(run)&&mode==='workshop'&&run.status==='build';
   $('contracts-open').hidden=!visible;
@@ -131,14 +136,16 @@ function renderPrototypeResult(result) {
     $('result-title').textContent=`${worldFor(run).name}, cleared!`;
     $('result-description').textContent=run.difficulty===0?'Take this rocket to the Moon. Parts, credits and remaining misses carry over.':run.difficulty===8?'The last launchpad is behind you. One final crossing to Tau Ceti.':`Next launchpad: ${destinationFor(run).name}. Start a fresh rocket there; research and unlocked worlds stay yours.`;
     $('return').textContent=`Travel to ${destinationFor(run).name} ↗`;
-    if(result.nextFunding)$('result-description').textContent=`Fresh rocket on ${destinationFor(run).name} next. ${result.nextFunding} credits saved for its first refit; research stays yours.`;
+    if(run.discoveryVersion===1&&run.startWorld===0&&run.difficulty===1){$('result-title').textContent='One rocket. Two worlds.';$('result-description').textContent=`${run.program.flights} launches, ${run.discoveries.length} recovered cores. Your ${coreById(run.program.core)?.identity.toLowerCase()||'rocket'} made it through Earth and Moon. Mars brings a fresh rocket; your research stays.`;}
+    if(result.nextFunding&&!(run.discoveryVersion===1&&run.startWorld===0&&run.difficulty===1))$('result-description').textContent=`Fresh rocket on ${destinationFor(run).name} next. ${result.nextFunding} credits saved for its first refit; research stays yours.`;
   }
-  if(result.contractPay||result.surveyPay||result.recoveryPay||result.fundingPay) {
-    const line=document.createElement('span');line.textContent=[result.contractPay?`Contract +${result.contractPay}`:'',result.surveyPay?`Survey +${result.surveyPay}`:'',result.recoveryPay?`Recovery +${result.recoveryPay}`:'',result.fundingPay?`Saved funding +${result.fundingPay}`:''].filter(Boolean).join(' · ');$('bonus-note').append(line);
+  if(result.scanPay||result.contractPay||result.surveyPay||result.recoveryPay||result.fundingPay) {
+    const line=document.createElement('span');line.textContent=[result.scanPay?`Echo scans +${result.scanPay}`:'',result.contractPay?`Contract +${result.contractPay}`:'',result.surveyPay?`Survey +${result.surveyPay}`:'',result.recoveryPay?`Recovery +${result.recoveryPay}`:'',result.fundingPay?`Saved funding +${result.fundingPay}`:''].filter(Boolean).join(' · ');$('bonus-note').append(line);
   }
   if(result.events?.length) {
     $('result-stock').textContent=result.events.join(' · ');$('result-stock').hidden=false;
   }
+  $('result-stock').classList.remove('salvage-reward');
   const engineering=result.engineering;
   if(engineering) {
     $('flight-log-open').hidden=false;
@@ -153,6 +160,13 @@ function renderPrototypeResult(result) {
     }
   }
 }
+function renderDiscoveryReward(result) {
+  const recovered=result.discoveries||[];
+  if(!recovered.length)return;
+  const cores=recovered.map(d=>coreById(d.core)).filter(Boolean);
+  $('result-stock').hidden=false;$('result-stock').classList.add('salvage-reward');
+  $('result-stock').textContent=`✦ RECOVERED: ${cores.map(c=>c.name+' + '+partById(c.part).name).join(' · ')}. Open Discoveries in the hangar to preview and fit a core.`;
+}
 function openFlightLog() {
   const result=expeditionSession.active?.lastResult,e=result?.engineering;
   if(!e)return;
@@ -164,7 +178,7 @@ function openFlightLog() {
     const card=document.createElement('div'),label=document.createElement('span'),number=document.createElement('strong');label.textContent=name;number.textContent=value;card.append(label,number);return card;
   }));
   $('flight-log-effects').replaceChildren(...(e.effects.length?e.effects:['Standard equipment: fuel, mass, thrust and drag shaped this flight.']).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
-  $('flight-log-earnings').textContent=[`Flight +${result.flightPay}`,`Milestones +${result.bonus}`,result.contractPay?`Contract +${result.contractPay}`:'',result.surveyPay?`Survey +${result.surveyPay}`:'',result.recoveryPay?`Recovery +${result.recoveryPay}`:'',result.fundingPay?`Saved funding +${result.fundingPay}`:''].filter(Boolean).join(' · ');
+  $('flight-log-earnings').textContent=[result.scanPay?`Echo scans +${result.scanPay}`:'',`Flight +${result.flightPay}`,`Milestones +${result.bonus}`,result.contractPay?`Contract +${result.contractPay}`:'',result.surveyPay?`Survey +${result.surveyPay}`:'',result.recoveryPay?`Recovery +${result.recoveryPay}`:'',result.fundingPay?`Saved funding +${result.fundingPay}`:''].filter(Boolean).join(' · ');
   $('flight-log-funding').textContent=result.nextFunding?`${result.nextFunding} credits reserved for your next ${destinationFor(expeditionSession.active).name} rocket, paid after its first flight. First-time departures save 10% of the closing budget, up to 200 credits. The rest retires with this rocket.`:'';
   $('flight-log-funding').hidden=!result.nextFunding;
   $('flight-log-dialog').showModal();
@@ -213,6 +227,7 @@ function syncScreens() {
   $('menu-flight-note').hidden = mode === 'workshop';
   $('menu-context').textContent = expeditionMode ? run && !['won','lost'].includes(run.status) ? `${worldFor(run).name} → ${destinationFor(run).name} · ${run.stage}/6 milestones` : 'Road to Tau Ceti · nine worlds, one journey' : 'Free Flight · permanent rocket and upgrades';
   if (prototype && expeditionMode) $('menu-context').textContent = isPrototype(run) && !['won','lost'].includes(run.status) ? `${worldFor(run).name} · ${run.stage}/6 milestones · World ${run.difficulty+1}/9` : 'Road to Tau Ceti · roguelite journey';
+  if(prototype&&expeditionMode&&run?.discoveryVersion!==1)$('menu-context').textContent+=' · New Earth/Moon rockets can recover experimental cores.';
   $('run-details').hidden = !inExpedition() || !run.program.relics.length;
   $('module-count').textContent = run?.program.relics.length || '';
   $('menu-modules').innerHTML = (run?.program.relics || []).map(id => { const m = MODULES.find(m => m.id === id); return `<p><strong>${m.name}</strong><br>${m.detail}</p>`; }).join('');
@@ -324,6 +339,8 @@ function renderJourney() {
   $('journey-count').textContent = `World ${run.difficulty+1}/9`;
   $('journey-steps').innerHTML = journeyMarkup(journey);
   $('journey-current').textContent = run.status === 'lost' ? 'Expedition ended' : journey.next ? `${airborne ? 'Climbing to' : 'Next'}: ${journey.next.name} · ${altitudeLabel(journey.next.altitude)}` : 'Departure target reached!';
+  const cache=nextCache(run);
+  if(cache){const secured=airborne&&flight.peak>=milestoneHeight(run,cache.stage-1);$('journey-count').textContent+=` · ✧ ${secured?'secured':altitudeLabel(milestoneHeight(run,cache.stage-1))}`;$('journey-count').title=secured?'Salvage secured; inspect after landing':`Next salvage signal: ${cache.name}`;}else $('journey-count').title='';
   $('journey-lives').textContent = `${3-run.strikes} misses left`;
   document.querySelector('.mission').setAttribute('aria-label', `World ${run.difficulty+1} of 9: ${worldFor(run).name}. Reach ${altitudeLabel(journey.goal)} to travel to ${destinationFor(run).name}. ${journey.reached} of 6 milestones reached.`);
 }
@@ -439,6 +456,7 @@ function launch(resumeQuality) {
   flight = createFlight(program.levels, quality, { plan: program.plan, contractIndex: program.contracts, assembly: assemblySpecs(program) }); mode = 'flying';
   normalPlaybackRate = presentationRate(flight);
   playbackRate = fastForward ? Math.max(normalPlaybackRate, fastForwardRate(flight)) : normalPlaybackRate;
+  seenDiscoverySignals=new Set();
   recordBefore = program.best; flightMilestonesShown = inExpedition() ? expeditionSession.active.stage : 0; recordShown = false; zoneSeen = 0; particles = [];
   visualFlightTime=0;detachedHardware=[];flightRings=[];
   flightGoals = inExpedition() ? journeyState(expeditionSession.active).steps.slice(expeditionSession.active.stage) : MILESTONES.map(goal=>({...goal,name:goal.label}));
@@ -519,7 +537,7 @@ function finish() {
   $('result-description').textContent = result.firstOrbit ? 'Two hundred kilometers. That little rocket has come a long way.' : result.firstWin ? 'You reached space! Next mission: 200 km. Your parts stay with you.' : result.contract ? `${result.contract.title} completed! ${result.record ? `New best by ${(result.improvement / 1000).toFixed(2)} km.` : 'Another bright idea, funded.'}` : result.record ? `You beat your best by ${(result.improvement / 1000).toFixed(2)} km.` : 'Every experiment funds the next bright idea.';
   $('final-altitude').textContent = `${(result.altitude / 1000).toFixed(2)} km`;
   $('earnings').textContent = `+${result.total.toLocaleString()}`;
-  $('bonus-note').textContent = [`Flight +${result.flightPay}`, result.salvage ? `Finds +${result.salvage}` : '', result.contractPay ? `Contract +${result.contractPay}` : '', result.bonus ? `Milestones +${result.bonus}` : ''].filter(Boolean).join(' · ');
+  $('bonus-note').textContent = [result.scanPay?`Echo scans +${result.scanPay}`:'',`Flight +${result.flightPay}`, result.salvage ? `Finds +${result.salvage}` : '', result.contractPay ? `Contract +${result.contractPay}` : '', result.bonus ? `Milestones +${result.bonus}` : ''].filter(Boolean).join(' · ');
   $('return').innerHTML = result.firstWin ? 'Keep exploring <span aria-hidden="true">↗</span>' : 'Improve rocket <span aria-hidden="true">↗</span>';
   if (inExpedition()) {
     const run = expeditionSession.active;
@@ -548,7 +566,7 @@ function finish() {
   const rating=launchRating(flight.quality);
   if(inExpedition())$('bonus-note').innerHTML=`<span class="report-research">+${result.data} research points</span><span>${rating.label} launch · ${rating.power}% power</span>`;
   else $('bonus-note').textContent += ` · ${rating.label} launch · ${rating.power}% power`;
-  if(inExpedition()&&isPrototype(expeditionSession.active))renderPrototypeResult(result);
+  if(inExpedition()&&isPrototype(expeditionSession.active)){renderPrototypeResult(result);renderDiscoveryReward(result);}
   syncScreens(); $('return').focus({ preventScroll: true }); $('launch').textContent = 'Flight complete';
   const success = inExpedition() ? result.success : result.record || result.firstWin;
   $('result').dataset.outcome = success ? 'success' : 'miss';
@@ -765,7 +783,7 @@ function drawScene() {
     ctx.beginPath();ctx.ellipse(x,rocketY,20+age*width*.5,12+age*height*.25,0,0,Math.PI*2);ctx.stroke();ctx.restore();
   }
   if (powered && altitude < 1200 && !reducedMotion) { cloud(x - 23, height - 52 + altitude * .06, .55 + flight.time * .2, .25); cloud(x + 25, height - 48 + altitude * .06, .55 + flight.time * .2, .25); }
-  rocket(x, rocketY, rocketScale, 0, powered && (flight.quality > 1.13||flight.time<flight.surgeUntil||flight.momentumFull), ambientTime, powered);
+  rocket(x, rocketY, rocketScale, 0, powered && (flight.quality > 1.13||flight.time<flight.surgeUntil||flight.time<flight.scanSurgeUntil||flight.momentumFull), ambientTime, powered);
   lastRocket = { x, y: rocketY, scale: rocketScale, tankHeight };
   canvas.classList.toggle('buildable', mode === 'workshop');
   if (powered && !reducedMotion) {
@@ -777,6 +795,10 @@ function drawScene() {
 function rocket(x, y, scale, rotation, boosting = false, time = ambientTime, flameEnabled = true) {
   const parts = fittedParts(program), tankHeight = parts.tank.height-(flight?.dropReleased?20:0), paint = flightPlan(program.plan).color;
   ctx.save(); ctx.translate(x, y); ctx.rotate(rotation); ctx.scale(scale, scale);
+  if(flight?.sailOpened&&['flying','paused','report'].includes(mode)) {
+    ctx.save();ctx.strokeStyle='#d3c7ff';ctx.fillStyle='#958ce05c';ctx.lineWidth=1.4;
+    for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(side*75,-75);ctx.lineTo(side*88,10);ctx.lineTo(0,28);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(side*88,10);ctx.stroke();}ctx.restore();
+  }
   if (flameEnabled) {
     const ramp=flight?.momentum&&flight.phase==='powered' ? .65+1.25*Math.min(1,flight.time/10) : 1;
     const tuningFlame=program.componentResearchVersion===1 ? (program.tunings?.engine==='pressure-feed' ? 1.12 : program.tunings?.engine==='cruise-feed' ? .92 : 1) : 1;
@@ -843,6 +865,15 @@ function rocket(x, y, scale, rotation, boosting = false, time = ambientTime, fla
   ctx.restore();
 }
 function drawDiscoveries(altitude, rocketY) {
+  if(inExpedition())for(const site of cacheSites(expeditionSession.active)) {
+    const run=expeditionSession.active;if(site.world!==run.difficulty||run.discoveries.includes(site.core))continue;
+    const target=milestoneHeight(run,site.stage-1),range=Math.max(5000,target*.22),y=rocketY+(altitude-target)/range*height*.65;
+    if(y<100||y>height-55)continue;
+    ctx.save();ctx.translate(width*.19,y);ctx.strokeStyle='#ffdd90';ctx.fillStyle='#343349';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(0,0,24+(reducedMotion?0:Math.sin(visualFlightTime*3)*3),0,Math.PI*2);ctx.stroke();
+    ctx.rotate(-.15);ctx.fillRect(-14,-12,28,24);ctx.strokeRect(-14,-12,28,24);ctx.fillStyle='#ffdc8a';ctx.fillRect(-3,-12,6,24);ctx.restore();
+    ctx.save();ctx.fillStyle='#ffe6ae';ctx.font='bold 10px monospace';ctx.fillText('SALVAGE SIGNAL',Math.max(8,width*.19-45),y+40);ctx.restore();
+  }
   const balloonY = rocketY + (altitude - 1300) * .045;
   if ((!inExpedition() || worldFor(expeditionSession.active).name==='Earth') && balloonY > -80 && balloonY < height + 80) {
     ctx.save(); ctx.translate(width * .22, balloonY); ctx.fillStyle = '#e4b8a1';
@@ -881,6 +912,10 @@ function checkFlightMoments() {
   if (inExpedition()) {
     const run = expeditionSession.active, journey = journeyState(run,flight.peak);
     renderJourney();
+    let securedSignal=false;
+    for(const site of cacheSites(run))if(site.world===run.difficulty&&!run.discoveries.includes(site.core)&&!seenDiscoverySignals.has(site.id)&&flight.peak>=milestoneHeight(run,site.stage-1)){
+      securedSignal=true;seenDiscoverySignals.add(site.id);showFlightNotice('Salvage secured!',`${site.name} · inspect after landing`);flightImpact('#ffdc8a');tone(1120,.18);
+    }
     if(flight.phase==='coasting') { $('launch').disabled=false; $('launch').textContent='See result ↗'; }
     if (flight.peak >= checkpoint(run)) {
       $('flight-status').textContent = `${journey.reached} OF 6 MILESTONES`;
@@ -890,7 +925,7 @@ function checkFlightMoments() {
       flightMilestonesShown = journey.reached;
       const reached = journey.steps[journey.reached-1];
       zoneSeen = Math.max(zoneSeen,reached.altitude);
-      showFlightNotice(journey.next ? `${reached.name} reached!` : 'Departure target reached!', `${journey.reached} of 6 milestones · ${journey.next ? `next: ${altitudeLabel(journey.next.altitude)}` : 'expedition complete'}`);
+      showFlightNotice(securedSignal?'Salvage secured!':journey.next ? `${reached.name} reached!` : 'Departure target reached!', `${journey.reached} of 6 milestones · ${journey.next ? `next: ${altitudeLabel(journey.next.altitude)}` : 'expedition complete'}`);
       burst(width*.56,height*.48,'#a5dcc4',45); flightImpact('#a5dcc4'); chord(520+journey.reached*80);
       return;
     }
@@ -922,6 +957,7 @@ function frame(now) {
     timingTier = rating.tier;
   }
   if (mode === 'flying') {
+    const beforeDiscovery=flight.events?.filter(e=>DISCOVERY_EVENTS.includes(e)).length||0;
     const wasBoosted = flight.boosted,wasDropped=flight.dropReleased,wasPowered=flight.phase==='powered';
     visualFlightTime+=dt;
     advanceFlight(flight, dt * playbackRate);
@@ -937,7 +973,9 @@ function frame(now) {
       detachedHardware=detachedHardware.slice(-4);
     }
     updateFlightHud();
-    if(flight.rulesVersion===1){const tuning=program.componentResearchVersion===1?componentNode(program.tunings?.engine)?.name:'';const label=[flightAbilityLabel(flight),tuning].filter(Boolean).join(' · ');$('ability-flight').hidden=!label;$('ability-flight').textContent=label;}
+    if(flight.rulesVersion===1){const tuning=program.componentResearchVersion===1?componentNode(program.tunings?.engine)?.name:'';const core=coreById(flight.discoveryCore);const label=[core?`${core.icon} ${flight.events?.filter(e=>DISCOVERY_EVENTS.includes(e)).at(-1)||core.identity}`:flightAbilityLabel(flight),tuning].filter(Boolean).join(' · ');$('ability-flight').hidden=!label;$('ability-flight').textContent=label;}
+    const discoveryEvents=flight.events?.filter(e=>DISCOVERY_EVENTS.includes(e))||[];
+    if(discoveryEvents.length>beforeDiscovery){const core=coreById(flight.discoveryCore);showFlightNotice(discoveryEvents.at(-1),core.identity);flightImpact(core.color);tone(core.id==='scanner'?920:core.id==='sail'?540:330,.18);}
     checkFlightMoments();
     if (flight.done) finish();
   }

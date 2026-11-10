@@ -1,5 +1,5 @@
-import { worldFor } from './worlds.js?v=component-research-1';
-import { normalizeComponentUnlocks } from './component-research.js?v=component-research-1';
+import { worldFor } from './worlds.js?v=discovery-4';
+import { normalizeComponentUnlocks } from './component-research.js?v=discovery-4';
 export function journeyRecordsMarkup(profile) {
   const records=profile.flightRecords;
   const stats=[

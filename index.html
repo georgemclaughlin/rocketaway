@@ -5,8 +5,8 @@
   <meta name="theme-color" content="#101325">
   <meta name="description" content="Launch a little rocket, earn rocket credits, and build your way to outer space. A cozy launch-and-upgrade game.">
   <title>Rocket Away — One little launch at a time</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=component-research-1">
-  <script type="module" src="./game.js?v=component-research-1"></script>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css?v=discovery-4">
+  <script type="module" src="./game.js?v=discovery-4"></script>
 </head>
 <body>
 <main class="app" data-view="expedition" data-mode="expedition" data-hub="true">
@@ -58,7 +58,7 @@
         <div class="part-comparison"><span><span id="comparison-label">Estimated height</span><small>Estimate at 110% power</small></span><div><strong id="candidate-height">—</strong><small id="candidate-difference">Current rocket</small></div></div>
         <div class="picker-action"><p id="candidate-tradeoff"></p><button id="part-fit" class="small-button">Fitted</button></div>
       </section>
-      <div class="hangar-actions"><button id="research-open" class="research-action" aria-label="Open permanent research">Research</button><button id="shop-launch" class="primary">Launch rocket <span aria-hidden="true">↗</span></button></div>
+      <div class="hangar-actions"><button id="research-open" class="research-action" aria-label="Open permanent research">Research</button><button id="discoveries-open" class="research-action" hidden>Discoveries</button><button id="shop-launch" class="primary">Launch rocket <span aria-hidden="true">↗</span></button></div>
       <span id="save-status" class="save-status">PROGRESS SAVED ON THIS DEVICE</span>
     </aside>
     <section id="expedition" class="expedition-panel" aria-labelledby="expedition-title">
@@ -79,6 +79,13 @@
           </section>
         </div>
   </div>
+  <dialog id="discovery-dialog" class="reset-dialog discovery-dialog" aria-labelledby="discovery-title">
+    <div class="menu-heading"><div><div class="eyebrow">RECOVER • REBUILD • EXPLORE</div><h2 id="discovery-title">Expedition discoveries</h2></div><button id="discovery-close" class="small-button" autofocus>Back</button></div>
+    <p id="discovery-next"></p><div id="discovery-cards"></div>
+    <p id="discovery-description"></p><p id="discovery-hint"></p><strong id="discovery-state"></strong><p id="discovery-estimate"></p>
+    <p class="discovery-note">One core at a time. Preview uses your fitted rocket. Fitting a core discards pending part previews; it never buys or fits parts.</p>
+    <div class="discovery-actions"><button id="discovery-none" class="small-button">Preview no core</button><button id="discovery-fit" class="primary">Fit core · free</button></div>
+  </dialog>
   <dialog id="menu-dialog" class="reset-dialog menu-dialog" aria-labelledby="menu-title">
     <div class="menu-heading"><h2 id="menu-title">Game menu</h2><button id="menu-close" class="small-button" autofocus>Back to game</button></div>
     <p id="menu-context"></p>

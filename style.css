@@ -1240,3 +1240,18 @@ button.expedition-card:hover,.kit-card[aria-pressed="true"],.route-card[aria-pre
  #part-dialog:has(#part-tuning:not([hidden])) #part-tuning { grid-column: 2; grid-row: 2 / 4; margin: 0; padding: 0; border: 0; }
  #part-dialog:has(#part-tuning:not([hidden])) #part-info-effects { grid-row: 4; }
 }
+
+/* Salvage stays optional and uses existing hangar space; discovery details may scroll. */
+.hangar-actions[data-discoveries="true"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.25fr)}
+#discoveries-open{border-color:#8276ae;background:linear-gradient(135deg,#383854,#263b4a);color:#e2d6ff;padding:5px 4px;min-width:0}
+#discoveries-open span{font-size:12px}#discoveries-open small{display:block;font-size:9px;font-weight:400;margin-top:4px;white-space:normal}
+.discovery-dialog{width:min(530px,94vw);max-height:90dvh;overflow:auto}
+#discovery-next{padding:10px;border-left:3px solid #e5ba70;background:#2d3946;color:#f2dcb1;font-size:13px}
+#discovery-cards{display:grid;gap:8px;margin:14px 0}.discovery-card{display:flex;align-items:center;gap:12px;min-height:66px;text-align:left;border:1px solid #536071;border-radius:10px;background:#202d40;color:#e9e6dd;padding:10px}
+.discovery-card[aria-pressed="true"]{border-color:var(--core-color);box-shadow:inset 3px 0 var(--core-color);background:#344354}.discovery-card:disabled{opacity:.45}.discovery-card strong{display:block;font-size:14px}.discovery-card small{display:block;font-size:11px;margin-top:5px;color:#b2c6cb}.core-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border:1px solid var(--core-color);color:var(--core-color);border-radius:50%;font-size:27px}
+#discovery-description{font-size:14px;line-height:1.5}#discovery-hint,.discovery-note{font-size:12px;line-height:1.45;color:#b9c9ce}#discovery-state{font-size:12px;color:#edcd92}#discovery-estimate{font-size:13px;color:#a7e0c6}.discovery-actions{display:flex;gap:8px;margin-top:14px}.discovery-actions>*{flex:1;min-height:48px}
+#result-stock.salvage-reward{padding:10px;border:1px solid #ba9b63;border-radius:8px;background:linear-gradient(120deg,#3d3946,#263d46);color:#ffe4b1;font-size:12px;line-height:1.45}
+@media(max-width:400px){#discoveries-open span{font-size:10px}#discoveries-open small{font-size:8px}.hangar-actions[data-discoveries="true"]{gap:5px}.hangar-actions[data-discoveries="true"] #shop-launch{font-size:12px}#result-stock.salvage-reward{font-size:10px;padding:6px}}
+.hangar-actions[data-discoveries="true"] .research-button-title{font-size:12px;gap:4px}
+.hangar-actions[data-discoveries="true"] .research-action small{white-space:normal;text-align:center;font-size:9px}
+@media(max-width:360px){.hangar-actions[data-discoveries="true"] .research-button-title{font-size:11px}.hangar-actions[data-discoveries="true"] .research-action small{font-size:8px}}

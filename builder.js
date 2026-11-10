@@ -1,17 +1,17 @@
-import { COMPONENT_RESEARCH, componentNode } from './component-research.js?v=component-research-1';
-import { flightConditions } from './worlds.js?v=component-research-1';
-import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=component-research-1';
-import { createFlight, stepFlight } from './engine.js?v=component-research-1';
-import { partInsight } from './part-insights.js?v=component-research-1';
-import { abilityDescription } from './experimental.js?v=component-research-1';
-import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=component-research-1';
-import { rocketArt } from './rocket-art.js?v=component-research-1';
-import { planBuild, fitBuild } from './build-plan.js?v=component-research-1';
+import { COMPONENT_RESEARCH, componentNode } from './component-research.js?v=discovery-4';
+import { flightConditions } from './worlds.js?v=discovery-4';
+import { PART_SLOTS, partById, partForProgram, fittedParts, assemblySpecs, fitPart, catalogFor } from './parts.js?v=discovery-4';
+import { createFlight, stepFlight } from './engine.js?v=discovery-4';
+import { partInsight } from './part-insights.js?v=discovery-4';
+import { abilityDescription } from './experimental.js?v=discovery-4';
+import { buildIdentity, buildEffects, combinationChange } from './rocket-insights.js?v=discovery-4';
+import { rocketArt } from './rocket-art.js?v=discovery-4';
+import { planBuild, fitBuild } from './build-plan.js?v=discovery-4';
 export { rocketArt };
 
 const estimates = new Map();
 export function estimateHeight(program, quality = 1.1) {
-  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1)+'|'+(program.rulesVersion||0)+'|'+(program.equipmentVersion||1)+'|'+(program.componentResearchVersion||0)+'|'+(program.componentResearch||[]).slice().sort().join(',')+'|'+PART_SLOTS.map(slot=>program.tunings?.[slot.id]||'standard').join('/');
+  const key = PART_SLOTS.map(slot => program.parts.equipped[slot.id]).join('/')+'|'+(program.relics||[]).join('/')+'|'+(program.route||'')+'|'+PART_SLOTS.map(slot=>program.partTraits?.[program.parts.equipped[slot.id]]||'').join('/')+'|'+quality+'|'+(program.research?.kit||'')+'/'+(program.research?.rank||0)+'|'+(program.launchWorld??'classic')+'|'+(program.conditionsVersion??1)+'|'+(program.rulesVersion||0)+'|'+(program.equipmentVersion||1)+'|'+(program.discoveryVersion||0)+'/'+(program.core||'')+'|'+(program.componentResearchVersion||0)+'|'+(program.componentResearch||[]).slice().sort().join(',')+'|'+PART_SLOTS.map(slot=>program.tunings?.[slot.id]||'standard').join('/');
   if (estimates.has(key)) return estimates.get(key);
   const flight = createFlight(program.levels, quality, { plan: 'explorer', assembly: assemblySpecs(program) });
   for (let step = 0; step < 12000 && !flight.done; step++) stepFlight(flight, .05);

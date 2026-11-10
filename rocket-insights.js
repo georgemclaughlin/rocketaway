@@ -1,6 +1,7 @@
+import { coreById, coreStatus } from './discoveries.js?v=discovery-4';
 // Build explanations use the same resolved equipment/research as the simulator.
-import { componentNode, componentResearchSnapshot } from './component-research.js?v=component-research-1';
-import { assemblySpecs, fittedParts } from './parts.js?v=component-research-1';
+import { componentNode, componentResearchSnapshot } from './component-research.js?v=discovery-4';
+import { assemblySpecs, fittedParts } from './parts.js?v=discovery-4';
 
 export function buildEffects(program) {
   if(program.rulesVersion!==1)return [];
@@ -15,6 +16,8 @@ export function buildEffects(program) {
   if(s.dropMass)add('drop',p.tank,true,`drops ${s.dropMass.toFixed(2)}t of dry mass`,'');
   if(s.survey)add('survey',p.aero,true,'+90 credits per new milestone','');
   if(s.recovery)add('recovery',p.boosters,true,'+90 credits after separation on success','');
+  const core=program.discoveryVersion===1?coreById(program.core):null;
+  if(core)add('core-'+core.id,core,s[core.id],coreStatus(core,s),coreStatus(core,s));
   const research=componentResearchSnapshot(program);
   for(const id of Object.values(research.tunings||{})) {
     const node=componentNode(id);
@@ -25,6 +28,8 @@ export function buildEffects(program) {
 
 export function buildIdentity(program) {
   const s=assemblySpecs(program);
+  const core=program.discoveryVersion===1?coreById(program.core):null;
+  if(core&&s[core.id])return core.identity;
   if(s.feather&&s.endurance)return 'Featherweight explorer';
   if(s.instrument)return 'Science vessel';
   if(s.surge&&s.reserveSeconds&&s.hasBoosters)return 'Staged pathfinder';
@@ -48,6 +53,9 @@ export function combinationChange(before,after) {
 
 export function flightBuildSummary(program,flight) {
   const effects=buildEffects(program).map(e=>{
+    if(e.key==='core-cascade')return `${e.part}: ${flight.echoes||0} / 2 echo kicks fired`;
+    if(e.key==='core-sail')return `${e.part}: ${flight.sailOpened?'deployed · lighter coast':'not deployed · '+e.reason}`;
+    if(e.key==='core-scanner')return `${e.part}: ${flight.scans||0} / 3 scans collected`;
     const activated=e.key==='drop'?flight.dropReleased:e.key==='reserve'?flight.reserveOpened:e.key==='surge'?flight.events?.includes('Separation surge · 2× thrust'):e.key==='momentum'?flight.momentumFull:e.active;
     const detail=activated?e.detail:e.key==='momentum'?'fuel ended before full thrust':e.active?'did not activate':e.reason;
     return `${e.part}: ${detail}`;

@@ -1,5 +1,6 @@
-import { newInventory, restoreInventory } from './parts.js?v=component-research-1';
-import { momentumMultiplier } from './experimental.js?v=component-research-1';
+import { stepDiscovery } from './discoveries.js?v=discovery-4';
+import { newInventory, restoreInventory } from './parts.js?v=discovery-4';
+import { momentumMultiplier } from './experimental.js?v=discovery-4';
 export const GOAL = 100000;
 export const SAVE_KEY = 'rocket-away-program-v1';
 export const UPGRADES = [
@@ -126,6 +127,7 @@ export function stepFlight(flight, elapsed) {
       if(flight.momentum&&powered&&!flight.momentumFull&&flight.time>=10) {
         flight.momentumFull=true;flight.events.push('Momentum engine · full thrust');
       }
+      stepDiscovery(flight,powered);
       if(!powered)flight.coastTime+=dt;
       const reserve=flight.reserveRatio||0;
       const totalBurn=flight.mainBurn+(flight.reserveSeconds||0);
@@ -133,9 +135,9 @@ export function stepFlight(flight, elapsed) {
       const consumed=flight.reserveOpened?Math.min(1,flight.time/totalBurn):(1-reserve)*Math.min(1,flight.time/flight.mainBurn);
       flight.fuel=Math.max(0,1-consumed);
       const massFactor=flight.mass/(flight.dryMass+flight.fuelMass*flight.fuel);
-      const surge=flight.time<flight.surgeUntil?2:1;
+      const surge=Math.max(flight.time<flight.surgeUntil?2:1,flight.time<flight.scanSurgeUntil?3:1);
       const ramp=flight.momentum?momentumMultiplier(flight.time):1;
-      const acceleration=(powered?flight.thrust*massFactor*flight.quality*surge*ramp:0)-flight.gravity-flight.drag*flight.velocity*Math.abs(flight.velocity);
+      const acceleration=(powered?flight.thrust*massFactor*flight.quality*surge*ramp:0)-flight.gravity*(flight.sailOpened ? .70 : 1)-flight.drag*flight.velocity*Math.abs(flight.velocity);
       flight.velocity+=acceleration*dt;flight.altitude=Math.max(0,flight.altitude+flight.velocity*dt*500);
       flight.peak=Math.max(flight.peak,flight.altitude);flight.phase=powered?'powered':'coasting';
       if(!powered&&flight.velocity<=0){flight.done=true;flight.phase='complete';}

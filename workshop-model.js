@@ -1,7 +1,7 @@
 // Isolated workshop experiment. No campaign save or economy dependencies.
-import { assemblySpecs, partById } from './parts.js?v=component-research-1';
-import { createFlight } from './engine.js?v=component-research-1';
-import { advanceFlight } from './flight-playback.js?v=component-research-1';
+import { assemblySpecs, partById } from './parts.js?v=discovery-4';
+import { createFlight } from './engine.js?v=discovery-4';
+import { advanceFlight } from './flight-playback.js?v=discovery-4';
 export const BENCH = { engine:['ember','momentum-engine','separation-engine','mammoth'], tank:['long','reserve-tank','drop-tank','jumbo'], boosters:['bare','twins','solids'] };
 export const TARGETS = [[2500,8000,18000,35000,65000,100000],[100000,200000,350000,550000,800000,1100000]];
 export const initialBuild = () => ({aero:'lab',engine:'ember',tank:'long',boosters:'twins'});

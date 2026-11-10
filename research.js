@@ -1,4 +1,4 @@
-import { componentNode, normalizeComponentUnlocks, normalizeTunings } from './component-research.js?v=component-research-1';
+import { componentNode, normalizeComponentUnlocks, normalizeTunings } from './component-research.js?v=discovery-4';
 // Permanent expedition research. No DOM, storage, or dependency on the game loop.
 export const RESEARCH_COSTS = [3,5,8,12,18];
 export const RESEARCH_TRACKS = [
